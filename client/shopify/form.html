@@ -1,0 +1,58 @@
+<div class="form-new-inquiry">
+  <form id="form-new-inquiry" method="POST">
+    <input
+      type="hidden"
+      id="inquiry-order-id"
+      value="5563344945437"
+      name="order_id"
+    />
+    <input
+      type="hidden"
+      id="inquiry-order-name"
+      value="#1007"
+      name="order_name"
+    />
+    <input
+      type="hidden"
+      id="inquiry-order-item"
+      value="Štíhlá a FIT | 1500 kcal - 1 měsíc (20 dní)"
+      name="item_title"
+    />
+    <input
+      type="hidden"
+      id="inquiry-order-contact"
+      value="upgrowthdev@gmail.com"
+      name="order_contact"
+    />
+    <input type="date" id="pause-start-date" name="pause_start_date" />
+    <input type="date" id="pause-end-date" name="pause_end_date" />
+    <input type="submit" value="submit" />
+  </form>
+</div>
+
+<script>
+  let form = document.getElementById("form-new-inquiry");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    let body = JSON.stringify(Object.fromEntries(new FormData(form)));
+
+    fetch("http://localhost:4000/inquiries/new", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    })
+      .then((response) => {
+        if (response.status != 200) {
+          return response.json();
+        }
+      })
+      .then((data) => {
+        if (data && data.message != undefined) {
+          console.log(data.message);
+        }
+      })
+      .catch((error) => console.log(error));
+  });
+</script>
