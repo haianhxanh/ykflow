@@ -9,7 +9,13 @@ import express from "express";
 var cors = require("cors");
 const app = express();
 
-app.use(cors());
+var corsOptions = {
+  origin: "https://yeskrabickyflow-dev-frontend.onrender.com",
+  optionsSuccessStatus: 200,
+  methods: "GET, PUT",
+};
+
+app.use(cors(corsOptions));
 /*--------env setup-----------*/
 dotenv.config();
 const { PORT } = process.env;
