@@ -12,7 +12,12 @@ const db_connect_1 = require("./database_connection/db_connect");
 const express_1 = __importDefault(require("express"));
 var cors = require("cors");
 const app = (0, express_1.default)();
-app.use(cors());
+var corsOptions = {
+    origin: "https://yeskrabickyflow-dev-frontend.onrender.com",
+    optionsSuccessStatus: 200,
+    methods: "GET, PUT",
+};
+app.use(cors(corsOptions));
 /*--------env setup-----------*/
 dotenv_1.default.config();
 const { PORT } = process.env;
