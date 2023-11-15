@@ -33,6 +33,7 @@ export const URLS = {
 };
 
 export const INQUIRIES_TABLE = {
+  REQUEST_ID: "ID",
   ORDER_NAME: "Obj.",
   ORDER_CONTACT: "Zákazník",
   ITEM: "Krabička",

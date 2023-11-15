@@ -10,6 +10,11 @@ Inquiry.init({
         primaryKey: true,
         allowNull: false,
     },
+    request_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+    },
     order_name: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,

@@ -64,6 +64,11 @@ export default function Inquiries() {
               pageSizeOptions={[5]}
               columns={[
                 {
+                  field: "request_id",
+                  headerName: INQUIRIES_TABLE.REQUEST_ID,
+                  width: 50,
+                },
+                {
                   field: "order_name",
                   headerName: INQUIRIES_TABLE.ORDER_NAME,
                 },

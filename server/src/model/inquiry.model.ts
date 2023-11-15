@@ -1,21 +1,30 @@
 import { STRINGS } from "./../utils/constants";
-import { DataTypes, Model, UUID } from "sequelize";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  UUID,
+} from "sequelize";
 import { db } from "../database_connection/db_connect";
 
-export type INQUIRY = {
-  id: string;
-  order_name: string;
-  order_id: number;
-  order_contact: string;
-  pause_start_date: string;
-  pause_end_date: string;
-  item_title: string;
-  new_end_date: string;
-  status: string;
-  request_date: string;
-};
-
-class Inquiry extends Model<INQUIRY> {}
+class Inquiry extends Model<
+  InferAttributes<Inquiry>,
+  InferCreationAttributes<Inquiry>
+> {
+  declare id: string;
+  declare request_id: CreationOptional<number>;
+  declare order_name: string;
+  declare order_id: number;
+  declare order_contact: string;
+  declare pause_start_date: string;
+  declare pause_end_date: string;
+  declare item_title: string;
+  declare new_end_date: string;
+  declare status: string;
+  declare request_date: string;
+}
 
 Inquiry.init(
   {
@@ -23,6 +32,11 @@ Inquiry.init(
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
+    },
+    request_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      autoIncrement: true,
     },
     order_name: {
       type: DataTypes.STRING,

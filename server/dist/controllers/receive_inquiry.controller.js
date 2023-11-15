@@ -87,6 +87,7 @@ const receive_inquiries = (req, res) => __awaiter(void 0, void 0, void 0, functi
         /*-------------------------------------NOTIFY CUSTOMER-----------------------------------------*/
         /*-------------------------------------NOTIFY MERCHANT-----------------------------------------*/
         return res.status(200).json({
+            request_id: `ID požadavku: ${new_inquiry.request_id}`,
             message: `Váš požadavek byl zapsán do našeho systému. Požádala jste o pozastavení krabičky od ${pause_start_date} do ${pause_end_date} včetně. V nejbližší době se Vám ozveme o potvrzení požadavku`,
         });
     }

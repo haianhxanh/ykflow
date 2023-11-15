@@ -12,9 +12,10 @@ import {
   DialogTitle,
   Grid,
   Stack,
+  Typography,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import AddCircleRoundedIcon from "@mui/icons-material/AddCircleRounded";
 import { useState } from "react";
 import { STATUS, TRANSLATIONS } from "@/utils/constants";
@@ -61,13 +62,17 @@ export default function StatusUpdate({
     <>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <Button
-            variant="outlined"
-            color="primary"
-            style={{ fontSize: "12px", padding: "2px 4px" }}
+          <Typography
+            variant="subtitle2"
+            style={{
+              color: "#CD5C5C",
+              textTransform: "uppercase",
+              fontSize: 10,
+            }}
           >
+            <PriorityHighIcon fontSize="medium" color="warning" />
             {parseInquiryStatus(value)}
-          </Button>
+          </Typography>
         </Grid>
 
         <Grid item xs={12}>

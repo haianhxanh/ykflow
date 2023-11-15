@@ -7,6 +7,7 @@ import {
   Grid,
   Input,
   InputLabel,
+  TextField,
 } from "@mui/material";
 import { SignInResponse, signIn, useSession } from "next-auth/react";
 import router from "next/router";
@@ -44,11 +45,9 @@ export default function Login() {
             <Grid container xs={12} gap={2} className="justify-center">
               <Grid item>
                 <FormControl>
-                  <InputLabel htmlFor="username">
-                    {TRANSLATIONS.USERNAME}
-                  </InputLabel>
-                  <Input
+                  <TextField
                     id="username"
+                    label={TRANSLATIONS.USERNAME}
                     onChange={({ target }) =>
                       setUser({ ...user, username: target.value })
                     }
@@ -57,11 +56,10 @@ export default function Login() {
               </Grid>
               <Grid item>
                 <FormControl>
-                  <InputLabel htmlFor="password">
-                    {TRANSLATIONS.PASSWORD}
-                  </InputLabel>
-                  <Input
+                  <TextField
                     id="password"
+                    type="password"
+                    label={TRANSLATIONS.PASSWORD}
                     onChange={({ target }) =>
                       setUser({ ...user, password: target.value })
                     }
