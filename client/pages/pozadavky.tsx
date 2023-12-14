@@ -184,7 +184,7 @@ export default function Inquiries() {
           </Box>
         ) : (
           <Container className="text-center p-10">
-            {TRANSLATIONS.NO_INQUIRIES} lala
+            {TRANSLATIONS.NO_INQUIRIES}
           </Container>
         )}
       </>
