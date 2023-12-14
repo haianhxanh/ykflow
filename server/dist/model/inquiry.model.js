@@ -6,13 +6,8 @@ class Inquiry extends sequelize_1.Model {
 }
 Inquiry.init({
     id: {
-        type: sequelize_1.DataTypes.UUID,
-        primaryKey: true,
-        allowNull: false,
-    },
-    request_id: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        primaryKey: true,
         autoIncrement: true,
     },
     order_name: {
@@ -38,6 +33,14 @@ Inquiry.init({
     item_title: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
+    },
+    item_id: {
+        type: sequelize_1.DataTypes.BIGINT,
+        allowNull: false,
+    },
+    note: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
     },
     new_end_date: {
         type: sequelize_1.DataTypes.STRING,

@@ -13,29 +13,25 @@ class Inquiry extends Model<
   InferAttributes<Inquiry>,
   InferCreationAttributes<Inquiry>
 > {
-  declare id: string;
-  declare request_id: CreationOptional<number>;
+  declare id: CreationOptional<number>;
   declare order_name: string;
   declare order_id: number;
   declare order_contact: string;
   declare pause_start_date: string;
   declare pause_end_date: string;
   declare item_title: string;
+  declare item_id: number;
   declare new_end_date: string;
   declare status: string;
   declare request_date: string;
+  declare note: string;
 }
 
 Inquiry.init(
   {
     id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      allowNull: false,
-    },
-    request_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      primaryKey: true,
       autoIncrement: true,
     },
     order_name: {
@@ -61,6 +57,14 @@ Inquiry.init(
     item_title: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    item_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+    note: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     new_end_date: {
       type: DataTypes.STRING,

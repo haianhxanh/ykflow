@@ -16,7 +16,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 
 /*-------------------------------------RECEIVE INQUIRY-----------------------------------------*/
 
-export const receive_inquiries = async (req: Request, res: Response) => {
+export const receive_inquiry = async (req: Request, res: Response) => {
   try {
     // catch missing content
     if (
@@ -92,24 +92,95 @@ export const receive_inquiries = async (req: Request, res: Response) => {
     let today_date = date.toISOString().split("T")[0];
 
     const new_inquiry = await Inquiry.create({
-      id: v4(),
       order_name: req.body.order_name,
       order_id: req.body.order_id,
       order_contact: req.body.order_contact,
       pause_start_date: req.body.pause_start_date,
       pause_end_date: req.body.pause_end_date,
       item_title: req.body.item_title,
+      item_id: req.body.item_id,
       new_end_date: package_new_end_date,
       status: STATUS.NEW,
       request_date: today_date,
+      note: req.body.note,
     });
 
+    /*---------------------------------UPDATE ORDER METAFIELDS-------------------------------------*/
+
+    const order_metafields_data = await axios.get(
+      `https://${STORE}/admin/api/${API_VERSION}/orders/${req.body.order_id}/metafields.json`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": ACCESS_TOKEN!,
+        },
+      }
+    );
+
+    if (res.statusCode == 200) {
+      if (order_metafields_data.data.metafields.length == 0) {
+        let array = [];
+        let order_metafield_value = {
+          item: {
+            id: req.body.item_id,
+            title: req.body.item_title,
+          },
+          details: {
+            inquiry_id: new_inquiry.id,
+            pause_start_date: req.body.pause_start_date,
+            pause_end_date: req.body.pause_end_date,
+            requested: true,
+            status: "čeká se na schválení",
+          },
+        };
+        array.push(order_metafield_value);
+        let body = JSON.stringify({
+          metafield: {
+            namespace: "flow",
+            key: "inquiries",
+            type: "json",
+            value: JSON.stringify(array),
+          },
+        });
+
+        setTimeout(async () => {
+          const order_metafield_create: any = await axios.post(
+            `https://${STORE}/admin/api/${API_VERSION}/orders/${req.body.order_id}/metafields.json`,
+            body,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Access-Token": ACCESS_TOKEN!,
+              },
+            }
+          );
+        }, 1000);
+      } else {
+        // order_metafield_update_body = JSON.stringify({
+        //   id: req.body.order_id,
+        //   metafields: [
+        //     {
+        //       item: {
+        //         id: item_id,
+        //       },
+        //       details: {
+        //         requested: true,
+        //         status: "pending",
+        //       },
+        //     },
+        //   ],
+        // });
+      }
+    }
+
     /*-------------------------------------NOTIFY CUSTOMER-----------------------------------------*/
+
+    // tbd
 
     /*-------------------------------------NOTIFY MERCHANT-----------------------------------------*/
 
     return res.status(200).json({
-      request_id: `ID požadavku: ${new_inquiry.request_id}`,
+      request_id: `ID požadavku: ${new_inquiry.id}`,
       message: `Váš požadavek byl zapsán do našeho systému. Požádala jste o pozastavení krabičky od ${pause_start_date} do ${pause_end_date} včetně. V nejbližší době se Vám ozveme o potvrzení požadavku`,
     });
   } catch (error) {

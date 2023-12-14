@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.API_RESPONSES = exports.STATUS = exports.STRINGS = void 0;
+exports.API_RESPONSES = exports.STATUS_STRINGS = exports.STATUS = exports.STRINGS = void 0;
 exports.STRINGS = {
     ORDER_ATTR_START_DATE: "Datum začátku Yes Krabiček",
 };
@@ -8,6 +8,11 @@ exports.STATUS = {
     NEW: "NEW",
     APPROVED: "APPROVED",
     DECLINED: "DECLINED",
+};
+exports.STATUS_STRINGS = {
+    NEW: "Nový požadavek",
+    APPROVED: "Vyhověno",
+    DECLINED: "Zamítnuto",
 };
 exports.API_RESPONSES = {
     MISSING_DATE: "Vyplňte prosím datum počátku/konce zastavení",

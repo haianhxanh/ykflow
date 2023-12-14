@@ -8,6 +8,12 @@ export const STATUS = {
   DECLINED: "DECLINED",
 };
 
+export const STATUS_STRINGS = {
+  NEW: "Nový požadavek",
+  APPROVED: "Vyhověno",
+  DECLINED: "Zamítnuto",
+};
+
 export const API_RESPONSES = {
   MISSING_DATE: "Vyplňte prosím datum počátku/konce zastavení",
   MISSING_ORDER_ITEM: "Vyberte prosím krabičku, kterou si přejete pozastavit",

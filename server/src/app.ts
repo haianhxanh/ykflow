@@ -10,7 +10,13 @@ var cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "https://yeskrabickyflow-dev-frontend.onrender.com",
+  origin: [
+    "https://yeskrabickyflow-dev-frontend.onrender.com",
+    "https://yes-krabicky-dev.myshopify.com",
+    "https://test-yes-krabicky.myshopify.com",
+    "https://yeskrabicky.cz",
+    "http://localhost:3000",
+  ],
   optionsSuccessStatus: 200,
   methods: "GET, PUT",
 };
