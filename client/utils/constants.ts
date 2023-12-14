@@ -26,6 +26,9 @@ export const TRANSLATIONS = {
   APPROVE: "Schválit",
   DECLINE: "Zamítnout",
   NO_INQUIRIES: "Zatím nemáte žádné požadavky",
+  NO_NOTE: "Žádná",
+  SHOW_NOTE: "Zobrazit",
+  INQUIRY: "Žádost",
 };
 
 export const URLS = {
@@ -42,4 +45,5 @@ export const INQUIRIES_TABLE = {
   PAUSE_END_DATE: "Konec pozastavení",
   NEW_END_DATE: "Nové datum ukončení",
   STATUS: "Stav žádosti",
+  NOTE: "Poznámka",
 };

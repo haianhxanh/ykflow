@@ -11,6 +11,8 @@ import { INQUIRIES_TABLE, STATUS, TRANSLATIONS } from "@/utils/constants";
 import StatusUpdate from "@/components/StatusUpdate";
 import { useSession } from "next-auth/react";
 import { Router } from "next/router";
+import { Note } from "@mui/icons-material";
+import RequestNote from "@/components/RequestNote";
 
 interface Inquiry {
   id: string;
@@ -23,6 +25,7 @@ interface Inquiry {
   new_end_date: string;
   status: string;
   request_date: string;
+  note: string;
 }
 
 export default function Inquiries() {
@@ -38,6 +41,7 @@ export default function Inquiries() {
 
   const handleInquiries = (data: any) => {
     setInquiries(data);
+    console.log(inquiries);
   };
 
   const fetch_inquiries = async () => {
@@ -64,7 +68,7 @@ export default function Inquiries() {
               pageSizeOptions={[5]}
               columns={[
                 {
-                  field: "request_id",
+                  field: "id",
                   headerName: INQUIRIES_TABLE.REQUEST_ID,
                   width: 50,
                 },
@@ -90,6 +94,24 @@ export default function Inquiries() {
                       return params.value;
                     }
                     return convertDateToISOString(params.value.split("T")[0]);
+                  },
+                },
+                {
+                  field: "note",
+                  headerName: INQUIRIES_TABLE.NOTE,
+                  renderCell: (params) => {
+                    return (
+                      <>
+                        {params.value == "" ? (
+                          TRANSLATIONS.NO_NOTE
+                        ) : (
+                          <RequestNote
+                            value={params.value}
+                            inquiryId={params.row.id}
+                          />
+                        )}
+                      </>
+                    );
                   },
                 },
                 {
@@ -162,7 +184,7 @@ export default function Inquiries() {
           </Box>
         ) : (
           <Container className="text-center p-10">
-            {TRANSLATIONS.NO_INQUIRIES}
+            {TRANSLATIONS.NO_INQUIRIES} lala
           </Container>
         )}
       </>

@@ -26,6 +26,7 @@
     />
     <input type="date" id="pause-start-date" name="pause_start_date" />
     <input type="date" id="pause-end-date" name="pause_end_date" />
+    <textarea type="hidden" id="inquiry-note" value="" name="note"></textarea>
     <input type="submit" value="submit" />
   </form>
 </div>
@@ -36,7 +37,7 @@
     e.preventDefault();
     let body = JSON.stringify(Object.fromEntries(new FormData(form)));
 
-    fetch("http://localhost:4000/inquiries/new", {
+    fetch("http://localhost:4000/inquiry/new", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/-LdfBu26HDz6-qOA3h100/_buildManifest.js",
-    "static/-LdfBu26HDz6-qOA3h100/_ssgManifest.js"
+    "static/7UP37nQCi2ywWs1Do6mQZ/_buildManifest.js",
+    "static/7UP37nQCi2ywWs1Do6mQZ/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -21,7 +21,7 @@
       "static/chunks/framework-66d32731bdd20e83.js",
       "static/chunks/main-50d44469728668f3.js",
       "static/css/d421d39eec40833b.css",
-      "static/chunks/pages/_app-02004062fbbcfcd4.js"
+      "static/chunks/pages/_app-5ecb795bee06038b.js"
     ],
     "/_error": [
       "static/chunks/webpack-87b3a303122f2f0d.js",
@@ -34,7 +34,7 @@
       "static/chunks/framework-66d32731bdd20e83.js",
       "static/chunks/main-50d44469728668f3.js",
       "static/chunks/138-d917caf025b272fa.js",
-      "static/chunks/pages/auth/login-df184649ba26678f.js"
+      "static/chunks/pages/auth/login-50b119f00dbe7824.js"
     ],
     "/pozadavky": [
       "static/chunks/webpack-87b3a303122f2f0d.js",
@@ -42,7 +42,7 @@
       "static/chunks/main-50d44469728668f3.js",
       "static/chunks/138-d917caf025b272fa.js",
       "static/chunks/575-b55a4d94ea3c8b9a.js",
-      "static/chunks/pages/pozadavky-b96d930441a724ab.js"
+      "static/chunks/pages/pozadavky-98c88fe5b1dc2f2f.js"
     ],
     "/protected": [
       "static/chunks/webpack-87b3a303122f2f0d.js",

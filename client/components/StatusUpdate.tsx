@@ -90,8 +90,16 @@ export default function StatusUpdate({
           onClose={handleClose}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          style={{ padding: "20px" }}
         >
           <DialogContent>
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ paddingBottom: "20px" }}
+            >
+              {TRANSLATIONS.INQUIRY} #{inquiryId}
+            </Typography>
             <DialogContentText id="alert-dialog-description">
               {TRANSLATIONS.HANDLE_INQUIRY_NOTE}
             </DialogContentText>
