@@ -12,6 +12,7 @@ const app = express();
 var corsOptions = {
   origin: [
     "https://yeskrabickyflow-dev-frontend.onrender.com",
+    "https://yeskrabickyflow.onrender.com",
     "https://yes-krabicky-dev.myshopify.com",
     "https://test-yes-krabicky.myshopify.com",
     "https://yeskrabicky.cz",
