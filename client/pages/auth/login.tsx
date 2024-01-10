@@ -35,7 +35,7 @@ export default function Login() {
     <>
       <form onSubmit={handleSubmit}>
         <Container className="flex justify-center w-full">
-          <Grid container xs={12} gap={2} className="p-8 justify-center">
+          <Grid container gap={2} className="p-8 justify-center">
             <Grid container gap={2} className="justify-center">
               <Grid item>
                 <FormControl>

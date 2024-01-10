@@ -1,8 +1,10 @@
 export const getBusinessDatesCount = (start: string, end: string) => {
+  // start date is included in the count
+  // end date is not included in the count
   let count = 0;
   let startDate = new Date(start);
   let endDate = new Date(end);
-  while (startDate <= endDate) {
+  while (startDate < endDate) {
     const dayOfWeek = startDate.getDay();
     if (dayOfWeek !== 0 && dayOfWeek !== 6) count++;
     startDate.setDate(startDate.getDate() + 1);
@@ -31,4 +33,15 @@ export const convertDate = (date: string) => {
 export const convertDateToISOString = (date: string) => {
   let dateArray = date.split("-");
   return `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}`;
+};
+
+export const convertDateToLocalString = (date: string) => {
+  let dateArray = date.split("-");
+  return `${dateArray[2]}.${dateArray[1]}.${dateArray[0]}`;
+};
+
+export const isWeekDay = (date: string) => {
+  let day = new Date(date).getDay();
+  if (day !== 0 && day !== 6) return true;
+  return false;
 };

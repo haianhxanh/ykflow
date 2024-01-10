@@ -42,6 +42,10 @@ Inquiry.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
+    new_start_date: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
     new_end_date: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,

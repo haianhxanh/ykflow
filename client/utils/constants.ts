@@ -43,6 +43,7 @@ export const INQUIRIES_TABLE = {
   REQUEST_DATE: "Přijetí žádosti",
   PAUSE_START_DATE: "Začátek pozastavení",
   PAUSE_END_DATE: "Konec pozastavení",
+  NEW_START_DATE: "Datum obnovení",
   NEW_END_DATE: "Nové datum ukončení",
   STATUS: "Stav žádosti",
   NOTE: "Poznámka",

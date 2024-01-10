@@ -1,1 +1,0 @@
-{"/_app":"pages/_app.js","/_document":"pages/_document.js","/api/hello":"pages/api/hello.js","/api/auth/[...nextauth]":"pages/api/auth/[...nextauth].js","/auth/login":"pages/auth/login.html","/":"pages/index.html","/pozadavky":"pages/pozadavky.html","/protected":"pages/protected.html","/_error":"pages/_error.js","/404":"pages/404.html"}

@@ -21,7 +21,7 @@ var corsOptions = {
         "http://localhost:3000",
     ],
     optionsSuccessStatus: 200,
-    methods: "GET, PUT",
+    methods: "GET, PUT, POST",
 };
 app.use(cors(corsOptions));
 /*--------env setup-----------*/

@@ -6,13 +6,14 @@ import {
   get_inquiries,
   parseInquiryStatus,
 } from "@/utils/helpers";
-import { Button, Container } from "@mui/material";
+import { Button, Container, Link } from "@mui/material";
 import { INQUIRIES_TABLE, STATUS, TRANSLATIONS } from "@/utils/constants";
 import StatusUpdate from "@/components/StatusUpdate";
 import { useSession } from "next-auth/react";
 import { Router } from "next/router";
 import { Note } from "@mui/icons-material";
 import RequestNote from "@/components/RequestNote";
+import CustomerInfo from "@/components/CustomerInfo";
 
 interface Inquiry {
   id: string;
@@ -22,6 +23,7 @@ interface Inquiry {
   pause_start_date: string;
   pause_end_date: string;
   item_title: string;
+  new_start_date: string;
   new_end_date: string;
   status: string;
   request_date: string;
@@ -41,7 +43,6 @@ export default function Inquiries() {
 
   const handleInquiries = (data: any) => {
     setInquiries(data);
-    console.log(inquiries);
   };
 
   const fetch_inquiries = async () => {
@@ -75,10 +76,36 @@ export default function Inquiries() {
                 {
                   field: "order_name",
                   headerName: INQUIRIES_TABLE.ORDER_NAME,
+                  renderCell: (params) => {
+                    return (
+                      <>
+                        <Link
+                          href={
+                            (process.env
+                              .NEXT_PUBLIC_ADMIN_ORDER_URL as string) +
+                            params.row.order_id
+                          }
+                          target="_blank"
+                        >
+                          {params.value}
+                        </Link>
+                      </>
+                    );
+                  },
                 },
                 {
                   field: "order_contact",
                   headerName: INQUIRIES_TABLE.ORDER_CONTACT,
+                  renderCell: (params) => {
+                    return (
+                      <>
+                        <CustomerInfo
+                          value={params.value}
+                          inquiryId={params.row.id}
+                        />
+                      </>
+                    );
+                  },
                 },
                 {
                   field: "item_title",
@@ -128,6 +155,17 @@ export default function Inquiries() {
                 {
                   field: "pause_end_date",
                   headerName: INQUIRIES_TABLE.PAUSE_END_DATE,
+                  minWidth: 150,
+                  valueGetter: (params) => {
+                    if (!params.value) {
+                      return params.value;
+                    }
+                    return convertDateToISOString(params.value);
+                  },
+                },
+                {
+                  field: "new_start_date",
+                  headerName: INQUIRIES_TABLE.NEW_START_DATE,
                   minWidth: 150,
                   valueGetter: (params) => {
                     if (!params.value) {

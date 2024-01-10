@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
+exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
 const getBusinessDatesCount = (start, end) => {
+    // start date is included in the count
+    // end date is not included in the count
     let count = 0;
     let startDate = new Date(start);
     let endDate = new Date(end);
-    while (startDate <= endDate) {
+    while (startDate < endDate) {
         const dayOfWeek = startDate.getDay();
         if (dayOfWeek !== 0 && dayOfWeek !== 6)
             count++;
@@ -38,3 +40,15 @@ const convertDateToISOString = (date) => {
     return `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}`;
 };
 exports.convertDateToISOString = convertDateToISOString;
+const convertDateToLocalString = (date) => {
+    let dateArray = date.split("-");
+    return `${dateArray[2]}.${dateArray[1]}.${dateArray[0]}`;
+};
+exports.convertDateToLocalString = convertDateToLocalString;
+const isWeekDay = (date) => {
+    let day = new Date(date).getDay();
+    if (day !== 0 && day !== 6)
+        return true;
+    return false;
+};
+exports.isWeekDay = isWeekDay;

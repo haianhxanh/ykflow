@@ -21,6 +21,7 @@ class Inquiry extends Model<
   declare pause_end_date: string;
   declare item_title: string;
   declare item_id: number;
+  declare new_start_date: string;
   declare new_end_date: string;
   declare status: string;
   declare request_date: string;
@@ -63,6 +64,10 @@ Inquiry.init(
       allowNull: false,
     },
     note: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    new_start_date: {
       type: DataTypes.STRING,
       allowNull: true,
     },

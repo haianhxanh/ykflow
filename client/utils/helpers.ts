@@ -94,7 +94,5 @@ export const get_inquiries = async () => {
   });
 
   const data = await res.json();
-
-  console.log(data);
   return data;
 };
