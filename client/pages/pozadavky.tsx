@@ -190,7 +190,6 @@ export default function Inquiries() {
                   field: "status",
                   headerName: INQUIRIES_TABLE.STATUS,
                   minWidth: 100,
-                  flex: 1,
                   renderCell: (params) => {
                     return (
                       <>
@@ -225,6 +224,7 @@ export default function Inquiries() {
                     ? INQUIRIES_TABLE.ACTIONS
                     : "Akce",
                   align: "center",
+                  minWidth: 100,
                   renderCell: (params) => {
                     return (
                       <>
