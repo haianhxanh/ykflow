@@ -29,6 +29,9 @@ export const TRANSLATIONS = {
   NO_NOTE: "Žádná",
   SHOW_NOTE: "Zobrazit",
   INQUIRY: "Žádost",
+  DELETE_VERIFY: "Opravdu chcete smazat?",
+  DELETE: "Smazat",
+  RETURN: "Zpět",
 };
 
 export const URLS = {
@@ -47,4 +50,5 @@ export const INQUIRIES_TABLE = {
   NEW_END_DATE: "Nové datum ukončení",
   STATUS: "Stav žádosti",
   NOTE: "Poznámka",
+  ACTIONS: "Akce",
 };

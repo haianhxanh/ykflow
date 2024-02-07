@@ -14,6 +14,7 @@ import { Router } from "next/router";
 import { Note } from "@mui/icons-material";
 import RequestNote from "@/components/RequestNote";
 import CustomerInfo from "@/components/CustomerInfo";
+import Actions from "@/components/Actions";
 
 interface Inquiry {
   id: string;
@@ -188,7 +189,7 @@ export default function Inquiries() {
                 {
                   field: "status",
                   headerName: INQUIRIES_TABLE.STATUS,
-                  minWidth: 150,
+                  minWidth: 100,
                   flex: 1,
                   renderCell: (params) => {
                     return (
@@ -213,6 +214,25 @@ export default function Inquiries() {
                             {parseInquiryStatus(params.value)}
                           </Button>
                         )}
+                      </>
+                    );
+                  },
+                },
+                {
+                  field: "actions",
+                  type: "actions",
+                  headerName: INQUIRIES_TABLE.ACTIONS
+                    ? INQUIRIES_TABLE.ACTIONS
+                    : "Akce",
+                  align: "center",
+                  renderCell: (params) => {
+                    return (
+                      <>
+                        <Actions
+                          value={params.value}
+                          inquiryId={params.row.id}
+                          setInquiries={setInquiries}
+                        />
                       </>
                     );
                   },

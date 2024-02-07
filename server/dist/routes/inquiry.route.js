@@ -9,9 +9,11 @@ const receive_inquiry_controller_1 = require("../controllers/receive_inquiry.con
 const authorization_1 = require("../authorization/authorization");
 const update_inquiry_controller_1 = require("../controllers/update_inquiry.controller");
 const get_order_inquiries_controller_1 = require("../controllers/get_order_inquiries.controller");
+const delete_inquiry_controller_1 = require("../controllers/delete_inquiry.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
 router.put("/inquiry/update", authorization_1.auth, update_inquiry_controller_1.update_inquiry);
+router.post("/inquiry/delete", authorization_1.auth, delete_inquiry_controller_1.delete_inquiry);
 router.get("/order-inquiries?:order_id", get_order_inquiries_controller_1.get_order_inquiries);
 exports.default = router;

@@ -83,6 +83,31 @@ export const updateInquiryStatus = async (id: string, status: string) => {
   return message;
 };
 
+export const deleteInquiry = async (id: string) => {
+  const body = {
+    id: id,
+  };
+
+  const jsonBody = JSON.stringify(body);
+
+  const res = await fetch(
+    process.env.NEXT_PUBLIC_URL_DELETE_INQUIRIES as string,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${
+          process.env.NEXT_PUBLIC_APP_SECRET_KEY as string
+        }`,
+        "Content-Type": "application/json",
+      },
+      body: jsonBody,
+    }
+  );
+
+  const message = await res.json();
+  return message;
+};
+
 export const get_inquiries = async () => {
   const res = await fetch(process.env.NEXT_PUBLIC_URL_GET_INQUIRIES as string, {
     method: "GET",
