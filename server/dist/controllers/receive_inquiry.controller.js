@@ -20,6 +20,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const inquiry_model_1 = __importDefault(require("../model/inquiry.model"));
 const constants_2 = require("../utils/constants");
 const helpers_2 = require("../utils/helpers");
+const notification_1 = require("../utils/notification");
 dotenv_1.default.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 /*-------------------------------------RECEIVE INQUIRY-----------------------------------------*/
@@ -178,12 +179,13 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
         }
         /*-------------------------------------NOTIFY CUSTOMER-----------------------------------------*/
         // tbd
-        /*-------------------------------------NOTIFY MERCHANT-----------------------------------------*/
-        // tbd
         /*-------------------------------------SUCCESS RESPONSE-----------------------------------------*/
+        let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${req.body.item_title} od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně). V nejbližší době se Vám ozveme o potvrzení požadavku.`;
+        /*-------------------------------------NOTIFY MERCHANT-----------------------------------------*/
+        const sendNotificationToMerchant = yield (0, notification_1.notifyMerchant)(req.body.order_contact, message);
         return res.status(200).json({
             request_id: `ID požadavku: ${new_inquiry.id}`,
-            message: `Přijali jsme Váš požadavek o pozastavení krabičky od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně). V nejbližší době se Vám ozveme o potvrzení požadavku.`,
+            message: message,
         });
     }
     catch (error) {
