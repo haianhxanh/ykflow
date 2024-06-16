@@ -237,7 +237,7 @@ export const receive_inquiry = async (req: Request, res: Response) => {
       pause_start_date
     )} do ${convertDateToLocalString(
       pause_end_date
-    )} (včetně). V nejbližší době se Vám ozveme o potvrzení požadavku.`;
+    )} (včetně). V nejbližší době Vás budeme kontaktovat.`;
 
     /*-------------------------------------NOTIFY MERCHANT AND CUSTOMER -----------------------------------------*/
     const sendNotificationToMerchant = await notifyMerchant(

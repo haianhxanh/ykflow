@@ -28,7 +28,7 @@ export const notifyMerchant = async (
   // axios post request to send email
   const message: Message = {
     text: content,
-    html: content,
+    html: content + "<br><br>---<br>Yes Krabičky",
     from_email: MANDRILL_MESSAGE_FROM_EMAIL as string,
     from_name: MANDRILL_MESSAGE_FROM_NAME as string,
     to: [
