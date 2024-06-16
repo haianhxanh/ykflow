@@ -17,7 +17,7 @@ const notifyMerchant = (orderName, customerEmail, content) => __awaiter(void 0, 
     // axios post request to send email
     const message = {
         text: content,
-        html: content,
+        html: content + "<br><br>---<br>Yes Krabičky",
         from_email: MANDRILL_MESSAGE_FROM_EMAIL,
         from_name: MANDRILL_MESSAGE_FROM_NAME,
         to: [
