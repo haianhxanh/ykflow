@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@mailchimp/mailchimp_transactional": "^1.0.59",
     "@shopify/shopify-api": "^8.0.1",
     "axios": "^1.5.1",
     "cors": "^2.8.5",
