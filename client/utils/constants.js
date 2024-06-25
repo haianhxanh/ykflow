@@ -28,7 +28,7 @@ exports.TRANSLATIONS = {
   INCORRECT_CREDENTIALS: "Zadejte správné jméno a heslo",
   HANDLE_INQUIRY: "Vyřídit",
   HANDLE_INQUIRY_NOTE:
-    "Po zamítnutí nebo schválení žádosti zákazníka informujte e-mailem.",
+    "V případě schválení žádosti bude zákazníkovi odeslána notifikace. Pokud žádost zamítnete, kontaktujte zákazníka.",
   APPROVE: "Schválit",
   DECLINE: "Zamítnout",
   NO_INQUIRIES: "Zatím nemáte žádné požadavky",

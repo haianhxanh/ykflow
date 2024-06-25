@@ -12,6 +12,7 @@ import {
 } from "../utils/helpers";
 import { v4 } from "uuid";
 import { array } from "joi";
+import { sendNotification } from "../utils/notification";
 
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
@@ -96,6 +97,58 @@ export const update_inquiry = async (req: Request, res: Response) => {
         },
       }
     );
+
+    let pauseStartDate = convertDateToISOString(inquiry.pause_start_date);
+    let pauseEndDate = convertDateToISOString(inquiry.pause_end_date);
+    let newStartDate = convertDateToISOString(inquiry.new_start_date);
+    let newEndDate = convertDateToISOString(inquiry.new_end_date);
+
+    const shopify_order = await axios.get(
+      `https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": ACCESS_TOKEN!,
+        },
+      }
+    );
+
+    let order_attributes = shopify_order.data.order.note_attributes;
+    order_attributes.push({
+      name: "NOVÉ Datum začátku",
+      value: newStartDate,
+    });
+    order_attributes.push({
+      name: "NOVÉ Datum ukončení",
+      value: newEndDate,
+    });
+
+    const order_attributes_update = await axios.put(
+      `https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`,
+      {
+        order: {
+          id: inquiry.order_id,
+          note_attributes: order_attributes,
+        },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": ACCESS_TOKEN!,
+        },
+      }
+    );
+
+    if (req.body.status == STATUS.APPROVED && inquiry) {
+      let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičku budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
+
+      let notificationSubject = `Vaše žádost o pozastavení Yes Krabičky (obj. ${inquiry.order_name}) byla schválena`;
+      const sendNotificationToMerchant = await sendNotification(
+        notificationSubject,
+        inquiry.order_contact,
+        message
+      );
+    }
 
     return res.status(200).json({
       message: `Status of the inquiry has been updated`,

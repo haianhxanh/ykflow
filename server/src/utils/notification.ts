@@ -20,8 +20,8 @@ const mailchimp = require("@mailchimp/mailchimp_transactional")(
   MANDRILL_API_KEY
 );
 
-export const notifyMerchant = async (
-  orderName: string,
+export const sendNotification = async (
+  subject: string,
   customerEmail: string,
   content: string
 ) => {
@@ -37,7 +37,7 @@ export const notifyMerchant = async (
         type: "to",
       },
     ],
-    subject: `Nová žádost o pozastavení Yes Krabičky (obj. ${orderName})`,
+    subject: subject,
     bcc_address: MANDRILL_MESSAGE_BCC_ADDRESS as string,
   };
 

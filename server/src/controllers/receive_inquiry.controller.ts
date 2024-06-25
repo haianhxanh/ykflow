@@ -12,7 +12,7 @@ import {
   isWeekDay,
 } from "../utils/helpers";
 import { v4 } from "uuid";
-import { notifyMerchant } from "../utils/notification";
+import { sendNotification } from "../utils/notification";
 
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
@@ -230,18 +230,16 @@ export const receive_inquiry = async (req: Request, res: Response) => {
     }
 
     /*-------------------------------------SUCCESS RESPONSE-----------------------------------------*/
-
+    /*----------------------------------NOTIFY MERCHANT AND CUSTOMER -------------------------------*/
     let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${
       req.body.item_title
     } od ${convertDateToLocalString(
       pause_start_date
-    )} do ${convertDateToLocalString(
-      pause_end_date
-    )} (včetně). V nejbližší době Vás budeme kontaktovat.`;
+    )} do ${convertDateToLocalString(pause_end_date)} (včetně).`;
 
-    /*-------------------------------------NOTIFY MERCHANT AND CUSTOMER -----------------------------------------*/
-    const sendNotificationToMerchant = await notifyMerchant(
-      req.body.order_name,
+    let notificationSubject = `Nová žádost o pozastavení Yes Krabičky (obj. ${req.body.order_name})`;
+    const sendNotificationToMerchant = await sendNotification(
+      notificationSubject,
       req.body.order_contact,
       message
     );

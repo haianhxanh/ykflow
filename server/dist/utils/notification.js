@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.notifyMerchant = void 0;
+exports.sendNotification = void 0;
 require("dotenv/config");
 const { MANDRILL_API_KEY, MANDRILL_MESSAGE_FROM_EMAIL, MANDRILL_MESSAGE_FROM_NAME, MANDRILL_MESSAGE_BCC_ADDRESS, } = process.env;
 const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY);
-const notifyMerchant = (orderName, customerEmail, content) => __awaiter(void 0, void 0, void 0, function* () {
+const sendNotification = (subject, customerEmail, content) => __awaiter(void 0, void 0, void 0, function* () {
     // axios post request to send email
     const message = {
         text: content,
@@ -26,7 +26,7 @@ const notifyMerchant = (orderName, customerEmail, content) => __awaiter(void 0, 
                 type: "to",
             },
         ],
-        subject: `Nová žádost o pozastavení Yes Krabičky (obj. ${orderName})`,
+        subject: subject,
         bcc_address: MANDRILL_MESSAGE_BCC_ADDRESS,
     };
     try {
@@ -37,7 +37,7 @@ const notifyMerchant = (orderName, customerEmail, content) => __awaiter(void 0, 
         console.log(error);
     }
 });
-exports.notifyMerchant = notifyMerchant;
+exports.sendNotification = sendNotification;
 function sendEmail(message) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield mailchimp.messages.send({
