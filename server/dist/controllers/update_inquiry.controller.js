@@ -17,6 +17,8 @@ const constants_1 = require("./../utils/constants");
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const inquiry_model_1 = __importDefault(require("../model/inquiry.model"));
+const helpers_1 = require("../utils/helpers");
+const notification_1 = require("../utils/notification");
 dotenv_1.default.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 /*-------------------------------------RECEIVE INQUIRY-----------------------------------------*/
@@ -67,6 +69,41 @@ const update_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 "X-Shopify-Access-Token": ACCESS_TOKEN,
             },
         });
+        let pauseStartDate = (0, helpers_1.convertDateToISOString)(inquiry.pause_start_date);
+        let pauseEndDate = (0, helpers_1.convertDateToISOString)(inquiry.pause_end_date);
+        let newStartDate = (0, helpers_1.convertDateToISOString)(inquiry.new_start_date);
+        let newEndDate = (0, helpers_1.convertDateToISOString)(inquiry.new_end_date);
+        const shopify_order = yield axios_1.default.get(`https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`, {
+            headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Access-Token": ACCESS_TOKEN,
+            },
+        });
+        let order_attributes = shopify_order.data.order.note_attributes;
+        order_attributes.push({
+            name: "NOVÉ Datum začátku",
+            value: newStartDate,
+        });
+        order_attributes.push({
+            name: "NOVÉ Datum ukončení",
+            value: newEndDate,
+        });
+        const order_attributes_update = yield axios_1.default.put(`https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`, {
+            order: {
+                id: inquiry.order_id,
+                note_attributes: order_attributes,
+            },
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Access-Token": ACCESS_TOKEN,
+            },
+        });
+        if (req.body.status == constants_1.STATUS.APPROVED && inquiry) {
+            let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičku budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
+            let notificationSubject = `Vaše žádost o pozastavení Yes Krabičky (obj. ${inquiry.order_name}) byla schválena`;
+            const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, inquiry.order_contact, message);
+        }
         return res.status(200).json({
             message: `Status of the inquiry has been updated`,
         });

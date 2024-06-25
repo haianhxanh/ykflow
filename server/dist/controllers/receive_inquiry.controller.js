@@ -178,9 +178,10 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
             }
         }
         /*-------------------------------------SUCCESS RESPONSE-----------------------------------------*/
-        let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${req.body.item_title} od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně). V nejbližší době Vás budeme kontaktovat.`;
-        /*-------------------------------------NOTIFY MERCHANT AND CUSTOMER -----------------------------------------*/
-        const sendNotificationToMerchant = yield (0, notification_1.notifyMerchant)(req.body.order_name, req.body.order_contact, message);
+        /*----------------------------------NOTIFY MERCHANT AND CUSTOMER -------------------------------*/
+        let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${req.body.item_title} od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně).`;
+        let notificationSubject = `Nová žádost o pozastavení Yes Krabičky (obj. ${req.body.order_name})`;
+        const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, req.body.order_contact, message);
         return res.status(200).json({
             request_id: `ID požadavku: ${new_inquiry.id}`,
             message: message,
