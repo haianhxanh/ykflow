@@ -140,7 +140,7 @@ export const update_inquiry = async (req: Request, res: Response) => {
     );
 
     if (req.body.status == STATUS.APPROVED && inquiry) {
-      let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičku budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
+      let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičky budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
 
       let notificationSubject = `Vaše žádost o pozastavení Yes Krabičky (obj. ${inquiry.order_name}) byla schválena`;
       const sendNotificationToMerchant = await sendNotification(
