@@ -41,7 +41,6 @@ const fulfill_order = (order_id) => __awaiter(void 0, void 0, void 0, function* 
             "X-Shopify-Access-Token": ACCESS_TOKEN,
         },
     });
-    console.log(data);
     const create_fulfillment = {
         fulfillment: {
             line_items_by_fulfillment_order: [

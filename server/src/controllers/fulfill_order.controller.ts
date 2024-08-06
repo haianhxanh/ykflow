@@ -31,8 +31,6 @@ const fulfill_order = async (order_id: string) => {
     }
   );
 
-  console.log(data);
-
   const create_fulfillment = {
     fulfillment: {
       line_items_by_fulfillment_order: [
