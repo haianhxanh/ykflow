@@ -25,6 +25,7 @@ const fulfill = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!order_id) {
             return res.status(400).send("Order ID is required");
         }
+        order_id = order_id.replace("gid://shopify/Order/", "");
         let fulfilled_order = yield fulfill_order(order_id);
         res.status(200).send(`Order ${req.query.order_id} has been fulfilled`);
     }
