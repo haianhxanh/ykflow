@@ -13,9 +13,9 @@ exports.sendNotification = void 0;
 require("dotenv/config");
 const { MANDRILL_API_KEY, MANDRILL_MESSAGE_FROM_EMAIL, MANDRILL_MESSAGE_FROM_NAME, MANDRILL_MESSAGE_BCC_ADDRESS, } = process.env;
 const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY);
-const sendNotification = (subject, customerEmail, content) => __awaiter(void 0, void 0, void 0, function* () {
+const sendNotification = (subject, customerEmail, content, attachment) => __awaiter(void 0, void 0, void 0, function* () {
     // axios post request to send email
-    const message = {
+    let message = {
         text: content,
         html: content + "<br><br>---<br>Yes Krabičky",
         from_email: MANDRILL_MESSAGE_FROM_EMAIL,
@@ -28,7 +28,17 @@ const sendNotification = (subject, customerEmail, content) => __awaiter(void 0, 
         ],
         subject: subject,
         bcc_address: MANDRILL_MESSAGE_BCC_ADDRESS,
+        attachments: [],
     };
+    if (attachment) {
+        message.attachments = [
+            {
+                type: attachment.type,
+                name: attachment.name,
+                content: attachment.content,
+            },
+        ];
+    }
     try {
         const response = sendEmail(message);
         return response;

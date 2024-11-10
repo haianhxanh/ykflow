@@ -14,6 +14,7 @@ type Message = {
   bcc_address: string;
   to: { email: string; type: string }[];
   subject: string;
+  attachments: {}[];
 };
 
 const mailchimp = require("@mailchimp/mailchimp_transactional")(
@@ -23,10 +24,11 @@ const mailchimp = require("@mailchimp/mailchimp_transactional")(
 export const sendNotification = async (
   subject: string,
   customerEmail: string,
-  content: string
+  content: string,
+  attachment: any
 ) => {
   // axios post request to send email
-  const message: Message = {
+  let message: Message = {
     text: content,
     html: content + "<br><br>---<br>Yes Krabičky",
     from_email: MANDRILL_MESSAGE_FROM_EMAIL as string,
@@ -39,7 +41,18 @@ export const sendNotification = async (
     ],
     subject: subject,
     bcc_address: MANDRILL_MESSAGE_BCC_ADDRESS as string,
+    attachments: [],
   };
+
+  if (attachment) {
+    message.attachments = [
+      {
+        type: attachment.type,
+        name: attachment.name,
+        content: attachment.content,
+      },
+    ];
+  }
 
   try {
     const response = sendEmail(message);

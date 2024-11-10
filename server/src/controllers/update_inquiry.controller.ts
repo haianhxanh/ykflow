@@ -146,7 +146,8 @@ export const update_inquiry = async (req: Request, res: Response) => {
       const sendNotificationToMerchant = await sendNotification(
         notificationSubject,
         inquiry.order_contact,
-        message
+        message,
+        undefined
       );
     }
 

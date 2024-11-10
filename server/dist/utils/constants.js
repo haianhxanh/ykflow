@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.API_RESPONSES = exports.STATUS_STRINGS = exports.STATUS = exports.STRINGS = void 0;
+exports.ALLERGENS = exports.API_RESPONSES = exports.STATUS_STRINGS = exports.STATUS = exports.STRINGS = void 0;
 exports.STRINGS = {
     ORDER_ATTR_START_DATE: "Datum začátku Yes Krabiček",
 };
@@ -26,3 +26,4 @@ exports.API_RESPONSES = {
     INVALID_END_DATE: "Konec pozastavení musí být po datu začátku pozastavení",
     OUT_OF_RANGE: "Požadovaná data jsou mimo rozsah objednávky",
 };
+exports.ALLERGENS = "Mořské plody,Houby,Tofu,Ryby,Sója,Vepřové maso,Skořápkové plody,Arašídy,Koriandr,Rajčata,Červená řepa,Avokádo,Jehněčí maso,Kozí sýr,Paprika,Olivy,Jahody";

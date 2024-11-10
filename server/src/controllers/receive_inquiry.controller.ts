@@ -241,7 +241,8 @@ export const receive_inquiry = async (req: Request, res: Response) => {
     const sendNotificationToMerchant = await sendNotification(
       notificationSubject,
       req.body.order_contact,
-      message
+      message,
+      undefined
     );
 
     return res.status(200).json({
