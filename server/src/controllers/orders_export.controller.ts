@@ -148,6 +148,7 @@ export const orders_export = async (req: Request, res: Response) => {
       `Objednávky ${yesterday}`,
       "upgrowthdev@gmail.com",
       "Objednávky jsou připraveny k exportu",
+      false,
       attachment
     );
     return res.status(200).json(sendEmail);

@@ -133,7 +133,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             name: `orders-${yesterday}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, "upgrowthdev@gmail.com", "Objednávky jsou připraveny k exportu", attachment);
+        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, "upgrowthdev@gmail.com", "Objednávky jsou připraveny k exportu", false, attachment);
         return res.status(200).json(sendEmail);
     }
     catch (error) {

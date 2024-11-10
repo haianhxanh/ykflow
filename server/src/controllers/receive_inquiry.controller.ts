@@ -242,6 +242,7 @@ export const receive_inquiry = async (req: Request, res: Response) => {
       notificationSubject,
       req.body.order_contact,
       message,
+      false,
       undefined
     );
 

@@ -147,6 +147,7 @@ export const update_inquiry = async (req: Request, res: Response) => {
         notificationSubject,
         inquiry.order_contact,
         message,
+        true,
         undefined
       );
     }

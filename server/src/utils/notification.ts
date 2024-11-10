@@ -11,7 +11,7 @@ type Message = {
   html: string;
   from_email: string;
   from_name: string;
-  bcc_address: string;
+  bcc_address: string | null | undefined;
   to: { email: string; type: string }[];
   subject: string;
   attachments: {}[];
@@ -25,6 +25,7 @@ export const sendNotification = async (
   subject: string,
   customerEmail: string,
   content: string,
+  bbc: boolean,
   attachment: any
 ) => {
   // axios post request to send email
@@ -40,8 +41,8 @@ export const sendNotification = async (
       },
     ],
     subject: subject,
-    bcc_address: MANDRILL_MESSAGE_BCC_ADDRESS as string,
     attachments: [],
+    bcc_address: undefined,
   };
 
   if (attachment) {
@@ -52,6 +53,10 @@ export const sendNotification = async (
         content: attachment.content,
       },
     ];
+  }
+
+  if (bbc) {
+    message.bcc_address = MANDRILL_MESSAGE_BCC_ADDRESS as string;
   }
 
   try {
