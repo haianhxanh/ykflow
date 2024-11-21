@@ -35,12 +35,10 @@ export const orders_export = async (req: Request, res: Response) => {
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
 
     for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
+      let severeAllergic = order.node.customAttributes.find((attr: any) => {
+        return attr.key == "Jsem prudký alergik" && attr.value == "Ano";
+      });
       if (orderIndex === 0) {
-        // let deliveryType = order.node.customAttributes.find(
-        //   (attr: any) => attr.key === "delivery_type" && attr.value === "pickup"
-        // );
-        // let orderIsPickup = order.node.shippingAddress == null && deliveryType;
-
         let header = [
           { header: "Order name", key: "orderName", width: 10 },
           { header: "Financial Status", key: "financialStatus", width: 10 },
@@ -59,6 +57,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "End Date", key: "endDate", width: 15 },
           { header: "Line Item Name", key: "lineItemName", width: 30 },
           { header: "Kcal", key: "kcal", width: 10 },
+          { header: "Prudký alergik", key: "severeAllergic", width: 10 },
         ];
         ALLERGENS.split(",").forEach((allergen) => {
           header.push({ header: allergen, key: allergen, width: 10 });
@@ -185,6 +184,7 @@ export const orders_export = async (req: Request, res: Response) => {
             lineIsProgram
               ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
               : "",
+            severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {
             let allergens = line.node?.customAttributes?.find(

@@ -13,6 +13,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
           }
           id
           name
+          note
           displayFinancialStatus
           paymentGatewayNames
           tags

@@ -39,11 +39,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const workbook = new exceljs_1.default.Workbook();
         const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
         for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
+            let severeAllergic = order.node.customAttributes.find((attr) => {
+                return attr.key == "Jsem prudký alergik" && attr.value == "Ano";
+            });
             if (orderIndex === 0) {
-                // let deliveryType = order.node.customAttributes.find(
-                //   (attr: any) => attr.key === "delivery_type" && attr.value === "pickup"
-                // );
-                // let orderIsPickup = order.node.shippingAddress == null && deliveryType;
                 let header = [
                     { header: "Order name", key: "orderName", width: 10 },
                     { header: "Financial Status", key: "financialStatus", width: 10 },
@@ -62,6 +61,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     { header: "End Date", key: "endDate", width: 15 },
                     { header: "Line Item Name", key: "lineItemName", width: 30 },
                     { header: "Kcal", key: "kcal", width: 10 },
+                    { header: "Prudký alergik", key: "severeAllergic", width: 10 },
                 ];
                 constants_1.ALLERGENS.split(",").forEach((allergen) => {
                     header.push({ header: allergen, key: allergen, width: 10 });
@@ -170,6 +170,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         lineIsProgram
                             ? (_8 = (_7 = (_6 = line.node) === null || _6 === void 0 ? void 0 : _6.title) === null || _7 === void 0 ? void 0 : _7.split(" | ")[1]) === null || _8 === void 0 ? void 0 : _8.replace(" kcal", "")
                             : "",
+                        severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
                         let allergens = (_10 = (_9 = line.node) === null || _9 === void 0 ? void 0 : _9.customAttributes) === null || _10 === void 0 ? void 0 : _10.find((attr) => attr.key == "Alergeny" && attr.value != "");
