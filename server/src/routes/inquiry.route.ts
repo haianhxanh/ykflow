@@ -7,6 +7,7 @@ import { get_order_inquiries } from "../controllers/get_order_inquiries.controll
 import { delete_inquiry } from "../controllers/delete_inquiry.controller";
 import { fulfill } from "../controllers/fulfill_order.controller";
 import { orders_export } from "../controllers/orders_export.controller";
+import { order_update_attributes } from "../controllers/order_update_attributes.controller";
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.post("/inquiry/delete", auth, delete_inquiry);
 router.get("/order-inquiries?:order_id", get_order_inquiries);
 router.get("/fulfill", fulfill);
 router.get("/orders/export", orders_export);
+router.get("/order/update/attributes", order_update_attributes);
 
 export default router;

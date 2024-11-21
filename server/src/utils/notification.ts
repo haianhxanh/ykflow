@@ -29,17 +29,15 @@ export const sendNotification = async (
   attachment: any
 ) => {
   // axios post request to send email
+  let recipients = customerEmail.split(",").map((email) => {
+    return { email: email.trim(), type: "to" };
+  });
   let message: Message = {
     text: content,
     html: content + "<br><br>---<br>Yes Krabičky",
     from_email: MANDRILL_MESSAGE_FROM_EMAIL as string,
     from_name: MANDRILL_MESSAGE_FROM_NAME as string,
-    to: [
-      {
-        email: customerEmail,
-        type: "to",
-      },
-    ],
+    to: recipients,
     subject: subject,
     attachments: [],
     bcc_address: undefined,

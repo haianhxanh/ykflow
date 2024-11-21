@@ -2,16 +2,16 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { GraphQLClient } from "graphql-request";
 import { ordersQuery } from "../queries/orders";
-import xlsx from "xlsx";
 import ExcelJS from "exceljs";
-import { Workbook, Worksheet, Column, Cell } from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
 
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS } =
+  process.env;
+const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
-/*-------------------------------------GET INQUIRIES FROM DATABASE------------------------------------------------*/
+/*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const orders_export = async (req: Request, res: Response) => {
   try {
@@ -28,16 +28,19 @@ export const orders_export = async (req: Request, res: Response) => {
     let yesterday = getYesterday();
 
     const latestOrders = await client.request(ordersQuery, {
-      query: `created_at:'${yesterday}'`,
+      query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
     });
-
-    // return res.status(200).json(latestOrders);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
 
     for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
       if (orderIndex === 0) {
+        // let deliveryType = order.node.customAttributes.find(
+        //   (attr: any) => attr.key === "delivery_type" && attr.value === "pickup"
+        // );
+        // let orderIsPickup = order.node.shippingAddress == null && deliveryType;
+
         let header = [
           { header: "Order name", key: "orderName", width: 10 },
           { header: "Financial Status", key: "financialStatus", width: 10 },
@@ -62,80 +65,155 @@ export const orders_export = async (req: Request, res: Response) => {
         });
         worksheet.columns = header;
       }
-      for (const [lineIndex, line] of order.node.lineItems.edges.entries()) {
+
+      let oneTypeOrder =
+        order.node.lineItems.edges.every((line: any) => {
+          return line.node.variant.product.tags.includes("Programy");
+        }) ||
+        order.node.lineItems.edges.every((line: any) => {
+          return !line.node.variant.product.tags.includes("Programy");
+        }) ||
+        false;
+
+      let mixedOrder = oneTypeOrder ? false : true;
+
+      let programsItems = order.node.lineItems.edges.filter((line: any) => {
+        return line.node.variant.product.tags.includes("Programy");
+      });
+      let nonProgramItems = order.node.lineItems.edges.filter((line: any) => {
+        return !line.node.variant.product.tags.includes("Programy");
+      });
+
+      let mainItems = [];
+      if (oneTypeOrder) {
+        if (programsItems.length > 0) {
+          mainItems = programsItems;
+        } else if (nonProgramItems.length > 0) {
+          mainItems = nonProgramItems;
+        }
+      } else {
+        mainItems = programsItems;
+      }
+
+      let secondaryItems = order.node.lineItems.edges.filter((line: any) => {
+        return !mainItems.includes(line);
+      });
+
+      let addons = [];
+      let promo = [];
+
+      if (mixedOrder) {
+        for (const [lineIndex, line] of secondaryItems.entries()) {
+          if (
+            line.node.originalTotalSet.shopMoney.amount -
+              line.node.totalDiscountSet.shopMoney.amount >
+            0
+          ) {
+            addons.push(line);
+          } else {
+            promo.push(line);
+          }
+        }
+      }
+
+      for (const [lineIndex, line] of mainItems.entries()) {
         let programStartDate, programEndDate;
         let lineIsProgram =
           line?.node?.variant?.product?.tags?.includes("Programy");
-        if (lineIsProgram && order.node.customAttributes) {
-          for (const attribute of order.node.customAttributes) {
-            if (attribute.key === "Datum začátku Yes Krabiček") {
-              programStartDate = attribute.value;
-            }
-            if (
-              attribute.key ===
-              `Konec_${line.node?.variant?.id?.replace(
-                "gid://shopify/ProductVariant/",
-                ""
-              )}`
-            ) {
-              programEndDate = attribute.value;
-            }
-          }
-        }
-        let customAttributes = order.node?.customAttributes?.map(
-          (attr: any) => {
-            return `${attr.key}: ${attr.value}`;
-          }
-        );
-        const row = [
-          order.node?.name,
-          order.node?.displayFinancialStatus,
-          order.node?.billingAddress?.name,
-          order.node?.shippingAddress?.name,
-          order.node?.shippingAddress?.company,
-          order.node?.shippingAddress?.phone,
-          order.node?.shippingAddress?.address1,
-          order.node?.shippingAddress?.city,
-          order.node?.shippingAddress?.zip,
-          order.node?.note,
-          customAttributes?.join("\n"),
-          "",
-          "",
-          programStartDate,
-          programEndDate,
-          line.node.title,
-          lineIsProgram
-            ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
-            : "",
-        ];
-        if (lineIsProgram) {
-          let allergens = line.node?.customAttributes?.find(
-            (attr: any) => attr.key == "Alergeny" && attr.value != ""
-          );
-          if (allergens) {
-            allergens = allergens.value
-              .split(",")
-              .map((allergen: string) => allergen.trim());
+        let lineQuantity = line.node.quantity;
+        let promoField;
+        let addonsField;
 
-            const firstRow = worksheet.getRow(1);
-
-            firstRow.eachCell((cell, colNumber) => {
-              if (colNumber > 17) {
-                if (allergens.includes(cell.value)) {
-                  row.push("X");
-                } else {
-                  row.push("");
-                }
+        for (let i = 0; i < lineQuantity; i++) {
+          if (lineIsProgram && order.node.customAttributes) {
+            for (const attribute of order.node.customAttributes) {
+              if (attribute.key === "Datum začátku Yes Krabiček") {
+                programStartDate = attribute.value;
               }
-            });
+              if (
+                attribute.key ===
+                `Konec_${line.node?.variant?.id?.replace(
+                  "gid://shopify/ProductVariant/",
+                  ""
+                )}`
+              ) {
+                programEndDate = attribute.value;
+              }
+            }
           }
+          let customAttributes = order.node?.customAttributes?.map(
+            (attr: any) => {
+              return `${attr.key}: ${attr.value}`;
+            }
+          );
+
+          if (lineIndex == 0 && mixedOrder) {
+            if (promo.length > 0)
+              promoField = promo
+                .map((item: any) => {
+                  return `${item.node.quantity} x ${item.node.title}`;
+                })
+                .join("\n");
+            if (addons.length > 0)
+              addonsField = addons
+                .map((item: any) => {
+                  return `${item.node.quantity} x ${item.node.title}`;
+                })
+                .join("\n");
+          }
+          const row = [
+            order.node?.name,
+            order.node?.displayFinancialStatus,
+            order.node?.billingAddress?.name,
+            order.node?.shippingAddress?.name || "",
+            order.node?.shippingAddress?.company || "",
+            order.node?.shippingAddress?.phone ||
+              order.node?.billingAddress?.phone ||
+              "",
+            order.node?.shippingAddress?.address1 ||
+              `Pickup ${order.node?.shippingLine?.title}` ||
+              "",
+            order.node?.shippingAddress?.city || "",
+            order.node?.shippingAddress?.zip || "",
+            order.node?.note,
+            customAttributes?.join("\n"),
+            addonsField ? addonsField : "",
+            promoField ? promoField : "",
+            programStartDate,
+            programEndDate,
+            line.node.title,
+            lineIsProgram
+              ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
+              : "",
+          ];
+          if (lineIsProgram) {
+            let allergens = line.node?.customAttributes?.find(
+              (attr: any) => attr.key == "Alergeny" && attr.value != ""
+            );
+            if (allergens) {
+              allergens = allergens.value
+                .split(",")
+                .map((allergen: string) => allergen.trim());
+
+              const firstRow = worksheet.getRow(1);
+
+              firstRow.eachCell((cell, colNumber) => {
+                if (colNumber > 17) {
+                  if (allergens.includes(cell.value)) {
+                    row.push(cell.value);
+                  } else {
+                    row.push("");
+                  }
+                }
+              });
+            }
+          }
+          worksheet.addRow(row);
         }
-        worksheet.addRow(row);
       }
     }
-
-    await workbook.xlsx.writeFile("orders.xlsx");
     // return res.status(200).json(latestOrders);
+    await workbook.xlsx.writeFile(`orders-${yesterday}.xlsx`);
     const buffer = await workbook.xlsx.writeBuffer();
     const base64Content = Buffer.from(buffer).toString("base64");
 
@@ -146,8 +224,8 @@ export const orders_export = async (req: Request, res: Response) => {
     };
     const sendEmail = await sendNotification(
       `Objednávky ${yesterday}`,
-      "upgrowthdev@gmail.com",
-      "Objednávky jsou připraveny k exportu",
+      recipientEmails,
+      `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
       false,
       attachment
     );

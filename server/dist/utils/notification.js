@@ -15,17 +15,15 @@ const { MANDRILL_API_KEY, MANDRILL_MESSAGE_FROM_EMAIL, MANDRILL_MESSAGE_FROM_NAM
 const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY);
 const sendNotification = (subject, customerEmail, content, bbc, attachment) => __awaiter(void 0, void 0, void 0, function* () {
     // axios post request to send email
+    let recipients = customerEmail.split(",").map((email) => {
+        return { email: email.trim(), type: "to" };
+    });
     let message = {
         text: content,
         html: content + "<br><br>---<br>Yes Krabičky",
         from_email: MANDRILL_MESSAGE_FROM_EMAIL,
         from_name: MANDRILL_MESSAGE_FROM_NAME,
-        to: [
-            {
-                email: customerEmail,
-                type: "to",
-            },
-        ],
+        to: recipients,
         subject: subject,
         attachments: [],
         bcc_address: undefined,

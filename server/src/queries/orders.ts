@@ -12,8 +12,15 @@ export const ordersQuery = gql`
           id
           name
           displayFinancialStatus
+          paymentGatewayNames
+          tags
           billingAddress {
             name
+            company
+            phone
+            address1
+            city
+            zip
           }
           shippingAddress {
             name
@@ -23,10 +30,25 @@ export const ordersQuery = gql`
             city
             zip
           }
-          lineItems(first: 1) {
+          shippingLine {
+            title
+          }
+          lineItems(first: 250) {
             edges {
               node {
+                id
                 title
+                quantity
+                totalDiscountSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+                originalTotalSet {
+                  shopMoney {
+                    amount
+                  }
+                }
                 customAttributes {
                   key
                   value
@@ -43,6 +65,35 @@ export const ordersQuery = gql`
             }
           }
         }
+      }
+    }
+  }
+`;
+
+export const orderQuery = gql`
+  query ($id: ID!) {
+    order(id: $id) {
+      customAttributes {
+        key
+        value
+      }
+    }
+  }
+`;
+
+export const orderUpdateMutation = gql`
+  mutation updateOrderAttributes($input: OrderInput!) {
+    orderUpdate(input: $input) {
+      order {
+        id
+        customAttributes {
+          key
+          value
+        }
+      }
+      userErrors {
+        message
+        field
       }
     }
   }
