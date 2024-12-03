@@ -26,6 +26,7 @@ export const orders_export = async (req: Request, res: Response) => {
     );
 
     let yesterday = getYesterday();
+    yesterday = "2024-11-28";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
@@ -160,6 +161,20 @@ export const orders_export = async (req: Request, res: Response) => {
                 })
                 .join("\n");
           }
+
+          let shippingAddress;
+          if (
+            order.node?.shippingAddress?.address1 &&
+            !order.node?.shippingAddress?.address2
+          ) {
+            shippingAddress = order.node?.shippingAddress?.address1;
+          } else if (
+            order.node?.shippingAddress?.address1 &&
+            order.node?.shippingAddress?.address2
+          ) {
+            shippingAddress = `${order.node?.shippingAddress?.address1} ${order.node?.shippingAddress?.address2}`;
+          }
+
           const row = [
             order.node?.name,
             order.node?.displayFinancialStatus,
@@ -169,7 +184,7 @@ export const orders_export = async (req: Request, res: Response) => {
             order.node?.shippingAddress?.phone ||
               order.node?.billingAddress?.phone ||
               "",
-            order.node?.shippingAddress?.address1 ||
+            shippingAddress ||
               `Pickup ${order.node?.shippingLine?.title}` ||
               "",
             order.node?.shippingAddress?.city || "",
@@ -222,6 +237,7 @@ export const orders_export = async (req: Request, res: Response) => {
       name: `orders-${yesterday}.xlsx`,
       content: base64Content,
     };
+
     const sendEmail = await sendNotification(
       `Objednávky ${yesterday}`,
       recipientEmails,

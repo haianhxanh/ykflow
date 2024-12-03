@@ -20,6 +20,7 @@ export const ordersQuery = gql`
             company
             phone
             address1
+            address2
             city
             zip
           }
@@ -28,6 +29,7 @@ export const ordersQuery = gql`
             company
             phone
             address1
+            address2
             city
             zip
           }

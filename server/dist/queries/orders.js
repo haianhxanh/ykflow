@@ -22,6 +22,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
             company
             phone
             address1
+            address2
             city
             zip
           }
@@ -30,6 +31,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
             company
             phone
             address1
+            address2
             city
             zip
           }
