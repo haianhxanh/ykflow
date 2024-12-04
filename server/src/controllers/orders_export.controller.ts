@@ -26,7 +26,7 @@ export const orders_export = async (req: Request, res: Response) => {
     );
 
     let yesterday = getYesterday();
-    yesterday = "2024-11-28";
+    // yesterday = "2024-11-28";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
