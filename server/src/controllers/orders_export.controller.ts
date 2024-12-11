@@ -57,6 +57,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Start Date", key: "startDate", width: 15 },
           { header: "End Date", key: "endDate", width: 15 },
           { header: "Line Item Name", key: "lineItemName", width: 30 },
+          { header: "Program Length", key: "programLength", width: 10 },
           { header: "Kcal", key: "kcal", width: 10 },
           { header: "Prudký alergik", key: "severeAllergic", width: 10 },
         ];
@@ -121,8 +122,7 @@ export const orders_export = async (req: Request, res: Response) => {
         let lineIsProgram =
           line?.node?.variant?.product?.tags?.includes("Programy");
         let lineQuantity = line.node.quantity;
-        let promoField;
-        let addonsField;
+        let promoField, addonsField;
 
         for (let i = 0; i < lineQuantity; i++) {
           if (lineIsProgram && order.node.customAttributes) {
@@ -196,6 +196,9 @@ export const orders_export = async (req: Request, res: Response) => {
             programStartDate,
             programEndDate,
             line.node.title,
+            lineIsProgram
+              ? line.node?.variant?.title?.split("(")[1]?.split(")")[0]
+              : "",
             lineIsProgram
               ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
               : "",

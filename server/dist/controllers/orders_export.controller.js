@@ -24,7 +24,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS } = process.en
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26;
     try {
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
@@ -61,6 +61,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     { header: "Start Date", key: "startDate", width: 15 },
                     { header: "End Date", key: "endDate", width: 15 },
                     { header: "Line Item Name", key: "lineItemName", width: 30 },
+                    { header: "Program Length", key: "programLength", width: 10 },
                     { header: "Kcal", key: "kcal", width: 10 },
                     { header: "Prudký alergik", key: "severeAllergic", width: 10 },
                 ];
@@ -116,8 +117,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 let programStartDate, programEndDate;
                 let lineIsProgram = (_d = (_c = (_b = (_a = line === null || line === void 0 ? void 0 : line.node) === null || _a === void 0 ? void 0 : _a.variant) === null || _b === void 0 ? void 0 : _b.product) === null || _c === void 0 ? void 0 : _c.tags) === null || _d === void 0 ? void 0 : _d.includes("Programy");
                 let lineQuantity = line.node.quantity;
-                let promoField;
-                let addonsField;
+                let promoField, addonsField;
                 for (let i = 0; i < lineQuantity; i++) {
                     if (lineIsProgram && order.node.customAttributes) {
                         for (const attribute of order.node.customAttributes) {
@@ -178,12 +178,15 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         programEndDate,
                         line.node.title,
                         lineIsProgram
-                            ? (_20 = (_19 = (_18 = line.node) === null || _18 === void 0 ? void 0 : _18.title) === null || _19 === void 0 ? void 0 : _19.split(" | ")[1]) === null || _20 === void 0 ? void 0 : _20.replace(" kcal", "")
+                            ? (_21 = (_20 = (_19 = (_18 = line.node) === null || _18 === void 0 ? void 0 : _18.variant) === null || _19 === void 0 ? void 0 : _19.title) === null || _20 === void 0 ? void 0 : _20.split("(")[1]) === null || _21 === void 0 ? void 0 : _21.split(")")[0]
+                            : "",
+                        lineIsProgram
+                            ? (_24 = (_23 = (_22 = line.node) === null || _22 === void 0 ? void 0 : _22.title) === null || _23 === void 0 ? void 0 : _23.split(" | ")[1]) === null || _24 === void 0 ? void 0 : _24.replace(" kcal", "")
                             : "",
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
-                        let allergens = (_22 = (_21 = line.node) === null || _21 === void 0 ? void 0 : _21.customAttributes) === null || _22 === void 0 ? void 0 : _22.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        let allergens = (_26 = (_25 = line.node) === null || _25 === void 0 ? void 0 : _25.customAttributes) === null || _26 === void 0 ? void 0 : _26.find((attr) => attr.key == "Alergeny" && attr.value != "");
                         if (allergens) {
                             allergens = allergens.value
                                 .split(",")
