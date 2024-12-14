@@ -18,6 +18,7 @@ var corsOptions = {
     "https://yeskrabicky.cz",
     "https://admin.shopify.com/store/yes-krabicky",
     "https://yes-krabicky.myshopify.com",
+    "https://extensions.shopifycdn.com",
   ],
   optionsSuccessStatus: 200,
   methods: "GET, PUT, POST",

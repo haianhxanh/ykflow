@@ -6,11 +6,14 @@
   "dependencies": {
     "@mailchimp/mailchimp_transactional": "^1.0.59",
     "@shopify/shopify-api": "^8.0.1",
+    "@turf/turf": "^7.1.0",
     "axios": "^1.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "exceljs": "^4.4.0",
     "express": "^4.18.2",
+    "express-rate-limit": "^7.4.1",
+    "fs": "^0.0.1-security",
     "googleapis": "^144.0.0",
     "graphql": "^16.9.0",
     "graphql-request": "5.1.0",
@@ -22,7 +25,9 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.33.0",
     "shopify-api-node": "^3.12.7",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "xml-js": "^1.6.11",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
     "build": "tsc -w",
