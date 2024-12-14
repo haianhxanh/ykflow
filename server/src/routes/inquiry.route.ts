@@ -9,7 +9,6 @@ import { delete_inquiry } from "../controllers/delete_inquiry.controller";
 import { fulfill } from "../controllers/fulfill_order.controller";
 import { orders_export } from "../controllers/orders_export.controller";
 import { order_update_attributes } from "../controllers/order_update_attributes.controller";
-import { checkout_pickup_availability_check } from "../controllers/checkout_pickup_availability_check.controller";
 import { checkout_address_validation } from "../controllers/checkout_address_validation.controller";
 
 const router = express.Router();
