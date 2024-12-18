@@ -124,7 +124,6 @@ const checkout_pickup_availability_check = (req, res) => __awaiter(void 0, void 
             namespace: "ykflow",
             key: "pickup_locations_meta",
         });
-        console.log(ykFlowMetafields);
         let updatedkFlowMetafield = yield client.request(metafields_1.metafieldsSetMutation, {
             metafields: [
                 {
@@ -137,7 +136,7 @@ const checkout_pickup_availability_check = (req, res) => __awaiter(void 0, void 
             ],
         });
         if (updatedkFlowMetafield.metafieldsSet.userErrors.length > 0) {
-            console.log(updatedkFlowMetafield.metafieldsSet.userErrors);
+            console.log("updatedkFlowMetafield errors" + updatedkFlowMetafield.metafieldsSet.userErrors);
         }
         return res.status(200).json("Pickup locations meta updated");
     }
