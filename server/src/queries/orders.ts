@@ -1,8 +1,14 @@
 import { gql } from "graphql-request";
+import axios from "axios";
+import dotenv from "dotenv";
+import { promisify } from "util";
+dotenv.config();
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+const sleep = promisify(setTimeout);
 
 export const ordersQuery = gql`
   query ($query: String) {
-    orders(first: 250, query: $query) {
+    orders(first: 250, query: $query, reverse: true) {
       edges {
         node {
           customAttributes {
@@ -101,3 +107,70 @@ export const orderUpdateMutation = gql`
     }
   }
 `;
+
+export async function allOrdersQuery(query: string) {
+  let cursor = "";
+  let hasNextPage = true;
+  let orders: any[] = [];
+  while (hasNextPage) {
+    const response = await axios.post(
+      `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
+      {
+        query: `query{
+          orders(query: "${query}", first: 250${
+          cursor ? `, after: "${cursor}"` : ""
+        }) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                name
+                customAttributes {
+                  key
+                  value
+                }
+                shippingLine {
+                  title
+                }
+                lineItems(first: 250) {
+                  edges {
+                    node {
+                      id 
+                      title
+                      quantity
+                      variant {
+                        id
+                        title
+                        product {
+                          title
+                          tags
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }`,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": ACCESS_TOKEN,
+        },
+      }
+    );
+
+    const data = response.data.data.orders;
+    hasNextPage = data.pageInfo.hasNextPage;
+    cursor = data.pageInfo.endCursor;
+    orders = orders.concat(data.edges);
+    await sleep(750);
+  }
+
+  return orders;
+}
