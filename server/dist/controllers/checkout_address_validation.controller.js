@@ -51,7 +51,15 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
                 .status(400)
                 .json({ message: "Missing required address fields" });
         const { address1, address2, city, zip } = req.body;
-        let address = `${address1} ${address2}, ${city}, ${zip}`;
+        let address = "";
+        if (address1)
+            address += address1 + ", ";
+        if (address2)
+            address += address2 + ", ";
+        if (city)
+            address += city + ", ";
+        if (zip)
+            address += zip;
         console.log("Address: ", address);
         let folder = [];
         let coordinates = [];

@@ -20,7 +20,11 @@ export const checkout_address_validation = async (
         .json({ message: "Missing required address fields" });
 
     const { address1, address2, city, zip } = req.body;
-    let address = `${address1} ${address2}, ${city}, ${zip}`;
+    let address = "";
+    if (address1) address += address1 + ", ";
+    if (address2) address += address2 + ", ";
+    if (city) address += city + ", ";
+    if (zip) address += zip;
     console.log("Address: ", address);
     let folder = [] as any;
     let coordinates = [] as any;
