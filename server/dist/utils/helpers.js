@@ -25,8 +25,8 @@ const getFutureBusinessDate = (start, days) => {
             count++;
     }
     let future_year = new Date(startDate).getFullYear();
-    let future_month = new Date(startDate).getMonth() + 1;
-    let future_date = new Date(startDate).getDate();
+    let future_month = String(new Date(startDate).getMonth() + 1).padStart(2, "0");
+    let future_date = String(new Date(startDate).getDate()).padStart(2, "0");
     return `${future_year}-${future_month}-${future_date}`;
 };
 exports.getFutureBusinessDate = getFutureBusinessDate;

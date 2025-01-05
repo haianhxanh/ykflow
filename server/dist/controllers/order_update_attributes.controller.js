@@ -24,7 +24,7 @@ const order_update_attributes = (req, res) => __awaiter(void 0, void 0, void 0, 
     var _a;
     try {
         let orderId = req.query.order_id;
-        orderId = "gid://shopify/Order/6317321584987";
+        // orderId = "gid://shopify/Order/6317321584987";
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
             headers: {

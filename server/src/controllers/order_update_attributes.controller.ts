@@ -16,7 +16,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 export const order_update_attributes = async (req: Request, res: Response) => {
   try {
     let orderId = req.query.order_id as string;
-    orderId = "gid://shopify/Order/6317321584987";
+    // orderId = "gid://shopify/Order/6317321584987";
     const client = new GraphQLClient(
       `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
       {

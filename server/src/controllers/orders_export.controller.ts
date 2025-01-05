@@ -5,6 +5,12 @@ import { ordersQuery } from "../queries/orders";
 import ExcelJS from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
+import {
+  convertDate,
+  convertDateToISOString,
+  convertDateToLocalString,
+  getFutureBusinessDate,
+} from "../utils/helpers";
 
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS } =
@@ -26,11 +32,13 @@ export const orders_export = async (req: Request, res: Response) => {
     );
 
     let yesterday = getYesterday();
-    // yesterday = "2024-11-28";
+    // yesterday = "2025-01-05";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
     });
+
+    // return res.status(200).json(latestOrders);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
@@ -118,11 +126,17 @@ export const orders_export = async (req: Request, res: Response) => {
       }
 
       for (const [lineIndex, line] of mainItems.entries()) {
-        let programStartDate, programEndDate;
+        let programStartDate, programEndDate, programLength;
         let lineIsProgram =
           line?.node?.variant?.product?.tags?.includes("Programy");
         let lineQuantity = line.node.quantity;
         let promoField, addonsField;
+
+        if (lineIsProgram) {
+          programLength = line.node?.variant?.title
+            ?.split("(")[1]
+            ?.split(")")[0];
+        }
 
         for (let i = 0; i < lineQuantity; i++) {
           if (lineIsProgram && order.node.customAttributes) {
@@ -138,6 +152,55 @@ export const orders_export = async (req: Request, res: Response) => {
                 )}`
               ) {
                 programEndDate = attribute.value;
+
+                // change program end date of AKCE items to be after the main program
+                if (
+                  line.node.customAttributes.find(
+                    (attr: any) => attr.key == "AKCE"
+                  )
+                ) {
+                  // add note about AKCE to the main program
+                  if (!programLength.includes("AKCE zdarma")) {
+                    programLength += `| AKCE zdarma, navazuje na hlavní program`;
+                  }
+
+                  console.log(order.node.id, line.node.title);
+
+                  // find the main program
+                  let mainProgram = order.node.lineItems.edges.find(
+                    (mainLine: any) => {
+                      return (
+                        line.node.title === mainLine.node.title &&
+                        !mainLine.node.customAttributes.find(
+                          (attr: any) => attr.key == "AKCE"
+                        )
+                      );
+                    }
+                  );
+
+                  let mainProgramEndDate = order.node.customAttributes.find(
+                    (attr: any) => {
+                      return (
+                        attr.key ===
+                        `Konec_${mainProgram?.node?.variant?.id?.replace(
+                          "gid://shopify/ProductVariant/",
+                          ""
+                        )}`
+                      );
+                    }
+                  );
+
+                  programStartDate = getFutureBusinessDate(
+                    convertDateToISOString(mainProgramEndDate.value),
+                    1
+                  );
+                  programEndDate = convertDateToLocalString(
+                    getFutureBusinessDate(programStartDate, 4)
+                  ).replace(/\./g, "-");
+                  programStartDate = convertDateToLocalString(
+                    programStartDate
+                  ).replace(/\./g, "-");
+                }
               }
             }
           }
@@ -195,10 +258,8 @@ export const orders_export = async (req: Request, res: Response) => {
             promoField ? promoField : "",
             programStartDate,
             programEndDate,
-            line.node.title,
-            lineIsProgram
-              ? line.node?.variant?.title?.split("(")[1]?.split(")")[0]
-              : "",
+            line.node?.title,
+            programLength ? programLength : "",
             lineIsProgram
               ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
               : "",
@@ -248,7 +309,7 @@ export const orders_export = async (req: Request, res: Response) => {
       false,
       attachment
     );
-    return res.status(200).json(sendEmail);
+    return res.status(200).json(attachment);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
