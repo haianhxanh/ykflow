@@ -22,7 +22,7 @@ const constants_2 = require("../utils/constants");
 const helpers_2 = require("../utils/helpers");
 const notification_1 = require("../utils/notification");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_FROM_EMAIL } = process.env;
 /*-------------------------------------RECEIVE INQUIRY-----------------------------------------*/
 const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -181,7 +181,7 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
         /*----------------------------------NOTIFY MERCHANT AND CUSTOMER -------------------------------*/
         let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${req.body.item_title} od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně).`;
         let notificationSubject = `Nová žádost o pozastavení Yes Krabičky (obj. ${req.body.order_name})`;
-        const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, req.body.order_contact, message, false, undefined);
+        const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, req.body.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined);
         return res.status(200).json({
             request_id: `ID požadavku: ${new_inquiry.id}`,
             message: message,

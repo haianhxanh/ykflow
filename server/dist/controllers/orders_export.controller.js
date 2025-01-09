@@ -21,7 +21,7 @@ const constants_1 = require("../utils/constants");
 const notification_1 = require("../utils/notification");
 const helpers_1 = require("../utils/helpers");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -241,7 +241,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             name: `orders-${yesterday}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, false, attachment);
+        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment);
         return res.status(200).json(attachment);
     }
     catch (error) {

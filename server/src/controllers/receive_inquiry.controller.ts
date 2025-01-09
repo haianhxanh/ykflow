@@ -15,7 +15,8 @@ import { v4 } from "uuid";
 import { sendNotification } from "../utils/notification";
 
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_FROM_EMAIL } =
+  process.env;
 
 /*-------------------------------------RECEIVE INQUIRY-----------------------------------------*/
 
@@ -242,7 +243,7 @@ export const receive_inquiry = async (req: Request, res: Response) => {
       notificationSubject,
       req.body.order_contact,
       message,
-      false,
+      MANDRILL_MESSAGE_FROM_EMAIL as string,
       undefined
     );
 

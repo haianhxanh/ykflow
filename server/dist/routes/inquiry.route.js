@@ -15,6 +15,7 @@ const orders_export_controller_1 = require("../controllers/orders_export.control
 const order_update_attributes_controller_1 = require("../controllers/order_update_attributes.controller");
 const checkout_address_validation_controller_1 = require("../controllers/checkout_address_validation.controller");
 const checkout_pickup_availability_check_controller_1 = require("../controllers/checkout_pickup_availability_check.controller");
+const express_checkout_address_validation_request_controller_1 = require("../controllers/express_checkout_address_validation_request.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -26,4 +27,5 @@ router.get("/orders/export", orders_export_controller_1.orders_export);
 router.get("/order/update/attributes", order_update_attributes_controller_1.order_update_attributes);
 router.post("/checkout/address/validation", checkout_address_validation_controller_1.checkout_address_validation);
 router.get("/checkout/pickup/availability/check", checkout_pickup_availability_check_controller_1.checkout_pickup_availability_check);
+router.get("/express-checkout/address-validation/request", express_checkout_address_validation_request_controller_1.express_checkout_address_validation_request);
 exports.default = router;

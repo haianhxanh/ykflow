@@ -13,7 +13,7 @@ exports.sendNotification = void 0;
 require("dotenv/config");
 const { MANDRILL_API_KEY, MANDRILL_MESSAGE_FROM_EMAIL, MANDRILL_MESSAGE_FROM_NAME, MANDRILL_MESSAGE_BCC_ADDRESS, } = process.env;
 const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY);
-const sendNotification = (subject, customerEmail, content, bbc, attachment) => __awaiter(void 0, void 0, void 0, function* () {
+const sendNotification = (subject, customerEmail, content, bbcEmail, attachment) => __awaiter(void 0, void 0, void 0, function* () {
     // axios post request to send email
     let recipients = customerEmail.split(",").map((email) => {
         return { email: email.trim(), type: "to" };
@@ -37,8 +37,8 @@ const sendNotification = (subject, customerEmail, content, bbc, attachment) => _
             },
         ];
     }
-    if (bbc) {
-        message.bcc_address = MANDRILL_MESSAGE_BCC_ADDRESS;
+    if (bbcEmail) {
+        message.bcc_address = bbcEmail;
     }
     try {
         const response = sendEmail(message);

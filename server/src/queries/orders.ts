@@ -86,6 +86,31 @@ export const orderQuery = gql`
         key
         value
       }
+      id
+      name
+      email
+      customer {
+        id
+        email
+        phone
+        firstName
+        lastName
+        createdAt
+        updatedAt
+      }
+      shippingAddress {
+        id
+        address1
+        address2
+        city
+        company
+        country
+        firstName
+        lastName
+        phone
+        province
+        zip
+      }
     }
   }
 `;

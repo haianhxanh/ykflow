@@ -11,6 +11,7 @@ import { orders_export } from "../controllers/orders_export.controller";
 import { order_update_attributes } from "../controllers/order_update_attributes.controller";
 import { checkout_address_validation } from "../controllers/checkout_address_validation.controller";
 import { checkout_pickup_availability_check } from "../controllers/checkout_pickup_availability_check.controller";
+import { express_checkout_address_validation_request } from "../controllers/express_checkout_address_validation_request.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -25,5 +26,9 @@ router.post("/checkout/address/validation", checkout_address_validation);
 router.get(
   "/checkout/pickup/availability/check",
   checkout_pickup_availability_check
+);
+router.get(
+  "/express-checkout/address-validation/request",
+  express_checkout_address_validation_request
 );
 export default router;

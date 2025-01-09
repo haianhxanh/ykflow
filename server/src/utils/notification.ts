@@ -25,7 +25,7 @@ export const sendNotification = async (
   subject: string,
   customerEmail: string,
   content: string,
-  bbc: boolean,
+  bbcEmail: string | null,
   attachment: any
 ) => {
   // axios post request to send email
@@ -53,8 +53,8 @@ export const sendNotification = async (
     ];
   }
 
-  if (bbc) {
-    message.bcc_address = MANDRILL_MESSAGE_BCC_ADDRESS as string;
+  if (bbcEmail) {
+    message.bcc_address = bbcEmail;
   }
 
   try {

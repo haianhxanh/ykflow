@@ -13,8 +13,13 @@ import {
 } from "../utils/helpers";
 
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS } =
-  process.env;
+const {
+  ACCESS_TOKEN,
+  STORE,
+  API_VERSION,
+  ORDER_EXPORT_RECIPIENTS,
+  MANDRILL_MESSAGE_BCC_ADDRESS_DEV,
+} = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
@@ -306,7 +311,7 @@ export const orders_export = async (req: Request, res: Response) => {
       `Objednávky ${yesterday}`,
       recipientEmails,
       `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
-      false,
+      MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
       attachment
     );
     return res.status(200).json(attachment);
