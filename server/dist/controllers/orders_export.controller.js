@@ -34,7 +34,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         });
         let yesterday = getYesterday();
-        // yesterday = "2025-01-05";
+        // yesterday = "2025-01-18";
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
         });
@@ -133,6 +133,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                                 `Konec_${(_l = (_k = (_j = line.node) === null || _j === void 0 ? void 0 : _j.variant) === null || _k === void 0 ? void 0 : _k.id) === null || _l === void 0 ? void 0 : _l.replace("gid://shopify/ProductVariant/", "")}`) {
                                 programEndDate = attribute.value;
                                 // change program end date of AKCE items to be after the main program
+                                continue;
                                 if (line.node.customAttributes.find((attr) => attr.key == "AKCE")) {
                                     // add note about AKCE to the main program
                                     if (!programLength.includes("AKCE zdarma")) {

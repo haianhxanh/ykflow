@@ -37,7 +37,7 @@ export const orders_export = async (req: Request, res: Response) => {
     );
 
     let yesterday = getYesterday();
-    // yesterday = "2025-01-05";
+    // yesterday = "2025-01-18";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
@@ -159,6 +159,7 @@ export const orders_export = async (req: Request, res: Response) => {
                 programEndDate = attribute.value;
 
                 // change program end date of AKCE items to be after the main program
+                continue;
                 if (
                   line.node.customAttributes.find(
                     (attr: any) => attr.key == "AKCE"
