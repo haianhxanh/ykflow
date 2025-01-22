@@ -112,6 +112,8 @@ export const checkout_address_validation = async (
       }
     }
 
+    console.log(`Address: ${address} is inside: ${isInside}`);
+
     return res.status(200).json({
       data: isInside,
     });

@@ -131,6 +131,7 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
                 break;
             }
         }
+        console.log(`Address: ${address} is inside: ${isInside}`);
         return res.status(200).json({
             data: isInside,
         });
