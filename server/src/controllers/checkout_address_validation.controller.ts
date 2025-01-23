@@ -22,7 +22,7 @@ export const checkout_address_validation = async (
     const { address1, address2, city, zip } = req.body;
     let address = "";
     if (address1) address += address1 + ", ";
-    if (address2) address += address2 + ", ";
+    // if (address2) address += address2 + ", ";
     if (city) address += city + ", ";
     if (zip) address += zip;
     console.log("Address: ", address);

@@ -54,8 +54,7 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
         let address = "";
         if (address1)
             address += address1 + ", ";
-        if (address2)
-            address += address2 + ", ";
+        // if (address2) address += address2 + ", ";
         if (city)
             address += city + ", ";
         if (zip)
