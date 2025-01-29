@@ -110,9 +110,6 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
             if (json.results.length === 0) {
                 return null;
             }
-            if (json.results["0"].partial_match) {
-                return false;
-            }
             let lat = json.results["0"].geometry.location.lat;
             let lng = json.results["0"].geometry.location.lng;
             return [lng, lat];

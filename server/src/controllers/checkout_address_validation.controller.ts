@@ -87,9 +87,6 @@ export const checkout_address_validation = async (
         if (json.results.length === 0) {
           return null;
         }
-        if (json.results["0"].partial_match) {
-          return false;
-        }
 
         let lat = json.results["0"].geometry.location.lat;
         let lng = json.results["0"].geometry.location.lng;
