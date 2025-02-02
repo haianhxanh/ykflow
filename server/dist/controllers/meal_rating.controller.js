@@ -17,7 +17,7 @@ const graphql_request_1 = require("graphql-request");
 const dotenv_1 = __importDefault(require("dotenv"));
 const metafields_1 = require("../queries/metafields");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const meal_rating = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const week = req.body.week;

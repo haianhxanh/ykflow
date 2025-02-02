@@ -1,4 +1,4 @@
-import { query, Request, Response } from "express";
+import { Request, Response } from "express";
 import { GraphQLClient } from "graphql-request";
 import dotenv from "dotenv";
 import {
@@ -6,8 +6,7 @@ import {
   metaobjectUpdateMutation,
 } from "../queries/metafields";
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } =
-  process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 export const meal_rating = async (req: Request, res: Response) => {
   try {
     const week = req.body.week;
