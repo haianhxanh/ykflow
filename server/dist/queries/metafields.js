@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.shopMetafieldQuery = exports.metafieldsSetMutation = void 0;
+exports.metaobjectUpdateMutation = exports.metaobjectsQuery = exports.shopMetafieldQuery = exports.metafieldsSetMutation = void 0;
 const graphql_request_1 = require("graphql-request");
 exports.metafieldsSetMutation = (0, graphql_request_1.gql) `
   mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
@@ -27,6 +27,35 @@ exports.shopMetafieldQuery = (0, graphql_request_1.gql) `
       metafield(namespace: $namespace, key: $key) {
         id
         value
+      }
+    }
+  }
+`;
+exports.metaobjectsQuery = (0, graphql_request_1.gql) `
+  query ($query: String!, $type: String!) {
+    metaobjects(query: $query, type: $type, first: 1) {
+      edges {
+        node {
+          id
+          fields {
+            key
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+exports.metaobjectUpdateMutation = (0, graphql_request_1.gql) `
+  mutation UpdateMetaobject($id: ID!, $metaobject: MetaobjectUpdateInput!) {
+    metaobjectUpdate(id: $id, metaobject: $metaobject) {
+      metaobject {
+        handle
+      }
+      userErrors {
+        field
+        message
+        code
       }
     }
   }

@@ -30,3 +30,34 @@ export const shopMetafieldQuery = gql`
     }
   }
 `;
+
+export const metaobjectsQuery = gql`
+  query ($query: String!, $type: String!) {
+    metaobjects(query: $query, type: $type, first: 1) {
+      edges {
+        node {
+          id
+          fields {
+            key
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const metaobjectUpdateMutation = gql`
+  mutation UpdateMetaobject($id: ID!, $metaobject: MetaobjectUpdateInput!) {
+    metaobjectUpdate(id: $id, metaobject: $metaobject) {
+      metaobject {
+        handle
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;

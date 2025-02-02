@@ -1,5 +1,4 @@
 import express from "express";
-import rateLimit from "express-rate-limit";
 import { get_inquiries } from "../controllers/get_inquiry.controller";
 import { receive_inquiry } from "../controllers/receive_inquiry.controller";
 import { auth } from "../authorization/authorization";
@@ -12,6 +11,7 @@ import { order_update_attributes } from "../controllers/order_update_attributes.
 import { checkout_address_validation } from "../controllers/checkout_address_validation.controller";
 import { checkout_pickup_availability_check } from "../controllers/checkout_pickup_availability_check.controller";
 import { express_checkout_address_validation_request } from "../controllers/express_checkout_address_validation_request.controller";
+import { meal_rating } from "../controllers/meal_rating.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -31,4 +31,5 @@ router.get(
   "/express-checkout/address-validation/request",
   express_checkout_address_validation_request
 );
+router.post("/meal/rating", meal_rating);
 export default router;
