@@ -12,6 +12,7 @@ import { checkout_address_validation } from "../controllers/checkout_address_val
 import { checkout_pickup_availability_check } from "../controllers/checkout_pickup_availability_check.controller";
 import { express_checkout_address_validation_request } from "../controllers/express_checkout_address_validation_request.controller";
 import { meal_rating } from "../controllers/meal_rating.controller";
+import { campaign_fuck_cancer } from "../controllers/campaign_fuck_cancer.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -32,4 +33,5 @@ router.get(
   express_checkout_address_validation_request
 );
 router.post("/meal/rating", meal_rating);
+router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 export default router;
