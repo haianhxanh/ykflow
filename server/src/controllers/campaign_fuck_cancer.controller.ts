@@ -23,7 +23,7 @@ export const campaign_fuck_cancer = async (req: Request, res: Response) => {
 
     const createdDateIsInRange = isDateInDateRange(
       createdDate,
-      "2025-02-03",
+      "2025-02-04",
       "2025-02-09"
     );
 

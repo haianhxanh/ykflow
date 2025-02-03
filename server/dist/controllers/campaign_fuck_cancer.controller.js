@@ -28,7 +28,7 @@ const campaign_fuck_cancer = (req, res) => __awaiter(void 0, void 0, void 0, fun
             },
         });
         const createdDate = (_b = (_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.created_at) === null || _b === void 0 ? void 0 : _b.split("T")[0];
-        const createdDateIsInRange = isDateInDateRange(createdDate, "2025-02-03", "2025-02-09");
+        const createdDateIsInRange = isDateInDateRange(createdDate, "2025-02-04", "2025-02-09");
         if (!createdDateIsInRange) {
             console.log(`${req.body.admin_graphql_api_id} with created_at ${createdDate} date out of range`);
             return res.status(200).json("Date not in range");
