@@ -33,7 +33,7 @@ const recipe_rating_create = (req, res) => __awaiter(void 0, void 0, void 0, fun
         shopify_user_id: ((_a = req.body) === null || _a === void 0 ? void 0 : _a.shopify_user_id) || null,
         comment: ((_b = req.body) === null || _b === void 0 ? void 0 : _b.comment) || null,
     }, { returning: true });
-    console.log("New rating with comment", rating);
+    console.log("New rating with comment", rating === null || rating === void 0 ? void 0 : rating.dataValues);
     return res.status(200).json(rating);
 });
 exports.recipe_rating_create = recipe_rating_create;

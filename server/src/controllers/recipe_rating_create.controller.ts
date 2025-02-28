@@ -28,6 +28,6 @@ export const recipe_rating_create = async (req: Request, res: Response) => {
     },
     { returning: true }
   );
-  console.log("New rating with comment", rating);
+  console.log("New rating with comment", rating?.dataValues);
   return res.status(200).json(rating);
 };
