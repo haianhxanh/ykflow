@@ -5,45 +5,29 @@ import { ordersQuery } from "../queries/orders";
 import ExcelJS from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
-import {
-  convertDate,
-  convertDateToISOString,
-  convertDateToLocalString,
-  getFutureBusinessDate,
-} from "../utils/helpers";
+import { convertDate, convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
 
 dotenv.config();
-const {
-  ACCESS_TOKEN,
-  STORE,
-  API_VERSION,
-  ORDER_EXPORT_RECIPIENTS,
-  MANDRILL_MESSAGE_BCC_ADDRESS_DEV,
-} = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const orders_export = async (req: Request, res: Response) => {
   try {
-    const client = new GraphQLClient(
-      `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
-      {
-        // @ts-ignore
-        headers: {
-          "X-Shopify-Access-Token": ACCESS_TOKEN,
-        },
-      }
-    );
+    const client = new GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
+      // @ts-ignore
+      headers: {
+        "X-Shopify-Access-Token": ACCESS_TOKEN,
+      },
+    });
 
     let yesterday = getYesterday();
-    // yesterday = "2025-01-18";
+    // yesterday = "2025-02-25";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
     });
-
-    // return res.status(200).json(latestOrders);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
@@ -118,11 +102,7 @@ export const orders_export = async (req: Request, res: Response) => {
 
       if (mixedOrder) {
         for (const [lineIndex, line] of secondaryItems.entries()) {
-          if (
-            line.node.originalTotalSet.shopMoney.amount -
-              line.node.totalDiscountSet.shopMoney.amount >
-            0
-          ) {
+          if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
             addons.push(line);
           } else {
             promo.push(line);
@@ -132,15 +112,12 @@ export const orders_export = async (req: Request, res: Response) => {
 
       for (const [lineIndex, line] of mainItems.entries()) {
         let programStartDate, programEndDate, programLength;
-        let lineIsProgram =
-          line?.node?.variant?.product?.tags?.includes("Programy");
+        let lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
         let lineQuantity = line.node.quantity;
         let promoField, addonsField;
 
         if (lineIsProgram) {
-          programLength = line.node?.variant?.title
-            ?.split("(")[1]
-            ?.split(")")[0];
+          programLength = line.node?.variant?.title?.split("(")[1]?.split(")")[0];
         }
 
         for (let i = 0; i < lineQuantity; i++) {
@@ -149,22 +126,12 @@ export const orders_export = async (req: Request, res: Response) => {
               if (attribute.key === "Datum začátku Yes Krabiček") {
                 programStartDate = attribute.value;
               }
-              if (
-                attribute.key ===
-                `Konec_${line.node?.variant?.id?.replace(
-                  "gid://shopify/ProductVariant/",
-                  ""
-                )}`
-              ) {
+              if (attribute.key === `Konec_${line.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`) {
                 programEndDate = attribute.value;
 
                 // change program end date of AKCE items to be after the main program
                 continue;
-                if (
-                  line.node.customAttributes.find(
-                    (attr: any) => attr.key == "AKCE"
-                  )
-                ) {
+                if (line.node.customAttributes.find((attr: any) => attr.key == "AKCE")) {
                   // add note about AKCE to the main program
                   if (!programLength.includes("AKCE zdarma")) {
                     programLength += `| AKCE zdarma, navazuje na hlavní program`;
@@ -173,48 +140,33 @@ export const orders_export = async (req: Request, res: Response) => {
                   console.log(order.node.id, line.node.title);
 
                   // find the main program
-                  let mainProgram = order.node.lineItems.edges.find(
-                    (mainLine: any) => {
-                      return (
-                        line.node.title === mainLine.node.title &&
-                        !mainLine.node.customAttributes.find(
-                          (attr: any) => attr.key == "AKCE"
-                        )
-                      );
-                    }
-                  );
+                  let mainProgram = order.node.lineItems.edges.find((mainLine: any) => {
+                    return (
+                      line.node.title === mainLine.node.title &&
+                      !mainLine.node.customAttributes.find((attr: any) => attr.key == "AKCE")
+                    );
+                  });
 
-                  let mainProgramEndDate = order.node.customAttributes.find(
-                    (attr: any) => {
-                      return (
-                        attr.key ===
-                        `Konec_${mainProgram?.node?.variant?.id?.replace(
-                          "gid://shopify/ProductVariant/",
-                          ""
-                        )}`
-                      );
-                    }
-                  );
+                  let mainProgramEndDate = order.node.customAttributes.find((attr: any) => {
+                    return (
+                      attr.key ===
+                      `Konec_${mainProgram?.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`
+                    );
+                  });
 
-                  programStartDate = getFutureBusinessDate(
-                    convertDateToISOString(mainProgramEndDate.value),
-                    1
+                  programStartDate = getFutureBusinessDate(convertDateToISOString(mainProgramEndDate.value), 1);
+                  programEndDate = convertDateToLocalString(getFutureBusinessDate(programStartDate, 4)).replace(
+                    /\./g,
+                    "-"
                   );
-                  programEndDate = convertDateToLocalString(
-                    getFutureBusinessDate(programStartDate, 4)
-                  ).replace(/\./g, "-");
-                  programStartDate = convertDateToLocalString(
-                    programStartDate
-                  ).replace(/\./g, "-");
+                  programStartDate = convertDateToLocalString(programStartDate).replace(/\./g, "-");
                 }
               }
             }
           }
-          let customAttributes = order.node?.customAttributes?.map(
-            (attr: any) => {
-              return `${attr.key}: ${attr.value}`;
-            }
-          );
+          let customAttributes = order.node?.customAttributes?.map((attr: any) => {
+            return `${attr.key}: ${attr.value}`;
+          });
 
           if (lineIndex == 0 && mixedOrder) {
             if (promo.length > 0)
@@ -232,15 +184,9 @@ export const orders_export = async (req: Request, res: Response) => {
           }
 
           let shippingAddress;
-          if (
-            order.node?.shippingAddress?.address1 &&
-            !order.node?.shippingAddress?.address2
-          ) {
+          if (order.node?.shippingAddress?.address1 && !order.node?.shippingAddress?.address2) {
             shippingAddress = order.node?.shippingAddress?.address1;
-          } else if (
-            order.node?.shippingAddress?.address1 &&
-            order.node?.shippingAddress?.address2
-          ) {
+          } else if (order.node?.shippingAddress?.address1 && order.node?.shippingAddress?.address2) {
             shippingAddress = `${order.node?.shippingAddress?.address1} ${order.node?.shippingAddress?.address2}`;
           }
 
@@ -250,12 +196,8 @@ export const orders_export = async (req: Request, res: Response) => {
             order.node?.billingAddress?.name,
             order.node?.shippingAddress?.name || "",
             order.node?.shippingAddress?.company || "",
-            order.node?.shippingAddress?.phone ||
-              order.node?.billingAddress?.phone ||
-              "",
-            shippingAddress ||
-              `Pickup ${order.node?.shippingLine?.title}` ||
-              "",
+            order.node?.shippingAddress?.phone || order.node?.billingAddress?.phone || "",
+            shippingAddress || `Pickup ${order.node?.shippingLine?.title}` || "",
             order.node?.shippingAddress?.city || "",
             order.node?.shippingAddress?.zip || "",
             order.node?.note,
@@ -266,19 +208,27 @@ export const orders_export = async (req: Request, res: Response) => {
             programEndDate,
             line.node?.title,
             programLength ? programLength : "",
-            lineIsProgram
-              ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "")
-              : "",
+            lineIsProgram ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "") : "",
             severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {
             let allergens = line.node?.customAttributes?.find(
               (attr: any) => attr.key == "Alergeny" && attr.value != ""
             );
+
+            if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
+              for (const attribute of order.node.customAttributes) {
+                if (attribute.key.includes("Alergeny")) {
+                  const sku = line.node.variant.sku;
+                  if (attribute.key.includes(sku)) {
+                    allergens = attribute;
+                  }
+                }
+              }
+            }
+
             if (allergens) {
-              allergens = allergens.value
-                .split(",")
-                .map((allergen: string) => allergen.trim());
+              allergens = allergens.value.split(",").map((allergen: string) => allergen.trim());
 
               const firstRow = worksheet.getRow(1);
 

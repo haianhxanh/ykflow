@@ -21,7 +21,7 @@ const constants_1 = require("../utils/constants");
 const notification_1 = require("../utils/notification");
 const helpers_1 = require("../utils/helpers");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -34,11 +34,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         });
         let yesterday = getYesterday();
-        // yesterday = "2025-01-18";
+        // yesterday = "2025-02-25";
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
         });
-        // return res.status(200).json(latestOrders);
         const workbook = new exceljs_1.default.Workbook();
         const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
         for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
@@ -105,9 +104,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             let promo = [];
             if (mixedOrder) {
                 for (const [lineIndex, line] of secondaryItems.entries()) {
-                    if (line.node.originalTotalSet.shopMoney.amount -
-                        line.node.totalDiscountSet.shopMoney.amount >
-                        0) {
+                    if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
                         addons.push(line);
                     }
                     else {
@@ -129,8 +126,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             if (attribute.key === "Datum začátku Yes Krabiček") {
                                 programStartDate = attribute.value;
                             }
-                            if (attribute.key ===
-                                `Konec_${(_l = (_k = (_j = line.node) === null || _j === void 0 ? void 0 : _j.variant) === null || _k === void 0 ? void 0 : _k.id) === null || _l === void 0 ? void 0 : _l.replace("gid://shopify/ProductVariant/", "")}`) {
+                            if (attribute.key === `Konec_${(_l = (_k = (_j = line.node) === null || _j === void 0 ? void 0 : _j.variant) === null || _k === void 0 ? void 0 : _k.id) === null || _l === void 0 ? void 0 : _l.replace("gid://shopify/ProductVariant/", "")}`) {
                                 programEndDate = attribute.value;
                                 // change program end date of AKCE items to be after the main program
                                 continue;
@@ -175,12 +171,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                                 .join("\n");
                     }
                     let shippingAddress;
-                    if (((_q = (_p = order.node) === null || _p === void 0 ? void 0 : _p.shippingAddress) === null || _q === void 0 ? void 0 : _q.address1) &&
-                        !((_s = (_r = order.node) === null || _r === void 0 ? void 0 : _r.shippingAddress) === null || _s === void 0 ? void 0 : _s.address2)) {
+                    if (((_q = (_p = order.node) === null || _p === void 0 ? void 0 : _p.shippingAddress) === null || _q === void 0 ? void 0 : _q.address1) && !((_s = (_r = order.node) === null || _r === void 0 ? void 0 : _r.shippingAddress) === null || _s === void 0 ? void 0 : _s.address2)) {
                         shippingAddress = (_u = (_t = order.node) === null || _t === void 0 ? void 0 : _t.shippingAddress) === null || _u === void 0 ? void 0 : _u.address1;
                     }
-                    else if (((_w = (_v = order.node) === null || _v === void 0 ? void 0 : _v.shippingAddress) === null || _w === void 0 ? void 0 : _w.address1) &&
-                        ((_y = (_x = order.node) === null || _x === void 0 ? void 0 : _x.shippingAddress) === null || _y === void 0 ? void 0 : _y.address2)) {
+                    else if (((_w = (_v = order.node) === null || _v === void 0 ? void 0 : _v.shippingAddress) === null || _w === void 0 ? void 0 : _w.address1) && ((_y = (_x = order.node) === null || _x === void 0 ? void 0 : _x.shippingAddress) === null || _y === void 0 ? void 0 : _y.address2)) {
                         shippingAddress = `${(_0 = (_z = order.node) === null || _z === void 0 ? void 0 : _z.shippingAddress) === null || _0 === void 0 ? void 0 : _0.address1} ${(_2 = (_1 = order.node) === null || _1 === void 0 ? void 0 : _1.shippingAddress) === null || _2 === void 0 ? void 0 : _2.address2}`;
                     }
                     const row = [
@@ -189,12 +183,8 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         (_6 = (_5 = order.node) === null || _5 === void 0 ? void 0 : _5.billingAddress) === null || _6 === void 0 ? void 0 : _6.name,
                         ((_8 = (_7 = order.node) === null || _7 === void 0 ? void 0 : _7.shippingAddress) === null || _8 === void 0 ? void 0 : _8.name) || "",
                         ((_10 = (_9 = order.node) === null || _9 === void 0 ? void 0 : _9.shippingAddress) === null || _10 === void 0 ? void 0 : _10.company) || "",
-                        ((_12 = (_11 = order.node) === null || _11 === void 0 ? void 0 : _11.shippingAddress) === null || _12 === void 0 ? void 0 : _12.phone) ||
-                            ((_14 = (_13 = order.node) === null || _13 === void 0 ? void 0 : _13.billingAddress) === null || _14 === void 0 ? void 0 : _14.phone) ||
-                            "",
-                        shippingAddress ||
-                            `Pickup ${(_16 = (_15 = order.node) === null || _15 === void 0 ? void 0 : _15.shippingLine) === null || _16 === void 0 ? void 0 : _16.title}` ||
-                            "",
+                        ((_12 = (_11 = order.node) === null || _11 === void 0 ? void 0 : _11.shippingAddress) === null || _12 === void 0 ? void 0 : _12.phone) || ((_14 = (_13 = order.node) === null || _13 === void 0 ? void 0 : _13.billingAddress) === null || _14 === void 0 ? void 0 : _14.phone) || "",
+                        shippingAddress || `Pickup ${(_16 = (_15 = order.node) === null || _15 === void 0 ? void 0 : _15.shippingLine) === null || _16 === void 0 ? void 0 : _16.title}` || "",
                         ((_18 = (_17 = order.node) === null || _17 === void 0 ? void 0 : _17.shippingAddress) === null || _18 === void 0 ? void 0 : _18.city) || "",
                         ((_20 = (_19 = order.node) === null || _19 === void 0 ? void 0 : _19.shippingAddress) === null || _20 === void 0 ? void 0 : _20.zip) || "",
                         (_21 = order.node) === null || _21 === void 0 ? void 0 : _21.note,
@@ -205,17 +195,23 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         programEndDate,
                         (_22 = line.node) === null || _22 === void 0 ? void 0 : _22.title,
                         programLength ? programLength : "",
-                        lineIsProgram
-                            ? (_25 = (_24 = (_23 = line.node) === null || _23 === void 0 ? void 0 : _23.title) === null || _24 === void 0 ? void 0 : _24.split(" | ")[1]) === null || _25 === void 0 ? void 0 : _25.replace(" kcal", "")
-                            : "",
+                        lineIsProgram ? (_25 = (_24 = (_23 = line.node) === null || _23 === void 0 ? void 0 : _23.title) === null || _24 === void 0 ? void 0 : _24.split(" | ")[1]) === null || _25 === void 0 ? void 0 : _25.replace(" kcal", "") : "",
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
                         let allergens = (_27 = (_26 = line.node) === null || _26 === void 0 ? void 0 : _26.customAttributes) === null || _27 === void 0 ? void 0 : _27.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
+                            for (const attribute of order.node.customAttributes) {
+                                if (attribute.key.includes("Alergeny")) {
+                                    const sku = line.node.variant.sku;
+                                    if (attribute.key.includes(sku)) {
+                                        allergens = attribute;
+                                    }
+                                }
+                            }
+                        }
                         if (allergens) {
-                            allergens = allergens.value
-                                .split(",")
-                                .map((allergen) => allergen.trim());
+                            allergens = allergens.value.split(",").map((allergen) => allergen.trim());
                             const firstRow = worksheet.getRow(1);
                             firstRow.eachCell((cell, colNumber) => {
                                 if (colNumber > 17) {

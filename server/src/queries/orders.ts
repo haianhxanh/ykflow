@@ -42,6 +42,7 @@ export const ordersQuery = gql`
           shippingLine {
             title
           }
+          sourceName
           lineItems(first: 250) {
             edges {
               node {
@@ -69,6 +70,7 @@ export const ordersQuery = gql`
                     title
                     tags
                   }
+                  sku
                 }
               }
             }
@@ -142,9 +144,7 @@ export async function allOrdersQuery(query: string) {
       `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
       {
         query: `query{
-          orders(query: "${query}", first: 250${
-          cursor ? `, after: "${cursor}"` : ""
-        }) {
+          orders(query: "${query}", first: 250${cursor ? `, after: "${cursor}"` : ""}) {
             pageInfo {
               hasNextPage
               endCursor

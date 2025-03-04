@@ -56,6 +56,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
           shippingLine {
             title
           }
+          sourceName
           lineItems(first: 250) {
             edges {
               node {
@@ -83,6 +84,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
                     title
                     tags
                   }
+                  sku
                 }
               }
             }
