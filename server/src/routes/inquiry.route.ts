@@ -14,6 +14,7 @@ import { express_checkout_address_validation_request } from "../controllers/expr
 import { meal_rating } from "../controllers/meal_rating.controller";
 import { campaign_fuck_cancer } from "../controllers/campaign_fuck_cancer.controller";
 import { recipe_rating_create } from "../controllers/recipe_rating_create.controller";
+import { products_export } from "../controllers/product_export_for_fakturoid.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -25,15 +26,10 @@ router.get("/fulfill", fulfill);
 router.get("/orders/export", orders_export);
 router.get("/order/update/attributes", order_update_attributes);
 router.post("/checkout/address/validation", checkout_address_validation);
-router.get(
-  "/checkout/pickup/availability/check",
-  checkout_pickup_availability_check
-);
-router.get(
-  "/express-checkout/address-validation/request",
-  express_checkout_address_validation_request
-);
+router.get("/checkout/pickup/availability/check", checkout_pickup_availability_check);
+router.get("/express-checkout/address-validation/request", express_checkout_address_validation_request);
 router.post("/meal/rating", meal_rating);
 router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create);
+router.get("/products/export", products_export);
 export default router;
