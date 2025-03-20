@@ -9,15 +9,9 @@ const { GOOGLE_GEOCODING_API_KEY, LOCATIONS_XML_FILE } = process.env;
 
 // ======================= CHECKOUT ADDRESS PRESENCE IN POLYGON =======================
 
-export const checkout_address_validation = async (
-  req: Request,
-  res: Response
-) => {
+export const checkout_address_validation = async (req: Request, res: Response) => {
   try {
-    if (!req.body.address1 || !req.body.city || !req.body.zip)
-      return res
-        .status(400)
-        .json({ message: "Missing required address fields" });
+    if (!req.body.address1 || !req.body.city || !req.body.zip) return res.status(400).json({ message: "Missing required address fields" });
 
     const { address1, address2, city, zip } = req.body;
     let address = "";
@@ -26,41 +20,65 @@ export const checkout_address_validation = async (
     if (city) address += city + ", ";
     if (zip) address += zip;
     console.log("Address: ", address);
-    let folder = [] as any;
+    let placemarks = [] as any;
     let coordinates = [] as any;
+    let layers = (LOCATIONS_XML_FILE as string).split(",");
 
-    const response = await fetch(LOCATIONS_XML_FILE as string, {
-      method: "GET",
-      headers: {
-        "Content-Type": "text/xml",
-      },
-    })
-      .then(function (response: any) {
-        return response.text();
+    for (const [index, layer] of layers.entries()) {
+      // if (index != 0) continue;
+      const response = await fetch(layer, {
+        method: "GET",
+        headers: {
+          "Content-Type": "text/xml",
+        },
       })
-      .then(function (xml: any) {
-        let result = xml2js.xml2js(xml, { compact: true }) as any;
-        folder = result.kml.Document.Folder;
-        return folder;
-      });
-
-    if (!folder) return res.status(404).json({ message: "Folder not found" });
-
-    for (const [index, coordinate] of folder.entries()) {
-      if (coordinate?.Placemark?.length > 0) {
-        for (const [i, c] of coordinate.Placemark.entries()) {
-          if (c?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
-            coordinates.push(c.Polygon.outerBoundaryIs.LinearRing.coordinates);
+        .then(function (response: any) {
+          return response.text();
+        })
+        .then(function (xml: any) {
+          let result = xml2js.xml2js(xml, { compact: true }) as any;
+          // return res.status(200).json(result);
+          if (result?.kml?.Document?.Folder) {
+            for (const folder of result.kml.Document.Folder) {
+              if (folder?.Placemark && folder.Placemark.length > 0) {
+                for (const placemark of folder.Placemark) {
+                  placemarks.push(placemark);
+                }
+              }
+            }
+          } else if (result?.kml?.Document?.Placemark) {
+            if (result?.kml?.Document?.Placemark?.length > 0) {
+              for (const placemark of result.kml.Document.Placemark) {
+                placemarks.push(placemark);
+              }
+            } else if (result?.kml?.Document?.Placemark) {
+              placemarks.push(result.kml.Document.Placemark);
+            }
           }
-        }
-      } else {
-        if (
-          coordinate?.Placemark?.Polygon?.outerBoundaryIs?.LinearRing
-            ?.coordinates
-        ) {
-          coordinates.push(
-            coordinate.Placemark.Polygon.outerBoundaryIs.LinearRing.coordinates
-          );
+          return result;
+        });
+    }
+
+    // return res.status(200).json(placemarks);
+
+    if (!placemarks) return res.status(404).json({ message: "Folder not found" });
+
+    for (const [index, placemark] of placemarks.entries()) {
+      // if (coordinate?.Placemark?.length > 0) {
+      //   for (const [i, c] of coordinate.Placemark.entries()) {
+      //     if (c?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
+      //       coordinates.push(c.Polygon.outerBoundaryIs.LinearRing.coordinates);
+      //     }
+      //   }
+      // } else {
+      //   if (coordinate?.Placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
+      //     coordinates.push(coordinate.Placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
+      //   }
+      // }
+
+      for (const [index, placemark] of placemarks.entries()) {
+        if (placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
+          coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
         }
       }
     }
@@ -79,9 +97,7 @@ export const checkout_address_validation = async (
     let encodedAddress = encodeURIComponent(address);
 
     const addressPoint = await axios
-      .get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${GOOGLE_GEOCODING_API_KEY}`
-      )
+      .get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${GOOGLE_GEOCODING_API_KEY}`)
       .then((res) => res.data)
       .then((json) => {
         if (json.results.length === 0) {

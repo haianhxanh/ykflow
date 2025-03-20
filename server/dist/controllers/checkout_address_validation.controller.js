@@ -44,12 +44,10 @@ dotenv_1.default.config();
 const { GOOGLE_GEOCODING_API_KEY, LOCATIONS_XML_FILE } = process.env;
 // ======================= CHECKOUT ADDRESS PRESENCE IN POLYGON =======================
 const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c;
     try {
         if (!req.body.address1 || !req.body.city || !req.body.zip)
-            return res
-                .status(400)
-                .json({ message: "Missing required address fields" });
+            return res.status(400).json({ message: "Missing required address fields" });
         const { address1, address2, city, zip } = req.body;
         let address = "";
         if (address1)
@@ -60,35 +58,64 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
         if (zip)
             address += zip;
         console.log("Address: ", address);
-        let folder = [];
+        let placemarks = [];
         let coordinates = [];
-        const response = yield fetch(LOCATIONS_XML_FILE, {
-            method: "GET",
-            headers: {
-                "Content-Type": "text/xml",
-            },
-        })
-            .then(function (response) {
-            return response.text();
-        })
-            .then(function (xml) {
-            let result = xml_js_1.default.xml2js(xml, { compact: true });
-            folder = result.kml.Document.Folder;
-            return folder;
-        });
-        if (!folder)
-            return res.status(404).json({ message: "Folder not found" });
-        for (const [index, coordinate] of folder.entries()) {
-            if (((_a = coordinate === null || coordinate === void 0 ? void 0 : coordinate.Placemark) === null || _a === void 0 ? void 0 : _a.length) > 0) {
-                for (const [i, c] of coordinate.Placemark.entries()) {
-                    if ((_d = (_c = (_b = c === null || c === void 0 ? void 0 : c.Polygon) === null || _b === void 0 ? void 0 : _b.outerBoundaryIs) === null || _c === void 0 ? void 0 : _c.LinearRing) === null || _d === void 0 ? void 0 : _d.coordinates) {
-                        coordinates.push(c.Polygon.outerBoundaryIs.LinearRing.coordinates);
+        let layers = LOCATIONS_XML_FILE.split(",");
+        for (const [index, layer] of layers.entries()) {
+            // if (index != 0) continue;
+            const response = yield fetch(layer, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "text/xml",
+                },
+            })
+                .then(function (response) {
+                return response.text();
+            })
+                .then(function (xml) {
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+                let result = xml_js_1.default.xml2js(xml, { compact: true });
+                // return res.status(200).json(result);
+                if ((_b = (_a = result === null || result === void 0 ? void 0 : result.kml) === null || _a === void 0 ? void 0 : _a.Document) === null || _b === void 0 ? void 0 : _b.Folder) {
+                    for (const folder of result.kml.Document.Folder) {
+                        if ((folder === null || folder === void 0 ? void 0 : folder.Placemark) && folder.Placemark.length > 0) {
+                            for (const placemark of folder.Placemark) {
+                                placemarks.push(placemark);
+                            }
+                        }
                     }
                 }
-            }
-            else {
-                if ((_h = (_g = (_f = (_e = coordinate === null || coordinate === void 0 ? void 0 : coordinate.Placemark) === null || _e === void 0 ? void 0 : _e.Polygon) === null || _f === void 0 ? void 0 : _f.outerBoundaryIs) === null || _g === void 0 ? void 0 : _g.LinearRing) === null || _h === void 0 ? void 0 : _h.coordinates) {
-                    coordinates.push(coordinate.Placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
+                else if ((_d = (_c = result === null || result === void 0 ? void 0 : result.kml) === null || _c === void 0 ? void 0 : _c.Document) === null || _d === void 0 ? void 0 : _d.Placemark) {
+                    if (((_g = (_f = (_e = result === null || result === void 0 ? void 0 : result.kml) === null || _e === void 0 ? void 0 : _e.Document) === null || _f === void 0 ? void 0 : _f.Placemark) === null || _g === void 0 ? void 0 : _g.length) > 0) {
+                        for (const placemark of result.kml.Document.Placemark) {
+                            placemarks.push(placemark);
+                        }
+                    }
+                    else if ((_j = (_h = result === null || result === void 0 ? void 0 : result.kml) === null || _h === void 0 ? void 0 : _h.Document) === null || _j === void 0 ? void 0 : _j.Placemark) {
+                        placemarks.push(result.kml.Document.Placemark);
+                    }
+                }
+                return result;
+            });
+        }
+        // return res.status(200).json(placemarks);
+        if (!placemarks)
+            return res.status(404).json({ message: "Folder not found" });
+        for (const [index, placemark] of placemarks.entries()) {
+            // if (coordinate?.Placemark?.length > 0) {
+            //   for (const [i, c] of coordinate.Placemark.entries()) {
+            //     if (c?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
+            //       coordinates.push(c.Polygon.outerBoundaryIs.LinearRing.coordinates);
+            //     }
+            //   }
+            // } else {
+            //   if (coordinate?.Placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
+            //     coordinates.push(coordinate.Placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
+            //   }
+            // }
+            for (const [index, placemark] of placemarks.entries()) {
+                if ((_c = (_b = (_a = placemark === null || placemark === void 0 ? void 0 : placemark.Polygon) === null || _a === void 0 ? void 0 : _a.outerBoundaryIs) === null || _b === void 0 ? void 0 : _b.LinearRing) === null || _c === void 0 ? void 0 : _c.coordinates) {
+                    coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
                 }
             }
         }
