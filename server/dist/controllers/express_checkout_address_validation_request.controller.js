@@ -25,6 +25,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = p
 // Request customer to validate their address when order is paid with Express Checkout
 // ===============================================================
 const express_checkout_address_validation_request = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     try {
         // console.log(req.body);
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
@@ -40,7 +41,25 @@ const express_checkout_address_validation_request = (req, res) => __awaiter(void
         const order = yield client.request(orders_1.orderQuery, {
             id: req.body.orderId,
         });
-        let email = order.order.email;
+        // return res.status(200).json(order);
+        // if is pickup
+        let email = "hana.nguyen@plavecmedia.cz";
+        let content, subject;
+        if (!((_a = order === null || order === void 0 ? void 0 : order.order) === null || _a === void 0 ? void 0 : _a.shippingAddress)) {
+            if (!((_c = (_b = order === null || order === void 0 ? void 0 : order.order) === null || _b === void 0 ? void 0 : _b.billingAddress) === null || _c === void 0 ? void 0 : _c.phone)) {
+                subject = `Yes Krabičky ${order.order.name}: Prosíme o doplnění telefonního čísla`;
+                content = `<p>Dobrý den,</p>
+          <p>děkujeme za Vaši objednávku. Rádi bychom Vás požádali o poskytnutí telefonního čísla, abychom Vás pro doručení Vašich krabiček mohli snadno kontaktovat.</p>
+          <p>Telefonní číslo nám prosím zašlete jako odpověď na tento e-mail nebo na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>
+          <p>Děkujeme.</p>`;
+                let sendEmailToPickupOrder = yield (0, notification_1.sendNotification)(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, null);
+                return res.status(200).json({
+                    emailSent: sendEmailToPickupOrder,
+                    message: `Is pickup order ${order.order.name}`,
+                });
+            }
+            return res.status(200).json(`Is pickup order ${order.order.name}`);
+        }
         const firstName = order.order.shippingAddress.firstName || "";
         const lastName = order.order.shippingAddress.lastName || "";
         const address1 = order.order.shippingAddress.address1 || "";
@@ -49,12 +68,12 @@ const express_checkout_address_validation_request = (req, res) => __awaiter(void
         const zip = order.order.shippingAddress.zip || "";
         const phone = order.order.shippingAddress.phone || "";
         let address = `<b>${firstName} ${lastName}</b> <br><b>${address1} ${address2}</b><br><b>${city} ${zip}</b><br><b>Tel: ${phone}</b>`;
-        let subject = `Yes Krabičky ${order.order.name}: Prosíme o kontrolu doručovací adresy`;
-        let content = ` <p>Dobrý den,</p>
+        subject = `Yes Krabičky ${order.order.name}: Prosíme o kontrolu doručovací adresy`;
+        content = ` <p>Dobrý den,</p>
       <p>Děkujeme za Vaši objednávku. Platba byla provedena pomocí zrychlené metody, která může obsahovat neaktuální doručovací údaje. Prosíme, zkontrolujte následující doručovací adresu a telefonní číslo:</p>
       <p>${address}</p>
       <p>Pokud je potřeba adresu upravit, odpovězte na tento e-mail nebo nás kontaktujte na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>`;
-        let sendEmail = (0, notification_1.sendNotification)(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, null);
+        let sendEmail = yield (0, notification_1.sendNotification)(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, null);
         return res.status(200).json(`Email sent: ${sendEmail}`);
     }
     catch (error) {
