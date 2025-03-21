@@ -1,7 +1,6 @@
-import express, { Request, Response } from "express";
+import { Request, Response } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
-import fs from "fs";
 import xml2js from "xml-js";
 import * as turf from "@turf/turf";
 dotenv.config();
@@ -37,12 +36,16 @@ export const checkout_address_validation = async (req: Request, res: Response) =
         })
         .then(function (xml: any) {
           let result = xml2js.xml2js(xml, { compact: true }) as any;
-          // return res.status(200).json(result);
+          // return res.status(200).json(result?.kml?.Document?.Folder);
           if (result?.kml?.Document?.Folder) {
             for (const folder of result.kml.Document.Folder) {
-              if (folder?.Placemark && folder.Placemark.length > 0) {
-                for (const placemark of folder.Placemark) {
-                  placemarks.push(placemark);
+              if (folder?.Placemark) {
+                if (folder.Placemark.length > 0)
+                  for (const placemark of folder.Placemark) {
+                    placemarks.push(placemark);
+                  }
+                else {
+                  placemarks.push(folder.Placemark);
                 }
               }
             }
@@ -59,23 +62,9 @@ export const checkout_address_validation = async (req: Request, res: Response) =
         });
     }
 
-    // return res.status(200).json(placemarks);
-
     if (!placemarks) return res.status(404).json({ message: "Folder not found" });
 
     for (const [index, placemark] of placemarks.entries()) {
-      // if (coordinate?.Placemark?.length > 0) {
-      //   for (const [i, c] of coordinate.Placemark.entries()) {
-      //     if (c?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
-      //       coordinates.push(c.Polygon.outerBoundaryIs.LinearRing.coordinates);
-      //     }
-      //   }
-      // } else {
-      //   if (coordinate?.Placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
-      //     coordinates.push(coordinate.Placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
-      //   }
-      // }
-
       for (const [index, placemark] of placemarks.entries()) {
         if (placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
           coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
