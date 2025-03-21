@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allOrdersQuery = exports.orderUpdateMutation = exports.orderQuery = exports.ordersQuery = void 0;
+exports.allGiftCardsQuery = exports.allOrdersQuery = exports.orderUpdateMutation = exports.orderQuery = exports.ordersQuery = void 0;
 const graphql_request_1 = require("graphql-request");
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -126,6 +126,9 @@ exports.orderQuery = (0, graphql_request_1.gql) `
         province
         zip
       }
+      billingAddress {
+        phone
+      }
     }
   }
 `;
@@ -187,6 +190,9 @@ function allOrdersQuery(query) {
                     }
                   }
                 }
+                transactions(first: 250) {
+                  id
+                }
               }
             }
           }
@@ -207,3 +213,53 @@ function allOrdersQuery(query) {
     });
 }
 exports.allOrdersQuery = allOrdersQuery;
+function allGiftCardsQuery(query) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let cursor = "";
+        let hasNextPage = true;
+        let giftCards = [];
+        while (hasNextPage) {
+            const response = yield axios_1.default.post(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
+                query: `query{
+          giftCards(first: 250${cursor ? `, after: "${cursor}"` : ""}, query: "${query}") {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                createdAt
+                order {
+                  name
+                }
+                initialValue {
+                  amount
+                }
+                transactions(first: 250) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }`,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Shopify-Access-Token": ACCESS_TOKEN,
+                },
+            });
+            const data = response.data.data.giftCards;
+            hasNextPage = data.pageInfo.hasNextPage;
+            cursor = data.pageInfo.endCursor;
+            giftCards = giftCards.concat(data.edges);
+            yield sleep(750);
+        }
+        return giftCards;
+    });
+}
+exports.allGiftCardsQuery = allGiftCardsQuery;

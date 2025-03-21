@@ -113,6 +113,9 @@ export const orderQuery = gql`
         province
         zip
       }
+      billingAddress {
+        phone
+      }
     }
   }
 `;
@@ -177,6 +180,9 @@ export async function allOrdersQuery(query: string) {
                     }
                   }
                 }
+                transactions(first: 250) {
+                  id
+                }
               }
             }
           }
@@ -198,4 +204,58 @@ export async function allOrdersQuery(query: string) {
   }
 
   return orders;
+}
+
+export async function allGiftCardsQuery(query: string) {
+  let cursor = "";
+  let hasNextPage = true;
+  let giftCards: any[] = [];
+  while (hasNextPage) {
+    const response = await axios.post(
+      `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
+      {
+        query: `query{
+          giftCards(first: 250${cursor ? `, after: "${cursor}"` : ""}, query: "${query}") {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                createdAt
+                order {
+                  name
+                }
+                initialValue {
+                  amount
+                }
+                transactions(first: 250) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }`,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": ACCESS_TOKEN,
+        },
+      }
+    );
+
+    const data = response.data.data.giftCards;
+    hasNextPage = data.pageInfo.hasNextPage;
+    cursor = data.pageInfo.endCursor;
+    giftCards = giftCards.concat(data.edges);
+    await sleep(750);
+  }
+
+  return giftCards;
 }
