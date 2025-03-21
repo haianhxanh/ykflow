@@ -33,9 +33,7 @@ export const express_checkout_address_validation_request = async (req: Request, 
       id: req.body.orderId,
     });
 
-    // return res.status(200).json(order);
-    // if is pickup
-    let email = "hana.nguyen@plavecmedia.cz";
+    let email = order.order.email;
     let content, subject;
 
     if (!order?.order?.shippingAddress) {

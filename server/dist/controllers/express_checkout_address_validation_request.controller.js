@@ -41,9 +41,7 @@ const express_checkout_address_validation_request = (req, res) => __awaiter(void
         const order = yield client.request(orders_1.orderQuery, {
             id: req.body.orderId,
         });
-        // return res.status(200).json(order);
-        // if is pickup
-        let email = "hana.nguyen@plavecmedia.cz";
+        let email = order.order.email;
         let content, subject;
         if (!((_a = order === null || order === void 0 ? void 0 : order.order) === null || _a === void 0 ? void 0 : _a.shippingAddress)) {
             if (!((_c = (_b = order === null || order === void 0 ? void 0 : order.order) === null || _b === void 0 ? void 0 : _b.billingAddress) === null || _c === void 0 ? void 0 : _c.phone)) {
