@@ -25,7 +25,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESS
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30;
     try {
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
@@ -34,16 +34,13 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         });
         let yesterday = getYesterday();
-        // yesterday = "2025-02-25";
+        // yesterday = "2025-03-22";
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
         });
         const workbook = new exceljs_1.default.Workbook();
         const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
         for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
-            let severeAllergic = order.node.customAttributes.find((attr) => {
-                return attr.key == "Jsem prudký alergik" && attr.value == "Ano";
-            });
             if (orderIndex === 0) {
                 let header = [
                     { header: "Order name", key: "orderName", width: 10 },
@@ -117,8 +114,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 let lineIsProgram = (_d = (_c = (_b = (_a = line === null || line === void 0 ? void 0 : line.node) === null || _a === void 0 ? void 0 : _a.variant) === null || _b === void 0 ? void 0 : _b.product) === null || _c === void 0 ? void 0 : _c.tags) === null || _d === void 0 ? void 0 : _d.includes("Programy");
                 let lineQuantity = line.node.quantity;
                 let promoField, addonsField;
+                let severeAllergicAttr = (_g = (_f = (_e = line === null || line === void 0 ? void 0 : line.node) === null || _e === void 0 ? void 0 : _e.customAttributes) === null || _f === void 0 ? void 0 : _f.find((attr) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))) === null || _g === void 0 ? void 0 : _g.value;
+                let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
                 if (lineIsProgram) {
-                    programLength = (_h = (_g = (_f = (_e = line.node) === null || _e === void 0 ? void 0 : _e.variant) === null || _f === void 0 ? void 0 : _f.title) === null || _g === void 0 ? void 0 : _g.split("(")[1]) === null || _h === void 0 ? void 0 : _h.split(")")[0];
+                    programLength = (_l = (_k = (_j = (_h = line.node) === null || _h === void 0 ? void 0 : _h.variant) === null || _j === void 0 ? void 0 : _j.title) === null || _k === void 0 ? void 0 : _k.split("(")[1]) === null || _l === void 0 ? void 0 : _l.split(")")[0];
                 }
                 for (let i = 0; i < lineQuantity; i++) {
                     if (lineIsProgram && order.node.customAttributes) {
@@ -126,7 +125,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             if (attribute.key === "Datum začátku Yes Krabiček") {
                                 programStartDate = attribute.value;
                             }
-                            if (attribute.key === `Konec_${(_l = (_k = (_j = line.node) === null || _j === void 0 ? void 0 : _j.variant) === null || _k === void 0 ? void 0 : _k.id) === null || _l === void 0 ? void 0 : _l.replace("gid://shopify/ProductVariant/", "")}`) {
+                            if (attribute.key === `Konec_${(_p = (_o = (_m = line.node) === null || _m === void 0 ? void 0 : _m.variant) === null || _o === void 0 ? void 0 : _o.id) === null || _p === void 0 ? void 0 : _p.replace("gid://shopify/ProductVariant/", "")}`) {
                                 programEndDate = attribute.value;
                                 // change program end date of AKCE items to be after the main program
                                 continue;
@@ -138,13 +137,11 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                                     console.log(order.node.id, line.node.title);
                                     // find the main program
                                     let mainProgram = order.node.lineItems.edges.find((mainLine) => {
-                                        return (line.node.title === mainLine.node.title &&
-                                            !mainLine.node.customAttributes.find((attr) => attr.key == "AKCE"));
+                                        return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr) => attr.key == "AKCE");
                                     });
                                     let mainProgramEndDate = order.node.customAttributes.find((attr) => {
                                         var _a, _b, _c;
-                                        return (attr.key ===
-                                            `Konec_${(_c = (_b = (_a = mainProgram === null || mainProgram === void 0 ? void 0 : mainProgram.node) === null || _a === void 0 ? void 0 : _a.variant) === null || _b === void 0 ? void 0 : _b.id) === null || _c === void 0 ? void 0 : _c.replace("gid://shopify/ProductVariant/", "")}`);
+                                        return attr.key === `Konec_${(_c = (_b = (_a = mainProgram === null || mainProgram === void 0 ? void 0 : mainProgram.node) === null || _a === void 0 ? void 0 : _a.variant) === null || _b === void 0 ? void 0 : _b.id) === null || _c === void 0 ? void 0 : _c.replace("gid://shopify/ProductVariant/", "")}`;
                                     });
                                     programStartDate = (0, helpers_1.getFutureBusinessDate)((0, helpers_1.convertDateToISOString)(mainProgramEndDate.value), 1);
                                     programEndDate = (0, helpers_1.convertDateToLocalString)((0, helpers_1.getFutureBusinessDate)(programStartDate, 4)).replace(/\./g, "-");
@@ -153,7 +150,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             }
                         }
                     }
-                    let customAttributes = (_o = (_m = order.node) === null || _m === void 0 ? void 0 : _m.customAttributes) === null || _o === void 0 ? void 0 : _o.map((attr) => {
+                    let customAttributes = (_r = (_q = order.node) === null || _q === void 0 ? void 0 : _q.customAttributes) === null || _r === void 0 ? void 0 : _r.map((attr) => {
                         return `${attr.key}: ${attr.value}`;
                     });
                     if (lineIndex == 0 && mixedOrder) {
@@ -171,35 +168,35 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                                 .join("\n");
                     }
                     let shippingAddress;
-                    if (((_q = (_p = order.node) === null || _p === void 0 ? void 0 : _p.shippingAddress) === null || _q === void 0 ? void 0 : _q.address1) && !((_s = (_r = order.node) === null || _r === void 0 ? void 0 : _r.shippingAddress) === null || _s === void 0 ? void 0 : _s.address2)) {
-                        shippingAddress = (_u = (_t = order.node) === null || _t === void 0 ? void 0 : _t.shippingAddress) === null || _u === void 0 ? void 0 : _u.address1;
+                    if (((_t = (_s = order.node) === null || _s === void 0 ? void 0 : _s.shippingAddress) === null || _t === void 0 ? void 0 : _t.address1) && !((_v = (_u = order.node) === null || _u === void 0 ? void 0 : _u.shippingAddress) === null || _v === void 0 ? void 0 : _v.address2)) {
+                        shippingAddress = (_x = (_w = order.node) === null || _w === void 0 ? void 0 : _w.shippingAddress) === null || _x === void 0 ? void 0 : _x.address1;
                     }
-                    else if (((_w = (_v = order.node) === null || _v === void 0 ? void 0 : _v.shippingAddress) === null || _w === void 0 ? void 0 : _w.address1) && ((_y = (_x = order.node) === null || _x === void 0 ? void 0 : _x.shippingAddress) === null || _y === void 0 ? void 0 : _y.address2)) {
-                        shippingAddress = `${(_0 = (_z = order.node) === null || _z === void 0 ? void 0 : _z.shippingAddress) === null || _0 === void 0 ? void 0 : _0.address1} ${(_2 = (_1 = order.node) === null || _1 === void 0 ? void 0 : _1.shippingAddress) === null || _2 === void 0 ? void 0 : _2.address2}`;
+                    else if (((_z = (_y = order.node) === null || _y === void 0 ? void 0 : _y.shippingAddress) === null || _z === void 0 ? void 0 : _z.address1) && ((_1 = (_0 = order.node) === null || _0 === void 0 ? void 0 : _0.shippingAddress) === null || _1 === void 0 ? void 0 : _1.address2)) {
+                        shippingAddress = `${(_3 = (_2 = order.node) === null || _2 === void 0 ? void 0 : _2.shippingAddress) === null || _3 === void 0 ? void 0 : _3.address1} ${(_5 = (_4 = order.node) === null || _4 === void 0 ? void 0 : _4.shippingAddress) === null || _5 === void 0 ? void 0 : _5.address2}`;
                     }
                     const row = [
-                        (_3 = order.node) === null || _3 === void 0 ? void 0 : _3.name,
-                        (_4 = order.node) === null || _4 === void 0 ? void 0 : _4.displayFinancialStatus,
-                        (_6 = (_5 = order.node) === null || _5 === void 0 ? void 0 : _5.billingAddress) === null || _6 === void 0 ? void 0 : _6.name,
-                        ((_8 = (_7 = order.node) === null || _7 === void 0 ? void 0 : _7.shippingAddress) === null || _8 === void 0 ? void 0 : _8.name) || "",
-                        ((_10 = (_9 = order.node) === null || _9 === void 0 ? void 0 : _9.shippingAddress) === null || _10 === void 0 ? void 0 : _10.company) || "",
-                        ((_12 = (_11 = order.node) === null || _11 === void 0 ? void 0 : _11.shippingAddress) === null || _12 === void 0 ? void 0 : _12.phone) || ((_14 = (_13 = order.node) === null || _13 === void 0 ? void 0 : _13.billingAddress) === null || _14 === void 0 ? void 0 : _14.phone) || "",
-                        shippingAddress || `Pickup ${(_16 = (_15 = order.node) === null || _15 === void 0 ? void 0 : _15.shippingLine) === null || _16 === void 0 ? void 0 : _16.title}` || "",
-                        ((_18 = (_17 = order.node) === null || _17 === void 0 ? void 0 : _17.shippingAddress) === null || _18 === void 0 ? void 0 : _18.city) || "",
-                        ((_20 = (_19 = order.node) === null || _19 === void 0 ? void 0 : _19.shippingAddress) === null || _20 === void 0 ? void 0 : _20.zip) || "",
-                        (_21 = order.node) === null || _21 === void 0 ? void 0 : _21.note,
+                        (_6 = order.node) === null || _6 === void 0 ? void 0 : _6.name,
+                        (_7 = order.node) === null || _7 === void 0 ? void 0 : _7.displayFinancialStatus,
+                        (_9 = (_8 = order.node) === null || _8 === void 0 ? void 0 : _8.billingAddress) === null || _9 === void 0 ? void 0 : _9.name,
+                        ((_11 = (_10 = order.node) === null || _10 === void 0 ? void 0 : _10.shippingAddress) === null || _11 === void 0 ? void 0 : _11.name) || "",
+                        ((_13 = (_12 = order.node) === null || _12 === void 0 ? void 0 : _12.shippingAddress) === null || _13 === void 0 ? void 0 : _13.company) || "",
+                        ((_15 = (_14 = order.node) === null || _14 === void 0 ? void 0 : _14.shippingAddress) === null || _15 === void 0 ? void 0 : _15.phone) || ((_17 = (_16 = order.node) === null || _16 === void 0 ? void 0 : _16.billingAddress) === null || _17 === void 0 ? void 0 : _17.phone) || "",
+                        shippingAddress || `Pickup ${(_19 = (_18 = order.node) === null || _18 === void 0 ? void 0 : _18.shippingLine) === null || _19 === void 0 ? void 0 : _19.title}` || "",
+                        ((_21 = (_20 = order.node) === null || _20 === void 0 ? void 0 : _20.shippingAddress) === null || _21 === void 0 ? void 0 : _21.city) || "",
+                        ((_23 = (_22 = order.node) === null || _22 === void 0 ? void 0 : _22.shippingAddress) === null || _23 === void 0 ? void 0 : _23.zip) || "",
+                        (_24 = order.node) === null || _24 === void 0 ? void 0 : _24.note,
                         customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.join("\n"),
                         addonsField ? addonsField : "",
                         promoField ? promoField : "",
                         programStartDate,
                         programEndDate,
-                        (_22 = line.node) === null || _22 === void 0 ? void 0 : _22.title,
+                        (_25 = line.node) === null || _25 === void 0 ? void 0 : _25.title,
                         programLength ? programLength : "",
-                        lineIsProgram ? (_25 = (_24 = (_23 = line.node) === null || _23 === void 0 ? void 0 : _23.title) === null || _24 === void 0 ? void 0 : _24.split(" | ")[1]) === null || _25 === void 0 ? void 0 : _25.replace(" kcal", "") : "",
+                        lineIsProgram ? (_28 = (_27 = (_26 = line.node) === null || _26 === void 0 ? void 0 : _26.title) === null || _27 === void 0 ? void 0 : _27.split(" | ")[1]) === null || _28 === void 0 ? void 0 : _28.replace(" kcal", "") : "",
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
-                        let allergens = (_27 = (_26 = line.node) === null || _26 === void 0 ? void 0 : _26.customAttributes) === null || _27 === void 0 ? void 0 : _27.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        let allergens = (_30 = (_29 = line.node) === null || _29 === void 0 ? void 0 : _29.customAttributes) === null || _30 === void 0 ? void 0 : _30.find((attr) => attr.key == "Alergeny" && attr.value != "");
                         if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
                             for (const attribute of order.node.customAttributes) {
                                 if (attribute.key.includes("Alergeny")) {

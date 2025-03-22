@@ -23,7 +23,7 @@ export const orders_export = async (req: Request, res: Response) => {
     });
 
     let yesterday = getYesterday();
-    // yesterday = "2025-02-25";
+    // yesterday = "2025-03-22";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
@@ -33,9 +33,6 @@ export const orders_export = async (req: Request, res: Response) => {
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
 
     for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
-      let severeAllergic = order.node.customAttributes.find((attr: any) => {
-        return attr.key == "Jsem prudký alergik" && attr.value == "Ano";
-      });
       if (orderIndex === 0) {
         let header = [
           { header: "Order name", key: "orderName", width: 10 },
@@ -115,6 +112,8 @@ export const orders_export = async (req: Request, res: Response) => {
         let lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
         let lineQuantity = line.node.quantity;
         let promoField, addonsField;
+        let severeAllergicAttr = line?.node?.customAttributes?.find((attr: any) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))?.value;
+        let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
 
         if (lineIsProgram) {
           programLength = line.node?.variant?.title?.split("(")[1]?.split(")")[0];
@@ -141,24 +140,15 @@ export const orders_export = async (req: Request, res: Response) => {
 
                   // find the main program
                   let mainProgram = order.node.lineItems.edges.find((mainLine: any) => {
-                    return (
-                      line.node.title === mainLine.node.title &&
-                      !mainLine.node.customAttributes.find((attr: any) => attr.key == "AKCE")
-                    );
+                    return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr: any) => attr.key == "AKCE");
                   });
 
                   let mainProgramEndDate = order.node.customAttributes.find((attr: any) => {
-                    return (
-                      attr.key ===
-                      `Konec_${mainProgram?.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`
-                    );
+                    return attr.key === `Konec_${mainProgram?.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`;
                   });
 
                   programStartDate = getFutureBusinessDate(convertDateToISOString(mainProgramEndDate.value), 1);
-                  programEndDate = convertDateToLocalString(getFutureBusinessDate(programStartDate, 4)).replace(
-                    /\./g,
-                    "-"
-                  );
+                  programEndDate = convertDateToLocalString(getFutureBusinessDate(programStartDate, 4)).replace(/\./g, "-");
                   programStartDate = convertDateToLocalString(programStartDate).replace(/\./g, "-");
                 }
               }
@@ -212,9 +202,7 @@ export const orders_export = async (req: Request, res: Response) => {
             severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {
-            let allergens = line.node?.customAttributes?.find(
-              (attr: any) => attr.key == "Alergeny" && attr.value != ""
-            );
+            let allergens = line.node?.customAttributes?.find((attr: any) => attr.key == "Alergeny" && attr.value != "");
 
             if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
               for (const attribute of order.node.customAttributes) {
