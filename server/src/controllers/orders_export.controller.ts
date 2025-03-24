@@ -26,7 +26,7 @@ export const orders_export = async (req: Request, res: Response) => {
     // yesterday = "2025-03-22";
 
     const latestOrders = await client.request(ordersQuery, {
-      query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'Zaplaceno ${yesterday}'`,
+      query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'bank payment'`,
     });
 
     const workbook = new ExcelJS.Workbook();
