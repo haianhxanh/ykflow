@@ -36,7 +36,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         let yesterday = getYesterday();
         // yesterday = "2025-03-22";
         const latestOrders = yield client.request(orders_1.ordersQuery, {
-            query: `(created_at:'${yesterday}' AND financial_status:'paid') OR tag:'bank payment'`,
+            query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
         });
         const workbook = new exceljs_1.default.Workbook();
         const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
