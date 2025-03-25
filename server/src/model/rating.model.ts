@@ -1,16 +1,7 @@
-import {
-  CreationOptional,
-  DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-} from "sequelize";
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import { db } from "../database_connection/db_connect";
 
-class Rating extends Model<
-  InferAttributes<Rating>,
-  InferCreationAttributes<Rating>
-> {
+class Rating extends Model<InferAttributes<Rating>, InferCreationAttributes<Rating>> {
   declare id: CreationOptional<number>;
   declare rating: number; // 1 - 5 stars
   declare recipe_id: number;

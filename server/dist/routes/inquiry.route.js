@@ -20,6 +20,7 @@ const meal_rating_controller_1 = require("../controllers/meal_rating.controller"
 const campaign_fuck_cancer_controller_1 = require("../controllers/campaign_fuck_cancer.controller");
 const recipe_rating_create_controller_1 = require("../controllers/recipe_rating_create.controller");
 const product_export_for_fakturoid_controller_1 = require("../controllers/product_export_for_fakturoid.controller");
+const reviews_export_1 = require("../controllers/reviews_export");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -36,4 +37,5 @@ router.post("/meal/rating", meal_rating_controller_1.meal_rating);
 router.post("/campaigns/fuck-cancer", campaign_fuck_cancer_controller_1.campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create_controller_1.recipe_rating_create);
 router.get("/products/export", product_export_for_fakturoid_controller_1.products_export);
+router.get("/reviews/export", reviews_export_1.reviews_export);
 exports.default = router;

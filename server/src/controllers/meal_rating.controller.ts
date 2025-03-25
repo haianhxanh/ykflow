@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { GraphQLClient } from "graphql-request";
 import dotenv from "dotenv";
-import {
-  metaobjectsQuery,
-  metaobjectUpdateMutation,
-} from "../queries/metafields";
+import { metaobjectsQuery, metaobjectUpdateMutation } from "../queries/metafields";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 export const meal_rating = async (req: Request, res: Response) => {
@@ -14,19 +11,14 @@ export const meal_rating = async (req: Request, res: Response) => {
     const mealIndex = req.body.mealIndex as keyof typeof meals;
     const rating = req.body.rating;
 
-    console.log(
-      `New rating for ${week}, ${days[day].name}, ${meals[mealIndex].name}: ${rating}`
-    );
+    console.log(`New rating for ${week}, ${days[day].name}, ${meals[mealIndex].name}: ${rating}`);
 
-    const client = new GraphQLClient(
-      `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
-      {
-        // @ts-ignore
-        headers: {
-          "X-Shopify-Access-Token": ACCESS_TOKEN,
-        },
-      }
-    );
+    const client = new GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
+      // @ts-ignore
+      headers: {
+        "X-Shopify-Access-Token": ACCESS_TOKEN,
+      },
+    });
 
     const meta = await client.request(metaobjectsQuery, {
       query: `handle=${week}`,
@@ -39,9 +31,7 @@ export const meal_rating = async (req: Request, res: Response) => {
 
     const dayRatingKey = `${days[day].name}_rating`;
     const mealName = meals[mealIndex].name;
-    const ratingOfTheDay = meta.metaobjects.edges[0].node.fields.find(
-      (field: any) => field.key == dayRatingKey
-    );
+    const ratingOfTheDay = meta.metaobjects.edges[0].node.fields.find((field: any) => field.key == dayRatingKey);
     let ratingOfTheDayValue;
 
     if (!ratingOfTheDay || !ratingOfTheDay.value) {
@@ -62,13 +52,8 @@ export const meal_rating = async (req: Request, res: Response) => {
         const oldRatingCount = ratingOfTheDayValue[mealName].rating_count;
         const newRatingCount = ratingOfTheDayValue[mealName].rating_count + 1;
         ratingOfTheDayValue[mealName].rating_count = newRatingCount;
-        const newRatingAverage =
-          (parseFloat(ratingOfTheDayValue[mealName].rating_average) *
-            oldRatingCount +
-            parseFloat(rating)) /
-          newRatingCount;
-        ratingOfTheDayValue[mealName].rating_average =
-          newRatingAverage.toFixed(1);
+        const newRatingAverage = (parseFloat(ratingOfTheDayValue[mealName].rating_average) * oldRatingCount + parseFloat(rating)) / newRatingCount;
+        ratingOfTheDayValue[mealName].rating_average = newRatingAverage.toFixed(1);
       }
     }
 
@@ -92,7 +77,7 @@ export const meal_rating = async (req: Request, res: Response) => {
   }
 };
 
-const meals = {
+export const meals = {
   "0": {
     name: "breakfast",
   },

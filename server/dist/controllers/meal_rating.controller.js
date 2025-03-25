@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.meal_rating = void 0;
+exports.meals = exports.meal_rating = void 0;
 const graphql_request_1 = require("graphql-request");
 const dotenv_1 = __importDefault(require("dotenv"));
 const metafields_1 = require("../queries/metafields");
@@ -24,7 +24,7 @@ const meal_rating = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const day = req.body.day;
         const mealIndex = req.body.mealIndex;
         const rating = req.body.rating;
-        console.log(`New rating for ${week}, ${days[day].name}, ${meals[mealIndex].name}: ${rating}`);
+        console.log(`New rating for ${week}, ${days[day].name}, ${exports.meals[mealIndex].name}: ${rating}`);
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
             headers: {
@@ -39,7 +39,7 @@ const meal_rating = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             return res.status(404).json({ message: `Week ${week} not found` });
         }
         const dayRatingKey = `${days[day].name}_rating`;
-        const mealName = meals[mealIndex].name;
+        const mealName = exports.meals[mealIndex].name;
         const ratingOfTheDay = meta.metaobjects.edges[0].node.fields.find((field) => field.key == dayRatingKey);
         let ratingOfTheDayValue;
         if (!ratingOfTheDay || !ratingOfTheDay.value) {
@@ -62,12 +62,8 @@ const meal_rating = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 const oldRatingCount = ratingOfTheDayValue[mealName].rating_count;
                 const newRatingCount = ratingOfTheDayValue[mealName].rating_count + 1;
                 ratingOfTheDayValue[mealName].rating_count = newRatingCount;
-                const newRatingAverage = (parseFloat(ratingOfTheDayValue[mealName].rating_average) *
-                    oldRatingCount +
-                    parseFloat(rating)) /
-                    newRatingCount;
-                ratingOfTheDayValue[mealName].rating_average =
-                    newRatingAverage.toFixed(1);
+                const newRatingAverage = (parseFloat(ratingOfTheDayValue[mealName].rating_average) * oldRatingCount + parseFloat(rating)) / newRatingCount;
+                ratingOfTheDayValue[mealName].rating_average = newRatingAverage.toFixed(1);
             }
         }
         const updatedMetaobject = client.request(metafields_1.metaobjectUpdateMutation, {
@@ -90,7 +86,7 @@ const meal_rating = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.meal_rating = meal_rating;
-const meals = {
+exports.meals = {
     "0": {
         name: "breakfast",
     },
