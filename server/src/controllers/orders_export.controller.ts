@@ -44,6 +44,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Shipping Street", key: "shippingStreet", width: 15 },
           { header: "Shipping City", key: "shippingCity", width: 15 },
           { header: "Shipping Zip", key: "shippingZip", width: 10 },
+          { header: "Full Address", key: "fullAddress", width: 20 },
           { header: "Note", key: "note", width: 15 },
           { header: "Note Attributes", key: "noteAttributes", width: 15 },
           { header: "Doplňkový prodej", key: "addon", width: 15 },
@@ -180,6 +181,22 @@ export const orders_export = async (req: Request, res: Response) => {
             shippingAddress = `${order.node?.shippingAddress?.address1} ${order.node?.shippingAddress?.address2}`;
           }
 
+          const fullAddressArray = [];
+          if (order.node?.shippingAddress?.address1) {
+            fullAddressArray.push(order.node?.shippingAddress?.address1);
+          }
+          if (order.node?.shippingAddress?.address2) {
+            fullAddressArray.push(order.node?.shippingAddress?.address2);
+          }
+          if (order.node?.shippingAddress?.city) {
+            fullAddressArray.push(order.node?.shippingAddress?.city);
+          }
+          if (order.node?.shippingAddress?.zip) {
+            fullAddressArray.push(order.node?.shippingAddress?.zip);
+          }
+
+          const fullAddress = fullAddressArray.join(", ");
+
           const row = [
             order.node?.name,
             order.node?.displayFinancialStatus,
@@ -190,6 +207,7 @@ export const orders_export = async (req: Request, res: Response) => {
             shippingAddress || `Pickup ${order.node?.shippingLine?.title}` || "",
             order.node?.shippingAddress?.city || "",
             order.node?.shippingAddress?.zip || "",
+            fullAddress,
             order.node?.note,
             customAttributes?.join("\n"),
             addonsField ? addonsField : "",
