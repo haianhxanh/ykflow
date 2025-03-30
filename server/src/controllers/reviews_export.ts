@@ -6,19 +6,18 @@ import Rating from "../model/rating.model";
 import { Op } from "sequelize";
 import { meals } from "./meal_rating.controller";
 import { sendNotification } from "../utils/notification";
+import { GraphQLClient } from "graphql-request";
+import { customerQuery } from "../queries/customers";
 
 dotenv.config();
 const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const reviews_export = async (req: Request, res: Response) => {
   try {
-    const yesterday = getYesterday();
-    const now = new Date();
-    const startOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0));
-    const endOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 23, 59, 59, 999));
     const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
     const ratings = await Rating.findAll({
       where: {
@@ -51,14 +50,21 @@ export const reviews_export = async (req: Request, res: Response) => {
         { header: "Type", key: "recipe_type", width: 20 },
         { header: "Rating", key: "rating", width: 10 },
         { header: "Comment", key: "comment", width: 20 },
+        { header: "User", key: "user", width: 50 },
+        { header: "User Profile", key: "userProfile", width: 50 },
       ];
       const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
       for (const rating of sortedRecipeTypeRatings) {
+        const shopifyUser = await client.request(customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` });
+        const user = shopifyUser.customer ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
+        const userAdminUrl = shopifyUser.customer ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";
         worksheet.addRow({
           recipe_name: rating.recipe_name,
           recipe_type: rating.recipe_type,
           rating: rating.rating,
           comment: rating.comment,
+          user: user,
+          userProfile: userAdminUrl,
         });
       }
     }
@@ -118,3 +124,10 @@ function czechDate(date: string) {
   const year = dateObj.getFullYear();
   return `${day}.${month}.${year}`;
 }
+
+const client = new GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
+  // @ts-ignore
+  headers: {
+    "X-Shopify-Access-Token": ACCESS_TOKEN,
+  },
+});

@@ -15,22 +15,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.reviews_export = void 0;
 const exceljs_1 = __importDefault(require("exceljs"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const helpers_1 = require("../utils/helpers");
 const rating_model_1 = __importDefault(require("../model/rating.model"));
 const sequelize_1 = require("sequelize");
 const meal_rating_controller_1 = require("./meal_rating.controller");
 const notification_1 = require("../utils/notification");
+const graphql_request_1 = require("graphql-request");
+const customers_1 = require("../queries/customers");
 dotenv_1.default.config();
 const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const yesterday = (0, helpers_1.getYesterday)();
-        const now = new Date();
-        const startOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 0, 0, 0));
-        const endOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1, 23, 59, 59, 999));
         const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
         const ratings = yield rating_model_1.default.findAll({
             where: {
@@ -59,14 +57,21 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 { header: "Type", key: "recipe_type", width: 20 },
                 { header: "Rating", key: "rating", width: 10 },
                 { header: "Comment", key: "comment", width: 20 },
+                { header: "User", key: "user", width: 50 },
+                { header: "User Profile", key: "userProfile", width: 50 },
             ];
             const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
             for (const rating of sortedRecipeTypeRatings) {
+                const shopifyUser = yield client.request(customers_1.customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` });
+                const user = shopifyUser.customer ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
+                const userAdminUrl = shopifyUser.customer ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";
                 worksheet.addRow({
                     recipe_name: rating.recipe_name,
                     recipe_type: rating.recipe_type,
                     rating: rating.rating,
                     comment: rating.comment,
+                    user: user,
+                    userProfile: userAdminUrl,
                 });
             }
         }
@@ -115,3 +120,9 @@ function czechDate(date) {
     const year = dateObj.getFullYear();
     return `${day}.${month}.${year}`;
 }
+const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
+    // @ts-ignore
+    headers: {
+        "X-Shopify-Access-Token": ACCESS_TOKEN,
+    },
+});
