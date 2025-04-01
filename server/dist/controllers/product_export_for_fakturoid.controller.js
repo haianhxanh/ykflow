@@ -78,7 +78,7 @@ const products_export = (req, res) => __awaiter(void 0, void 0, void 0, function
                 };
                 console.log(`Processing ${index} - ${row.name}`);
                 worksheet.addRow(row);
-                yield new Promise(resolve => setTimeout(resolve, 250));
+                yield new Promise((resolve) => setTimeout(resolve, 250));
             }
         }
         yield workbook.xlsx.writeFile(`products-${vat}.xlsx`);

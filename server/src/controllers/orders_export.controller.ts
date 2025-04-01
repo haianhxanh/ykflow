@@ -192,10 +192,13 @@ export const orders_export = async (req: Request, res: Response) => {
             fullAddressArray.push(order.node?.shippingAddress?.city);
           }
           if (order.node?.shippingAddress?.zip) {
-            fullAddressArray.push(order.node?.shippingAddress?.zip);
+            fullAddressArray.push(order.node?.shippingAddress?.zip?.replace(/\s/g, ""));
           }
 
-          const fullAddress = fullAddressArray.join(", ");
+          let fullAddress = fullAddressArray.join(", ");
+          if (!shippingAddress) {
+            fullAddress = `Pickup ${order.node?.shippingLine?.title}`;
+          }
 
           const row = [
             order.node?.name,
@@ -206,7 +209,7 @@ export const orders_export = async (req: Request, res: Response) => {
             order.node?.shippingAddress?.phone || order.node?.billingAddress?.phone || "",
             shippingAddress || `Pickup ${order.node?.shippingLine?.title}` || "",
             order.node?.shippingAddress?.city || "",
-            order.node?.shippingAddress?.zip || "",
+            order.node?.shippingAddress?.zip?.replace(/\s/g, "") || "",
             fullAddress,
             order.node?.note,
             customAttributes?.join("\n"),

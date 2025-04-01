@@ -61,7 +61,7 @@ export const products_export = async (req: Request, res: Response) => {
         // @ts-ignore
         if (variantPrice <= 1) continue;
         const row = {
-          name: `${product.node.title} - ${variant.node.title}`;
+          name: `${product.node.title} - ${variant.node.title}`,
           // @ts-ignore
           priceExclVat: ((variantPrice / vatTotal) * 100).toFixed(2),
           vat: vat,
@@ -71,7 +71,7 @@ export const products_export = async (req: Request, res: Response) => {
         };
         console.log(`Processing ${index} - ${row.name}`);
         worksheet.addRow(row);
-        await new Promise(resolve => setTimeout(resolve, 250))
+        await new Promise((resolve) => setTimeout(resolve, 250));
       }
     }
     await workbook.xlsx.writeFile(`products-${vat}.xlsx`);
