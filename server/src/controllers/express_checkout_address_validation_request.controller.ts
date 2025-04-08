@@ -43,7 +43,7 @@ export const express_checkout_address_validation_request = async (req: Request, 
           <p>děkujeme za Vaši objednávku. Rádi bychom Vás požádali o poskytnutí telefonního čísla, abychom Vás pro doručení Vašich krabiček mohli snadno kontaktovat.</p>
           <p>Telefonní číslo nám prosím zašlete jako odpověď na tento e-mail nebo na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>
           <p>Děkujeme.</p>`;
-        let sendEmailToPickupOrder = await sendNotification(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string, null);
+        let sendEmailToPickupOrder = await sendNotification(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string, null, true);
         return res.status(200).json({
           emailSent: sendEmailToPickupOrder,
           message: `Is pickup order ${order.order.name}`,
@@ -66,7 +66,7 @@ export const express_checkout_address_validation_request = async (req: Request, 
       <p>${address}</p>
       <p>Pokud je potřeba adresu upravit, odpovězte na tento e-mail nebo nás kontaktujte na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>`;
 
-    let sendEmail = await sendNotification(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string, null);
+    let sendEmail = await sendNotification(subject, email, content, MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string, null, true);
     return res.status(200).json(`Email sent: ${sendEmail}`);
   } catch (error) {
     console.log("Error: ", error);

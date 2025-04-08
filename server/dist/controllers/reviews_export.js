@@ -84,7 +84,7 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
             name: `hodnoceni-receptu-tyden-${weekNumber}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment);
+        const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
         return res.status(200).json(attachment);
     }
     catch (error) {

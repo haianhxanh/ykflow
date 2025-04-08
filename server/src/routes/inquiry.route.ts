@@ -16,6 +16,8 @@ import { campaign_fuck_cancer } from "../controllers/campaign_fuck_cancer.contro
 import { recipe_rating_create } from "../controllers/recipe_rating_create.controller";
 import { products_export } from "../controllers/product_export_for_fakturoid.controller";
 import { reviews_export } from "../controllers/reviews_export";
+import { getEasterDiscount } from "../controllers/easter_discount.controller";
+import { validateEmail } from "../controllers/validate_email.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -34,4 +36,7 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create);
 router.get("/products/export", products_export);
 router.get("/reviews/export", reviews_export);
+router.post("/easter/discount", getEasterDiscount);
+router.post("/validate/email", validateEmail);
+
 export default router;

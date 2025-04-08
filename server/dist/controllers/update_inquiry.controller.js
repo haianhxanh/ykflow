@@ -53,8 +53,7 @@ const update_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
         let metafield_inquiry_value_array = JSON.parse(metafield_inquiry.value);
         let inquiryIndex = metafield_inquiry_value_array.findIndex((item) => parseInt(item.id) == parseInt(inquiry.id));
-        metafield_inquiry_value_array[inquiryIndex].status =
-            req.body.status == constants_1.STATUS.APPROVED ? constants_1.STATUS.APPROVED : constants_1.STATUS.DECLINED;
+        metafield_inquiry_value_array[inquiryIndex].status = req.body.status == constants_1.STATUS.APPROVED ? constants_1.STATUS.APPROVED : constants_1.STATUS.DECLINED;
         let body = JSON.stringify({
             metafield: {
                 namespace: "flow",
@@ -102,7 +101,7 @@ const update_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (req.body.status == constants_1.STATUS.APPROVED && inquiry) {
             let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičky budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
             let notificationSubject = `Vaše žádost o pozastavení Yes Krabičky (obj. ${inquiry.order_name}) byla schválena`;
-            const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, inquiry.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined);
+            const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, inquiry.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined, true);
         }
         return res.status(200).json({
             message: `Status of the inquiry has been updated`,

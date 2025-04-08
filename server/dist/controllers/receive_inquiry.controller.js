@@ -68,16 +68,13 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
         /*---------------------------------INPUT VALIDATION I.-------------------------------------*/
         let errors_validation = [];
         // catch pause start date / pause end date in the past
-        if ((0, helpers_2.convertDateToISOString)(start_date) > pause_start_date ||
-            today_date >= pause_start_date ||
-            (0, helpers_2.convertDateToISOString)(start_date) > pause_end_date)
+        if ((0, helpers_2.convertDateToISOString)(start_date) > pause_start_date || today_date >= pause_start_date || (0, helpers_2.convertDateToISOString)(start_date) > pause_end_date)
             errors_validation.push(constants_1.API_RESPONSES.PAST_DATE);
         // catch pause end date before pause start date
         if (pause_start_date > pause_end_date)
             errors_validation.push(constants_1.API_RESPONSES.INVALID_END_DATE);
         // pause dates must be weekdays
-        if ((0, helpers_2.isWeekDay)(pause_start_date) == false ||
-            (0, helpers_2.isWeekDay)(pause_end_date) == false)
+        if ((0, helpers_2.isWeekDay)(pause_start_date) == false || (0, helpers_2.isWeekDay)(pause_end_date) == false)
             errors_validation.push(constants_1.API_RESPONSES.NOT_WORKING_DAY);
         /*---------------------------------DATES CALCULATION-------------------------------------*/
         // calc total package days length
@@ -130,7 +127,7 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (res.statusCode == 200) {
             if (order_metafields_data.data.metafields.length == 0 ||
                 order_metafields_data.data.metafields.find((metafield) => {
-                    return (metafield.namespace === "flow" && metafield.key === "inquiries");
+                    return metafield.namespace === "flow" && metafield.key === "inquiries";
                 }) == undefined) {
                 // create order metafield
                 let array = [];
@@ -155,7 +152,7 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
             else {
                 // update order metafield
                 const metafield_inquiry = order_metafields_data.data.metafields.find((metafield) => {
-                    return (metafield.namespace === "flow" && metafield.key === "inquiries");
+                    return metafield.namespace === "flow" && metafield.key === "inquiries";
                 });
                 let metafield_inquiry_value_array = JSON.parse(metafield_inquiry.value);
                 metafield_inquiry_value_array.push(new_inquiry.dataValues);
@@ -181,7 +178,7 @@ const receive_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function
         /*----------------------------------NOTIFY MERCHANT AND CUSTOMER -------------------------------*/
         let message = `Přijali jsme Váš požadavek o pozastavení krabičky ${req.body.item_title} od ${(0, helpers_1.convertDateToLocalString)(pause_start_date)} do ${(0, helpers_1.convertDateToLocalString)(pause_end_date)} (včetně).`;
         let notificationSubject = `Nová žádost o pozastavení Yes Krabičky (obj. ${req.body.order_name})`;
-        const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, req.body.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined);
+        const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, req.body.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined, true);
         return res.status(200).json({
             request_id: `ID požadavku: ${new_inquiry.id}`,
             message: message,

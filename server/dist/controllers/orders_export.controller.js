@@ -254,7 +254,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             name: `orders-${yesterday}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment);
+        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
         return res.status(200).json(attachment);
     }
     catch (error) {

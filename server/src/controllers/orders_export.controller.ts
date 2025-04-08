@@ -272,7 +272,8 @@ export const orders_export = async (req: Request, res: Response) => {
       recipientEmails,
       `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
       MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
-      attachment
+      attachment,
+      true
     );
     return res.status(200).json(attachment);
   } catch (error) {

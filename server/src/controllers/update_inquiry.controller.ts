@@ -4,19 +4,13 @@ import axios from "axios";
 import dotenv from "dotenv";
 import Inquiry from "../model/inquiry.model";
 import { STRINGS } from "../utils/constants";
-import {
-  convertDateToISOString,
-  convertDateToLocalString,
-  getBusinessDatesCount,
-  getFutureBusinessDate,
-} from "../utils/helpers";
+import { convertDateToISOString, convertDateToLocalString, getBusinessDatesCount, getFutureBusinessDate } from "../utils/helpers";
 import { v4 } from "uuid";
 import { array } from "joi";
 import { sendNotification } from "../utils/notification";
 
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_FROM_EMAIL } =
-  process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_FROM_EMAIL } = process.env;
 
 interface InquiryMetafield {
   namespace: string;
@@ -54,30 +48,22 @@ export const update_inquiry = async (req: Request, res: Response) => {
       },
     });
 
-    const order_metafields_data = await axios.get(
-      `https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}/metafields.json`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": ACCESS_TOKEN!,
-        },
-      }
-    );
+    const order_metafields_data = await axios.get(`https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}/metafields.json`, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": ACCESS_TOKEN!,
+      },
+    });
 
     let metafields = order_metafields_data.data.metafields;
-    const metafield_inquiry = order_metafields_data.data.metafields.find(
-      (metafield: any) => {
-        return metafield.namespace === "flow" && metafield.key === "inquiries";
-      }
-    );
+    const metafield_inquiry = order_metafields_data.data.metafields.find((metafield: any) => {
+      return metafield.namespace === "flow" && metafield.key === "inquiries";
+    });
     let metafield_inquiry_value_array = JSON.parse(metafield_inquiry.value);
 
-    let inquiryIndex = metafield_inquiry_value_array.findIndex(
-      (item: any) => parseInt(item.id) == parseInt(inquiry.id)
-    );
+    let inquiryIndex = metafield_inquiry_value_array.findIndex((item: any) => parseInt(item.id) == parseInt(inquiry.id));
 
-    metafield_inquiry_value_array[inquiryIndex].status =
-      req.body.status == STATUS.APPROVED ? STATUS.APPROVED : STATUS.DECLINED;
+    metafield_inquiry_value_array[inquiryIndex].status = req.body.status == STATUS.APPROVED ? STATUS.APPROVED : STATUS.DECLINED;
 
     let body = JSON.stringify({
       metafield: {
@@ -88,31 +74,24 @@ export const update_inquiry = async (req: Request, res: Response) => {
       },
     });
 
-    const order_metafield_update: any = await axios.post(
-      `https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}/metafields.json`,
-      body,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": ACCESS_TOKEN!,
-        },
-      }
-    );
+    const order_metafield_update: any = await axios.post(`https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}/metafields.json`, body, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": ACCESS_TOKEN!,
+      },
+    });
 
     let pauseStartDate = convertDateToISOString(inquiry.pause_start_date);
     let pauseEndDate = convertDateToISOString(inquiry.pause_end_date);
     let newStartDate = convertDateToISOString(inquiry.new_start_date);
     let newEndDate = convertDateToISOString(inquiry.new_end_date);
 
-    const shopify_order = await axios.get(
-      `https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": ACCESS_TOKEN!,
-        },
-      }
-    );
+    const shopify_order = await axios.get(`https://${STORE}/admin/api/${API_VERSION}/orders/${inquiry.order_id}.json`, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": ACCESS_TOKEN!,
+      },
+    });
 
     let order_attributes = shopify_order.data.order.note_attributes;
     order_attributes.push({
@@ -149,7 +128,8 @@ export const update_inquiry = async (req: Request, res: Response) => {
         inquiry.order_contact,
         message,
         MANDRILL_MESSAGE_FROM_EMAIL as string,
-        undefined
+        undefined,
+        true
       );
     }
 

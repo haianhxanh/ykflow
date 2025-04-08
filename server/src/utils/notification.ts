@@ -1,10 +1,5 @@
 import "dotenv/config";
-const {
-  MANDRILL_API_KEY,
-  MANDRILL_MESSAGE_FROM_EMAIL,
-  MANDRILL_MESSAGE_FROM_NAME,
-  MANDRILL_MESSAGE_BCC_ADDRESS,
-} = process.env;
+const { MANDRILL_API_KEY, MANDRILL_MESSAGE_FROM_EMAIL, MANDRILL_MESSAGE_FROM_NAME, MANDRILL_MESSAGE_BCC_ADDRESS } = process.env;
 
 type Message = {
   text: string;
@@ -17,16 +12,15 @@ type Message = {
   attachments: {}[];
 };
 
-const mailchimp = require("@mailchimp/mailchimp_transactional")(
-  MANDRILL_API_KEY
-);
+const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY);
 
 export const sendNotification = async (
   subject: string,
   customerEmail: string,
   content: string,
   bbcEmail: string | null,
-  attachment: any
+  attachment: any,
+  showSignature: boolean
 ) => {
   // axios post request to send email
   let recipients = customerEmail.split(",").map((email) => {
@@ -34,7 +28,7 @@ export const sendNotification = async (
   });
   let message: Message = {
     text: content,
-    html: content + "<br><br>---<br>Yes Krabičky",
+    html: showSignature ? content + "<br><br>---<br>Yes Krabičky" : content,
     from_email: MANDRILL_MESSAGE_FROM_EMAIL as string,
     from_name: MANDRILL_MESSAGE_FROM_NAME as string,
     to: recipients,
