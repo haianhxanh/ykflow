@@ -111,9 +111,12 @@ export const orders_export = async (req: Request, res: Response) => {
       for (const [lineIndex, line] of mainItems.entries()) {
         let programStartDate, programEndDate, programLength;
         let lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
+        const lineSku = line?.node?.variant?.sku;
         let lineQuantity = line.node.quantity;
         let promoField, addonsField;
-        let severeAllergicAttr = line?.node?.customAttributes?.find((attr: any) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))?.value;
+        let severeAllergicAttr =
+          line?.node?.customAttributes?.find((attr: any) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))?.value ||
+          order.node?.customAttributes?.find((attr: any) => attr.key.includes(`Alergik_${lineSku}`))?.value;
         let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
 
         if (lineIsProgram) {
@@ -242,7 +245,7 @@ export const orders_export = async (req: Request, res: Response) => {
               const firstRow = worksheet.getRow(1);
 
               firstRow.eachCell((cell, colNumber) => {
-                if (colNumber > 17) {
+                if (colNumber > 20) {
                   if (allergens.includes(cell.value)) {
                     row.push(cell.value);
                   } else {
