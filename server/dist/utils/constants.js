@@ -26,4 +26,4 @@ exports.API_RESPONSES = {
     INVALID_END_DATE: "Konec pozastavení musí být po datu začátku pozastavení",
     OUT_OF_RANGE: "Požadovaná data jsou mimo rozsah objednávky",
 };
-exports.ALLERGENS = "Mořské plody,Houby,Tofu,Ryby,Sója,Vepřové maso,Skořápkové plody,Arašídy,Koriandr,Rajčata,Červená řepa,Avokádo,Jehněčí maso,Kozí sýr,Paprika,Olivy,Jahody";
+exports.ALLERGENS = "Mořské plody,Houby,Tofu,Ryby,Sója,Vepřové maso,Skořápkové plody,Arašídy,Koriandr,Červená řepa,Jehněčí maso,Kozí sýr,Olivy";

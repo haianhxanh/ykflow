@@ -21,12 +21,10 @@ export const API_RESPONSES = {
   MISSING_ORDER_CONTACT: "Zadejte emailovou adresu",
   MISSING_ORDER_ID: "Chybí ID objednávky",
   MISSING_ORDER_NAME: "Chybí číslo objednávky",
-  PAST_DATE:
-    "Začátek/konec pozastavení nemůže být dřív než začátek objednávky a musí být v budoucnosti",
+  PAST_DATE: "Začátek/konec pozastavení nemůže být dřív než začátek objednávky a musí být v budoucnosti",
   NOT_WORKING_DAY: "Začátek/konec pozastavení nesmí být víkend",
   INVALID_END_DATE: "Konec pozastavení musí být po datu začátku pozastavení",
   OUT_OF_RANGE: "Požadovaná data jsou mimo rozsah objednávky",
 };
 
-export const ALLERGENS =
-  "Mořské plody,Houby,Tofu,Ryby,Sója,Vepřové maso,Skořápkové plody,Arašídy,Koriandr,Rajčata,Červená řepa,Avokádo,Jehněčí maso,Kozí sýr,Paprika,Olivy,Jahody";
+export const ALLERGENS = "Mořské plody,Houby,Tofu,Ryby,Sója,Vepřové maso,Skořápkové plody,Arašídy,Koriandr,Červená řepa,Jehněčí maso,Kozí sýr,Olivy";
