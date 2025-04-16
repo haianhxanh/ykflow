@@ -20,7 +20,7 @@ const discounts_1 = require("../queries/discounts");
 const notification_1 = require("../utils/notification");
 const easterEmailContent_1 = require("../utils/easterEmailContent");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, COLLECTION_PROGRAMS_ID } = process.env;
 const discountRules = [
     {
         discount_type: "a",
@@ -108,7 +108,9 @@ const createNewShopifyDiscount = (percentage, email, code) => __awaiter(void 0, 
                     percentage: percentage / 100,
                 },
                 items: {
-                    all: true,
+                    collections: {
+                        add: [`gid://shopify/Collection/${COLLECTION_PROGRAMS_ID}`],
+                    },
                 },
             },
             startsAt: new Date().toISOString(),

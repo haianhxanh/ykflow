@@ -7,7 +7,7 @@ import { sendNotification } from "../utils/notification";
 import { easterHtmlContent } from "../utils/easterEmailContent";
 dotenv.config();
 
-const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, COLLECTION_PROGRAMS_ID } = process.env;
 
 const discountRules = [
   {
@@ -104,7 +104,9 @@ const createNewShopifyDiscount = async (percentage: number, email: string, code:
           percentage: percentage / 100,
         },
         items: {
-          all: true,
+          collections: {
+            add: [`gid://shopify/Collection/${COLLECTION_PROGRAMS_ID}`],
+          },
         },
       },
       startsAt: new Date().toISOString(),
