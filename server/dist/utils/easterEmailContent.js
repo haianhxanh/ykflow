@@ -30,6 +30,7 @@ const easterHtmlContent = (code, percentage) => {
         display: inline-block;
         text-align: center;
         margin-top: 20px;
+        margin-bottom: 20px;
       }
     }
     .footer {
@@ -68,21 +69,24 @@ const easterHtmlContent = (code, percentage) => {
                 <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/Velikonoce_e-mail-automat_2.png?v=1744779377" alt="Velikonoce" width="100%" style="max-width: 600px; width: 100%; display: block;">
 
                 <!-- Unique code -->
-                <div class="code-text" style="
-                  background-color: #f3fa9b; 
-                  color: #5faf46;
-                  border: 2px solid #5faf46; 
-                  padding: 10px 25px;
-                  font-size: 18px;
-                  font-family: Arial, sans-serif;
-                  font-weight: bold;
-                  border-radius: 50px;
-                  text-decoration: none;
-                  display: inline-block;
-                  text-align: center;
-                  margin-top: 20px;
-                ">
-                  ${code}
+                <div class="code-wrapper" style="background-color: #029d78">
+                  <div class="code-text" style="
+                    background-color: #f3fa9b; 
+                    color: #5faf46;
+                    border: 2px solid #5faf46; 
+                    padding: 10px 25px;
+                    font-size: 18px;
+                    font-family: Arial, sans-serif;
+                    font-weight: bold;
+                    border-radius: 50px;
+                    text-decoration: none;
+                    display: inline-block;
+                    text-align: center;
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                  ">
+                    ${code}
+                  </div>
                 </div>
               </div>
 
