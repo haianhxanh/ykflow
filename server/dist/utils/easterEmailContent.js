@@ -6,113 +6,116 @@ const easterHtmlContent = (code, percentage) => {
   <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <title>Vaše sleva je připravena!</title>
+  <meta charset="UTF-8">
+  <title>Velikonoční kód</title>
   <style>
-    body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      padding: 0;
-      margin: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    }
-    .header {
-      background-color: #fdd835;
-      padding: 30px;
-      text-align: center;
-      position: relative;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 21px;
-      color: #000;
-    }
-    .eggs {
-      margin-top: 10px;
-    }
-    .eggs img {
-      margin: 0 6px;
-      vertical-align: middle;
-    }
-    .content {
-      padding: 30px;
-      text-align: center;
-    }
-    .content p {
-      font-size: 16px;
-      line-height: 1.3;
-    }
-    .code {
-      margin: 20px 0;
-      font-size: 21px;
-      font-weight: bold;
-      background: #eee;
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 8px;
-      letter-spacing: 2px;
-      color: #d32f2f;
+    @media screen {
+      .code-container {
+        position: relative;
+        text-align: center;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .code-text {
+        background-color: #f3fa9b; 
+        color: #5faf46;
+        border: 2px solid #5faf46; 
+        padding: 10px 25px;
+        font-size: 18px;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        border-radius: 50px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        margin-top: 20px;
+      }
     }
     .footer {
+      font-family: Arial, sans-serif;
       font-size: 14px;
-      color: #888;
+      color: #444;
       text-align: center;
-      padding: 20px;
+      padding: 20px 10px;
     }
-    .social-icons a, .code-link {
+    .footer a {
+      color: #444;
       text-decoration: none;
     }
-    .social-icons img {
-      margin: 4px;
-      padding: 4px;
+    .social-icons {
+      margin: 10px 0;
     }
-    .code-link {
-      color: #d32f2f;
+    .social-icons img {
+      margin: 0 5px;
+      vertical-align: middle;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🐰 Velikonoční nadílka právě dorazila!</h1>
-      <div class="eggs">
-        <img src="https://cdn.shopify.com/s/files/1/0783/9960/2973/files/Velikonocni-vajicka_2.png" alt="vajíčko 1" width="50" />
-        <img src="https://cdn.shopify.com/s/files/1/0783/9960/2973/files/Velikonocni-vajicka_3.png" alt="vajíčko 2" width="50" />
-        <img src="https://cdn.shopify.com/s/files/1/0783/9960/2973/files/Velikonocni-vajicka_5.png" alt="vajíčko 3" width="50" />
-      </div>
-    </div>
-    <div class="content">
-      <p>Děkujeme, že jste se zapojili do naší soutěže!</p>
-      <p>Zde je Váš <strong>unikátní slevový kód</strong> na <strong>${percentage} %</strong>:</p>
-      <a href="https://www.yeskrabicky.cz" target="_blank" class="code-link">
-        <div class="code">${code}</div>
-      </a>
-      <p>Slevu uplatníte na pokladně při dokončení objednávky na <a href="https://www.yeskrabicky.cz" target="_blank">yeskrabicky.cz</a>.</p>
-    </div>
-    <div class="footer">
-      <p>Pokud máte jakékoliv dotazy, neváhejte nás kontaktovat na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>
-      <div class="social-icons">
-        <a href="https://www.facebook.com/yeskrabicky.cz" target="_blank">
-          <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-fb-icon.png" alt="Facebook" width="28" />
-        </a>
-        <a href="https://www.instagram.com/yeskrabicky.cz" target="_blank">
-          <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-ig-icon.png" alt="Instagram" width="28" />
-        </a>
-        <a href="https://www.yeskrabicky.cz" target="_blank">
-          <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-web-icon.png" alt="Web" width="28" />
-        </a>
-      </div>
-      <p>Copyright © RR food delivery s.r.o., Všechna práva vyhrazena.</p>
-    </div>
-  </div>
+<body style="Margin:0;padding:0;background:#ffffff;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" align="center">
+    <tr>
+      <td align="center" style="padding:0;">
+
+        <!-- Email content wrapper -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto;">
+          <tr>
+            <td align="center" valign="top" style="position: relative;">
+
+              <!-- Image + code -->
+              <div class="code-container" style="position: relative; display: inline-block; text-align: center;">
+                <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/Velikonoce_e-mail-automat_2.png?v=1744779377" alt="Velikonoce" width="100%" style="max-width: 600px; width: 100%; display: block;">
+
+                <!-- Unique code -->
+                <div class="code-text" style="
+                  background-color: #f3fa9b; 
+                  color: #5faf46;
+                  border: 2px solid #5faf46; 
+                  padding: 10px 25px;
+                  font-size: 18px;
+                  font-family: Arial, sans-serif;
+                  font-weight: bold;
+                  border-radius: 50px;
+                  text-decoration: none;
+                  display: inline-block;
+                  text-align: center;
+                  margin-top: 20px;
+                ">
+                  ${code}
+                </div>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center">
+              <div class="footer">
+                <p>Pokud máte jakékoliv dotazy, neváhejte nás kontaktovat na <a href="mailto:info@yeskrabicky.cz">info@yeskrabicky.cz</a>.</p>
+                <div class="social-icons">
+                  <a href="https://www.facebook.com/yeskrabicky.cz" target="_blank">
+                    <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-fb-icon.png" alt="Facebook" width="28" />
+                  </a>
+                  <a href="https://www.instagram.com/yeskrabicky.cz" target="_blank">
+                    <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-ig-icon.png" alt="Instagram" width="28" />
+                  </a>
+                  <a href="https://www.yeskrabicky.cz" target="_blank">
+                    <img src="https://cdn.shopify.com/s/files/1/0625/1026/8645/files/mail-web-icon.png" alt="Web" width="28" />
+                  </a>
+                </div>
+                <p>Copyright © RR food delivery s.r.o., Všechna práva vyhrazena.</p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>
   `;
