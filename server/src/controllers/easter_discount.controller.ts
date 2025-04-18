@@ -129,6 +129,7 @@ const generateConsonants = () => {
   const randomConsonants =
     consonants[Math.floor(Math.random() * consonants.length)] +
     consonants[Math.floor(Math.random() * consonants.length)] +
+    consonants[Math.floor(Math.random() * consonants.length)] +
     consonants[Math.floor(Math.random() * consonants.length)];
   return randomConsonants.toUpperCase();
 };
