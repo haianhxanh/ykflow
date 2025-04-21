@@ -36,7 +36,7 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create);
 router.get("/products/export", products_export);
 router.get("/reviews/export", reviews_export);
-router.post("/easter/discount", getEasterDiscount);
-router.post("/validate/email", validateEmail);
+// router.post("/easter/discount", getEasterDiscount);
+// router.post("/validate/email", validateEmail);
 
 export default router;

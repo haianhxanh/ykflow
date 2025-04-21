@@ -21,8 +21,6 @@ const campaign_fuck_cancer_controller_1 = require("../controllers/campaign_fuck_
 const recipe_rating_create_controller_1 = require("../controllers/recipe_rating_create.controller");
 const product_export_for_fakturoid_controller_1 = require("../controllers/product_export_for_fakturoid.controller");
 const reviews_export_1 = require("../controllers/reviews_export");
-const easter_discount_controller_1 = require("../controllers/easter_discount.controller");
-const validate_email_controller_1 = require("../controllers/validate_email.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -40,6 +38,6 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer_controller_1.campaign
 router.post("/recipe/rating/create", recipe_rating_create_controller_1.recipe_rating_create);
 router.get("/products/export", product_export_for_fakturoid_controller_1.products_export);
 router.get("/reviews/export", reviews_export_1.reviews_export);
-router.post("/easter/discount", easter_discount_controller_1.getEasterDiscount);
-router.post("/validate/email", validate_email_controller_1.validateEmail);
+// router.post("/easter/discount", getEasterDiscount);
+// router.post("/validate/email", validateEmail);
 exports.default = router;
