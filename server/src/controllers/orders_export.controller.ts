@@ -172,7 +172,7 @@ export const orders_export = async (req: Request, res: Response) => {
             if (addons.length > 0)
               addonsField = addons
                 .map((item: any) => {
-                  return `${item.node.quantity} x ${item.node.title}`;
+                  return `${item.node.quantity} x ${item.node.title} ${item.node.variant.title}; `;
                 })
                 .join("\n");
           }

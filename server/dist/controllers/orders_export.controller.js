@@ -166,7 +166,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         if (addons.length > 0)
                             addonsField = addons
                                 .map((item) => {
-                                return `${item.node.quantity} x ${item.node.title}`;
+                                return `${item.node.quantity} x ${item.node.title} ${item.node.variant.title}; `;
                             })
                                 .join("\n");
                     }
