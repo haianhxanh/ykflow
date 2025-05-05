@@ -6,6 +6,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "YK Admin",
@@ -20,12 +21,13 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <TRPCReactProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            {/* <SidebarTrigger /> */}
-            {children}
-          </SidebarProvider>
-          <Toaster />
+          <SessionProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              {children}
+            </SidebarProvider>
+            <Toaster />
+          </SessionProvider>
         </TRPCReactProvider>
       </body>
     </html>

@@ -5,7 +5,7 @@ export default async function Home() {
     <HydrateClient>
       <main className="flex min-h-screen w-full flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <Typography variant="h1">Hello</Typography>
+          <Typography variant="h1">Žádosti</Typography>
         </div>
       </main>
     </HydrateClient>

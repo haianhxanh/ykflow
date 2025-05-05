@@ -10,21 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
-import {
-  Home,
-  Inbox,
-  Calendar,
-  Search,
-  Settings,
-  ChevronUp,
-  User2,
-} from "lucide-react";
+import { Home, User2, LogOut } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
@@ -35,46 +22,14 @@ const items = [
     url: "#",
     icon: Home,
   },
-  {
-    title: "Detaily firmy", // company details
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Pro zákazníky", // for customers
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Propojení", // integartions
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Statistiky", // stats
-    url: "#",
-    icon: Settings,
-  },
-  {
-    title: "Podmínky", // terms & conditions
-    url: "#",
-    icon: Settings,
-  },
-  {
-    title: "Profily mazlíčků", // pet profiles
-    url: "#",
-    icon: Settings,
-  },
-  {
-    title: "Kontakt",
-    url: "#",
-    icon: Settings,
-  },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
+  // For whatever reason custom layout doesn't work so for now I'm hiding the sidebar for auth pages (preferably it'd have its own layout)
   const isAuthPage = pathname.startsWith("/auth");
+  const { data: session } = useSession();
+
   if (isAuthPage) return null;
 
   return (
@@ -82,16 +37,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* TODO: adjust */}
             <div className="mt-2 ml-2 flex items-center">
-              <Image src="/logo.svg" alt="yk logo" width="200" height="50" />
+              <Image src="/logo.png" alt="yk logo" width="100" height="100" />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          {/* TODO: make this svg */}
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -111,23 +64,11 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 /> IncredibleClinic
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem>
-                  {/* TODO: to be implemented */}
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton>
+              <User2 />
+              {session?.user.name ?? session?.user.email}
+              <LogOut className="ml-auto" onClick={() => signOut()} />
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
