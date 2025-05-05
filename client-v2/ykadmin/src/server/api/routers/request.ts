@@ -120,8 +120,8 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  // Update request status
-  updateStatus: protectedProcedure
+  // Update request
+  update: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -139,14 +139,17 @@ export const requestRouter = createTRPCRouter({
             updated_by_id: ctx.session.user.id,
             update_history: {
               push: {
+                timestamp: new Date(),
                 updatedBy: ctx.session.user.id,
-                updatedAt: new Date(),
-                changes: {
-                  status: input.status,
-                  merchant_note: input.merchant_note,
-                },
+                details: "tbd",
               },
             },
+            original_start_date: input.original_start_date,
+            original_end_date: input.original_end_date,
+            pause_start_date: input.pause_start_date,
+            pause_end_date: input.pause_end_date,
+            new_start_date: input.new_start_date,
+            new_end_date: input.new_end_date,
           },
         });
         return request;

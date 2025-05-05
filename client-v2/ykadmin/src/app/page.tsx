@@ -4,6 +4,7 @@ import { RequestList } from "@/components/requests/request-list";
 
 export default async function Home() {
   const requests = await getRequests();
+
   return (
     <HydrateClient>
       <main className="flex min-h-screen w-full flex-col items-center justify-center">

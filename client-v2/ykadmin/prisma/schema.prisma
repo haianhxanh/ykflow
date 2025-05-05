@@ -62,23 +62,25 @@ model VerificationToken {
 }
 
 model Request {
-  id               String   @id @default(cuid())
-  order_name       String
-  order_id         String
-  order_email      String
-  pause_start_date DateTime @db.Date
-  pause_end_date   DateTime @db.Date
-  item_title       String
-  item_id          String
-  new_start_date   DateTime @db.Date
-  new_end_date     DateTime @db.Date
-  status           String   @default("PENDING")
-  request_date     DateTime @default(now())
-  merchant_note    String?
-  user_note        String?
-  created_by_id    String?
-  updated_by_id    String?
-  update_history   Json[]   @default([]) // Array of update history entries
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  order_name          String
+  order_id            String
+  order_email         String
+  original_start_date DateTime @db.Date
+  original_end_date   DateTime @db.Date
+  pause_start_date    DateTime @db.Date
+  pause_end_date      DateTime @db.Date
+  item_title          String
+  item_id             String
+  new_start_date      DateTime @db.Date
+  new_end_date        DateTime @db.Date
+  status              String   @default("PENDING")
+  request_date        DateTime @default(now())
+  merchant_note       String?
+  user_note           String?
+  created_by_id       String?
+  updated_by_id       String?
+  update_history      Json[]   @default([]) // Array of update history entries
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

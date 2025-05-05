@@ -11,9 +11,11 @@ async function main() {
     const requests = [
       // Original requests
       {
-        order_name: "Objednávka #1234",
+        order_name: "#1234",
         order_id: "1234",
         order_email: "jan.novak@example.com",
+        original_start_date: new Date("2024-03-01"),
+        original_end_date: new Date("2024-03-30"),
         pause_start_date: new Date("2024-03-01"),
         pause_end_date: new Date("2024-03-15"),
         item_title: "Program Hubnutí",
@@ -26,9 +28,11 @@ async function main() {
         update_history: [],
       },
       {
-        order_name: "Objednávka #1235",
+        order_name: "#1235",
         order_id: "1235",
         order_email: "petra.svobodova@example.com",
+        original_start_date: new Date("2024-03-10"),
+        original_end_date: new Date("2024-04-04"),
         pause_start_date: new Date("2024-03-10"),
         pause_end_date: new Date("2024-03-20"),
         item_title: "Program Kondice",
@@ -42,9 +46,11 @@ async function main() {
       },
       // Additional requests
       {
-        order_name: "Objednávka #1239",
+        order_name: "#1239",
         order_id: "1239",
         order_email: "lucie.krejcova@example.com",
+        original_start_date: new Date("2024-03-05"),
+        original_end_date: new Date("2024-04-03"),
         pause_start_date: new Date("2024-03-05"),
         pause_end_date: new Date("2024-03-19"),
         item_title: "Program Hubnutí Plus",
@@ -57,9 +63,11 @@ async function main() {
         update_history: [],
       },
       {
-        order_name: "Objednávka #1240",
+        order_name: "#1240",
         order_id: "1240",
         order_email: "marek.dvorak@example.com",
+        original_start_date: new Date("2024-03-15"),
+        original_end_date: new Date("2024-04-13"),
         pause_start_date: new Date("2024-03-15"),
         pause_end_date: new Date("2024-03-29"),
         item_title: "Program Kondice Premium",
@@ -73,9 +81,11 @@ async function main() {
       },
       // Approved requests
       {
-        order_name: "Objednávka #1241",
+        order_name: "#1241",
         order_id: "1241",
         order_email: "tereza.novotna@example.com",
+        original_start_date: new Date("2024-02-28"),
+        original_end_date: new Date("2024-03-28"),
         pause_start_date: new Date("2024-02-28"),
         pause_end_date: new Date("2024-03-13"),
         item_title: "Program Hubnutí",
@@ -95,9 +105,11 @@ async function main() {
         ],
       },
       {
-        order_name: "Objednávka #1242",
+        order_name: "#1242",
         order_id: "1242",
         order_email: "pavel.svoboda@example.com",
+        original_start_date: new Date("2024-03-01"),
+        original_end_date: new Date("2024-03-30"),
         pause_start_date: new Date("2024-03-01"),
         pause_end_date: new Date("2024-03-15"),
         item_title: "Program Kondice",
@@ -118,9 +130,11 @@ async function main() {
       },
       // Rejected requests
       {
-        order_name: "Objednávka #1243",
+        order_name: "#1243",
         order_id: "1243",
         order_email: "martin.prochazka@example.com",
+        original_start_date: new Date("2024-03-05"),
+        original_end_date: new Date("2024-04-03"),
         pause_start_date: new Date("2024-03-05"),
         pause_end_date: new Date("2024-03-19"),
         item_title: "Program Hubnutí Plus",
@@ -140,9 +154,11 @@ async function main() {
         ],
       },
       {
-        order_name: "Objednávka #1244",
+        order_name: "#1244",
         order_id: "1244",
         order_email: "jana.kovarova@example.com",
+        original_start_date: new Date("2024-03-10"),
+        original_end_date: new Date("2024-04-08"),
         pause_start_date: new Date("2024-03-10"),
         pause_end_date: new Date("2024-03-24"),
         item_title: "Program Kondice Premium",
@@ -163,9 +179,11 @@ async function main() {
       },
       // More pending requests
       {
-        order_name: "Objednávka #1245",
+        order_name: "#1245",
         order_id: "1245",
         order_email: "tomas.malik@example.com",
+        original_start_date: new Date("2024-03-15"),
+        original_end_date: new Date("2024-04-13"),
         pause_start_date: new Date("2024-03-15"),
         pause_end_date: new Date("2024-03-29"),
         item_title: "Program Hubnutí",
@@ -178,9 +196,11 @@ async function main() {
         update_history: [],
       },
       {
-        order_name: "Objednávka #1246",
+        order_name: "#1246",
         order_id: "1246",
         order_email: "eva.benesova@example.com",
+        original_start_date: new Date("2024-03-20"),
+        original_end_date: new Date("2024-04-18"),
         pause_start_date: new Date("2024-03-20"),
         pause_end_date: new Date("2024-04-03"),
         item_title: "Program Kondice",
@@ -194,9 +214,11 @@ async function main() {
       },
       // More approved requests
       {
-        order_name: "Objednávka #1247",
+        order_name: "#1247",
         order_id: "1247",
         order_email: "petr.hajek@example.com",
+        original_start_date: new Date("2024-02-25"),
+        original_end_date: new Date("2024-03-25"),
         pause_start_date: new Date("2024-02-25"),
         pause_end_date: new Date("2024-03-10"),
         item_title: "Program Hubnutí Plus",
@@ -216,9 +238,11 @@ async function main() {
         ],
       },
       {
-        order_name: "Objednávka #1248",
+        order_name: "#1248",
         order_id: "1248",
         order_email: "lenka.machova@example.com",
+        original_start_date: new Date("2024-03-01"),
+        original_end_date: new Date("2024-03-30"),
         pause_start_date: new Date("2024-03-01"),
         pause_end_date: new Date("2024-03-15"),
         item_title: "Program Kondice Premium",
@@ -239,9 +263,11 @@ async function main() {
       },
       // More rejected requests
       {
-        order_name: "Objednávka #1249",
+        order_name: "#1249",
         order_id: "1249",
         order_email: "david.kral@example.com",
+        original_start_date: new Date("2024-03-05"),
+        original_end_date: new Date("2024-04-03"),
         pause_start_date: new Date("2024-03-05"),
         pause_end_date: new Date("2024-03-19"),
         item_title: "Program Hubnutí",
@@ -261,9 +287,11 @@ async function main() {
         ],
       },
       {
-        order_name: "Objednávka #1250",
+        order_name: "#1250",
         order_id: "1250",
         order_email: "michaela.vesela@example.com",
+        original_start_date: new Date("2024-03-10"),
+        original_end_date: new Date("2024-04-08"),
         pause_start_date: new Date("2024-03-10"),
         pause_end_date: new Date("2024-03-24"),
         item_title: "Program Kondice",

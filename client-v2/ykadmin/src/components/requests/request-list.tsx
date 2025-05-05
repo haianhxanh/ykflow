@@ -1,13 +1,14 @@
 "use client";
 import { Typography } from "@/components/ui/typography";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import { useState } from "react";
 import type { Request } from "@/app/types";
-import { REQUEST_STATUS, REQUEST_STATUS_LABELS } from "@/app/constants";
+import { REQUEST_STATUS_LABELS } from "@/app/constants";
+import { RequestDetailDialog } from "./request-detail-dialog";
+import { Pencil, ArrowUpRight } from "lucide-react";
 
 interface RequestListProps {
   requests: Request[];
@@ -18,6 +19,8 @@ const ITEMS_PER_PAGE = 10;
 export function RequestList({ requests }: RequestListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const filteredRequests = requests.filter((request) => {
     const searchLower = searchTerm.toLowerCase();
@@ -38,14 +41,22 @@ export function RequestList({ requests }: RequestListProps) {
     setCurrentPage(page);
   };
 
+  const handleRequestClick = (request: Request) => {
+    setSelectedRequest(request);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setSelectedRequest(null);
+  };
+
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
-        <Typography variant="h2">Seznam žádostí</Typography>
         <Input
           type="search"
-          placeholder="Hledat podle objednávky, emailu, produktu nebo statusu..."
-          className="max-w-sm"
+          placeholder="Hledat podle objednávky nebo e-mailu..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -53,29 +64,44 @@ export function RequestList({ requests }: RequestListProps) {
 
       <div className="rounded-md border">
         <div className="bg-muted/50 grid grid-cols-12 gap-4 border-b p-4">
-          <div className="col-span-3">
+          <div className="col-span-1">
             <Typography variant="smallText" className="font-medium">
               Objednávka
             </Typography>
           </div>
-          <div className="col-span-3">
+          <div className="col-span-2">
             <Typography variant="smallText" className="font-medium">
               Email
             </Typography>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1">
             <Typography variant="smallText" className="font-medium">
               Program
             </Typography>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1">
             <Typography variant="smallText" className="font-medium">
               Status
             </Typography>
           </div>
           <div className="col-span-2">
             <Typography variant="smallText" className="font-medium">
-              Datum
+              Původní termín
+            </Typography>
+          </div>
+          <div className="col-span-2">
+            <Typography variant="smallText" className="font-medium">
+              Pauza
+            </Typography>
+          </div>
+          <div className="col-span-2">
+            <Typography variant="smallText" className="font-medium">
+              Nový termín
+            </Typography>
+          </div>
+          <div className="col-span-1">
+            <Typography variant="smallText" className="font-medium">
+              Akce
             </Typography>
           </div>
         </div>
@@ -86,27 +112,33 @@ export function RequestList({ requests }: RequestListProps) {
               key={request.id}
               className="hover:bg-muted/50 grid grid-cols-12 gap-4 p-4"
             >
-              <div className="col-span-3">
-                <Typography>{request.order_name}</Typography>
-                <Typography
-                  variant="smallText"
-                  className="text-muted-foreground"
+              <div className="col-span-1">
+                <a
+                  href={`https://admin.shopify.com/store/yes-krabicky/orders/${request.order_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 hover:underline"
                 >
-                  {request.order_id}
-                </Typography>
+                  <Typography>
+                    {request.order_name}
+                    <ArrowUpRight className="ml-1 inline-block h-4 w-4" />
+                  </Typography>
+                </a>
               </div>
-              <div className="col-span-3">
+              <div className="col-span-2">
                 <Typography>{request.order_email}</Typography>
               </div>
-              <div className="col-span-2">
-                <Typography>{request.item_title}</Typography>
+              <div className="col-span-1">
+                <Typography itemID={request.item_id}>
+                  {request.item_title}
+                </Typography>
               </div>
-              <div className="col-span-2">
+              <div className="col-span-1">
                 <Typography
                   className={
-                    request.status === REQUEST_STATUS.APPROVED
+                    request.status === "APPROVED"
                       ? "text-green-600"
-                      : request.status === REQUEST_STATUS.REJECTED
+                      : request.status === "REJECTED"
                         ? "text-red-600"
                         : ""
                   }
@@ -115,11 +147,45 @@ export function RequestList({ requests }: RequestListProps) {
                 </Typography>
               </div>
               <div className="col-span-2">
-                <Typography>
-                  {format(new Date(request.request_date), "d.M.yyyy", {
+                <Typography variant="smallText">
+                  {format(new Date(request.original_start_date), "d.M.yyyy", {
+                    locale: cs,
+                  })}
+                  {" - "}
+                  {format(new Date(request.original_end_date), "d.M.yyyy", {
                     locale: cs,
                   })}
                 </Typography>
+              </div>
+              <div className="col-span-2">
+                <Typography variant="smallText">
+                  {format(new Date(request.pause_start_date), "d.M.yyyy", {
+                    locale: cs,
+                  })}
+                  {" - "}
+                  {format(new Date(request.pause_end_date), "d.M.yyyy", {
+                    locale: cs,
+                  })}
+                </Typography>
+              </div>
+              <div className="col-span-2">
+                <Typography variant="smallText">
+                  {format(new Date(request.new_start_date), "d.M.yyyy", {
+                    locale: cs,
+                  })}
+                  {" - "}
+                  {format(new Date(request.new_end_date), "d.M.yyyy", {
+                    locale: cs,
+                  })}
+                </Typography>
+              </div>
+              <div
+                className="col-span-1 flex items-center"
+                onClick={() => handleRequestClick(request)}
+              >
+                <Button variant="ghost" size="icon" className="block h-8 w-8">
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
@@ -162,6 +228,12 @@ export function RequestList({ requests }: RequestListProps) {
           </div>
         </div>
       </div>
+
+      <RequestDetailDialog
+        request={selectedRequest}
+        isOpen={isDialogOpen}
+        onClose={handleDialogClose}
+      />
     </div>
   );
 }
