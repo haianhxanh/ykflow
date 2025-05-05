@@ -1,0 +1,11 @@
+export const REQUEST_STATUS = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+};
+
+export const REQUEST_STATUS_LABELS = {
+  [REQUEST_STATUS.PENDING]: "Čeká",
+  [REQUEST_STATUS.APPROVED]: "Schváleno",
+  [REQUEST_STATUS.REJECTED]: "Zamítnuto",
+};

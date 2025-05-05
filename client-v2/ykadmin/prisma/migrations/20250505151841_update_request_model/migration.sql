@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Request" ADD COLUMN     "created_by_id" TEXT,
+ADD COLUMN     "update_history" JSONB[] DEFAULT ARRAY[]::JSONB[],
+ADD COLUMN     "updated_by_id" TEXT,
+ALTER COLUMN "status" SET DEFAULT 'PENDING',
+ALTER COLUMN "request_date" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "merchant_note" DROP NOT NULL,
+ALTER COLUMN "user_note" DROP NOT NULL,
+ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP;
