@@ -6,6 +6,7 @@ import ExcelJS from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
 import { convertDate, convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
+import { getShippingInstructions } from "../utils/orderExportHelper";
 
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
@@ -23,7 +24,7 @@ export const orders_export = async (req: Request, res: Response) => {
     });
 
     let yesterday = getYesterday();
-    // yesterday = "2025-03-22";
+    yesterday = "2025-05-06";
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
@@ -45,6 +46,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Shipping City", key: "shippingCity", width: 15 },
           { header: "Shipping Zip", key: "shippingZip", width: 10 },
           { header: "Full Address", key: "fullAddress", width: 20 },
+          { header: "Delivery Note", key: "shippingInstructions", width: 40 },
           { header: "Note", key: "note", width: 15 },
           { header: "Note Attributes", key: "noteAttributes", width: 15 },
           { header: "Doplňkový prodej", key: "addon", width: 15 },
@@ -203,6 +205,8 @@ export const orders_export = async (req: Request, res: Response) => {
             fullAddress = `Pickup ${order.node?.shippingLine?.title}`;
           }
 
+          let shippingInstructions = getShippingInstructions(order);
+
           const row = [
             order.node?.name,
             order.node?.displayFinancialStatus,
@@ -214,6 +218,7 @@ export const orders_export = async (req: Request, res: Response) => {
             order.node?.shippingAddress?.city || "",
             order.node?.shippingAddress?.zip?.replace(/\s/g, "") || "",
             fullAddress,
+            shippingInstructions,
             order.node?.note,
             customAttributes?.join("\n"),
             addonsField ? addonsField : "",

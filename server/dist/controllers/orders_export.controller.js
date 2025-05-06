@@ -20,6 +20,7 @@ const exceljs_1 = __importDefault(require("exceljs"));
 const constants_1 = require("../utils/constants");
 const notification_1 = require("../utils/notification");
 const helpers_1 = require("../utils/helpers");
+const orderExportHelper_1 = require("../utils/orderExportHelper");
 dotenv_1.default.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
@@ -34,7 +35,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         });
         let yesterday = getYesterday();
-        // yesterday = "2025-03-22";
+        yesterday = "2025-05-06";
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
         });
@@ -53,6 +54,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     { header: "Shipping City", key: "shippingCity", width: 15 },
                     { header: "Shipping Zip", key: "shippingZip", width: 10 },
                     { header: "Full Address", key: "fullAddress", width: 20 },
+                    { header: "Delivery Note", key: "shippingInstructions", width: 40 },
                     { header: "Note", key: "note", width: 15 },
                     { header: "Note Attributes", key: "noteAttributes", width: 15 },
                     { header: "Doplňkový prodej", key: "addon", width: 15 },
@@ -194,6 +196,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     if (!shippingAddress) {
                         fullAddress = `Pickup ${(_29 = (_28 = order.node) === null || _28 === void 0 ? void 0 : _28.shippingLine) === null || _29 === void 0 ? void 0 : _29.title}`;
                     }
+                    let shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
                     const row = [
                         (_30 = order.node) === null || _30 === void 0 ? void 0 : _30.name,
                         (_31 = order.node) === null || _31 === void 0 ? void 0 : _31.displayFinancialStatus,
@@ -205,6 +208,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         ((_45 = (_44 = order.node) === null || _44 === void 0 ? void 0 : _44.shippingAddress) === null || _45 === void 0 ? void 0 : _45.city) || "",
                         ((_48 = (_47 = (_46 = order.node) === null || _46 === void 0 ? void 0 : _46.shippingAddress) === null || _47 === void 0 ? void 0 : _47.zip) === null || _48 === void 0 ? void 0 : _48.replace(/\s/g, "")) || "",
                         fullAddress,
+                        shippingInstructions,
                         (_49 = order.node) === null || _49 === void 0 ? void 0 : _49.note,
                         customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.join("\n"),
                         addonsField ? addonsField : "",
