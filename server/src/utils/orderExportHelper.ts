@@ -6,12 +6,12 @@ export const getShippingInstructions = (order: any) => {
   const shippingInstructions = [];
 
   if (primaryInstructions) {
-    shippingInstructions.push("DOR1: " + primaryInstructions.value);
+    shippingInstructions.push("DOR1: " + primaryInstructions.value + ";");
   }
 
   if (secondaryInstructions) {
     shippingInstructions.push("DOR2: " + (secondaryPhone ? secondaryPhone.value + "," : "") + " " + secondaryInstructions.value);
   }
 
-  return shippingInstructions.join("\n");
+  return shippingInstructions.join("\r\n");
 };

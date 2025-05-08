@@ -34,8 +34,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 "X-Shopify-Access-Token": ACCESS_TOKEN,
             },
         });
-        let yesterday = getYesterday();
-        // yesterday = "2025-05-06";
+        let yesterday = req.query.date ? req.query.date : getYesterday();
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
         });
@@ -104,6 +103,9 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             let promo = [];
             if (mixedOrder) {
                 for (const [lineIndex, line] of secondaryItems.entries()) {
+                    if (line.node.variant.product.tags.includes("excluded-from-export")) {
+                        continue;
+                    }
                     if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
                         addons.push(line);
                     }
@@ -236,7 +238,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             allergens = allergens.value.split(",").map((allergen) => allergen.trim());
                             const firstRow = worksheet.getRow(1);
                             firstRow.eachCell((cell, colNumber) => {
-                                if (colNumber > 20) {
+                                if (colNumber > 21) {
                                     if (allergens.includes(cell.value)) {
                                         row.push(cell.value);
                                     }
@@ -260,7 +262,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             name: `orders-${yesterday}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+        const shouldSendEmail = req.query.sendEmail !== "false";
+        if (shouldSendEmail) {
+            const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+        }
         return res.status(200).json(attachment);
     }
     catch (error) {

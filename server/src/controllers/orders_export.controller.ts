@@ -5,7 +5,7 @@ import { ordersQuery } from "../queries/orders";
 import ExcelJS from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
-import { convertDate, convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
+import { convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
 import { getShippingInstructions } from "../utils/orderExportHelper";
 
 dotenv.config();
@@ -22,9 +22,7 @@ export const orders_export = async (req: Request, res: Response) => {
         "X-Shopify-Access-Token": ACCESS_TOKEN,
       },
     });
-
-    let yesterday = getYesterday();
-    // yesterday = "2025-05-06";
+    let yesterday = req.query.date ? req.query.date : getYesterday();
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
@@ -102,6 +100,9 @@ export const orders_export = async (req: Request, res: Response) => {
 
       if (mixedOrder) {
         for (const [lineIndex, line] of secondaryItems.entries()) {
+          if (line.node.variant.product.tags.includes("excluded-from-export")) {
+            continue;
+          }
           if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
             addons.push(line);
           } else {
@@ -250,7 +251,7 @@ export const orders_export = async (req: Request, res: Response) => {
               const firstRow = worksheet.getRow(1);
 
               firstRow.eachCell((cell, colNumber) => {
-                if (colNumber > 20) {
+                if (colNumber > 21) {
                   if (allergens.includes(cell.value)) {
                     row.push(cell.value);
                   } else {
@@ -275,14 +276,17 @@ export const orders_export = async (req: Request, res: Response) => {
       content: base64Content,
     };
 
-    const sendEmail = await sendNotification(
-      `Objednávky ${yesterday}`,
-      recipientEmails,
-      `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
-      MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
-      attachment,
-      true
-    );
+    const shouldSendEmail = req.query.sendEmail !== "false";
+    if (shouldSendEmail) {
+      const sendEmail = await sendNotification(
+        `Objednávky ${yesterday}`,
+        recipientEmails,
+        `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
+        MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
+        attachment,
+        true
+      );
+    }
     return res.status(200).json(attachment);
   } catch (error) {
     console.error(error);

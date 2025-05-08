@@ -8,11 +8,11 @@ const getShippingInstructions = (order) => {
     const secondaryPhone = (_c = order.node) === null || _c === void 0 ? void 0 : _c.customAttributes.find((attribute) => attribute.key === "secondary_phone" && attribute.value !== "");
     const shippingInstructions = [];
     if (primaryInstructions) {
-        shippingInstructions.push("DOR1: " + primaryInstructions.value);
+        shippingInstructions.push("DOR1: " + primaryInstructions.value + ";");
     }
     if (secondaryInstructions) {
         shippingInstructions.push("DOR2: " + (secondaryPhone ? secondaryPhone.value + "," : "") + " " + secondaryInstructions.value);
     }
-    return shippingInstructions.join("\n");
+    return shippingInstructions.join("\r\n");
 };
 exports.getShippingInstructions = getShippingInstructions;
