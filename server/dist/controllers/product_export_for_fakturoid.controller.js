@@ -17,12 +17,21 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const graphql_request_1 = require("graphql-request");
 const exceljs_1 = __importDefault(require("exceljs"));
 const products_1 = require("../queries/products");
+const commonObjects_1 = require("../queries/commonObjects");
 dotenv_1.default.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+// Steps
+// 1. Get all products from collection with id 390902710501
+// 2. Add tag "DPH 12%" to all products
+// 3. Run export with vat standard
+// 4. Run export with vat reduced
+// TODO:
+// add Rozvoz for all program lengths
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const products_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const vat = req.query.vat;
+        const tagProductsWithSpecialVat = req.query.tagProductsWithSpecialVat;
         const query = vat == "standard" ? "tag_not:'DPH 12%'" : "tag:'DPH 12%'";
         const vatTotal = vat == "standard" ? 121 : 112;
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
@@ -31,21 +40,24 @@ const products_export = (req, res) => __awaiter(void 0, void 0, void 0, function
                 "X-Shopify-Access-Token": ACCESS_TOKEN,
             },
         });
-        // tag with DPH 12%
-        // const allProducts = await allProductsQuery("collection_id:390902710501");
-        // for (const [index, product] of allProducts.entries()) {
-        //   const tag = "DPH 12%";
-        //   const tagAdded = await client.request(addTagsMutation, {
-        //     id: product.node.id,
-        //     tags: [tag],
-        //   });
-        //   if (tagAdded.tagsAdd.userErrors.length > 0) {
-        //     console.error(`Error adding tag to product ${product.node.id}: ${tagAdded.tagsAdd.userErrors[0].message}`);
-        //   } else {
-        //     console.log(`Tag added to product ${product.node.id}`);
-        //   }
-        //   new Promise((resolve) => setTimeout(resolve, 200));
-        // }
+        if (tagProductsWithSpecialVat) {
+            const specialVatProducts = yield (0, products_1.allProductsQuery)("collection_id:390902710501");
+            for (const [index, product] of specialVatProducts.entries()) {
+                const tag = "DPH 12%";
+                const tagAdded = yield client.request(commonObjects_1.addTagsMutation, {
+                    id: product.node.id,
+                    tags: [tag],
+                });
+                if (tagAdded.tagsAdd.userErrors.length > 0) {
+                    console.error(`Error adding tag to product ${product.node.id}: ${tagAdded.tagsAdd.userErrors[0].message}`);
+                }
+                else {
+                    console.log(`Tag added to product ${product.node.id}`);
+                }
+                new Promise((resolve) => setTimeout(resolve, 200));
+            }
+            return res.status(200).json("OK");
+        }
         const allProducts = yield (0, products_1.allProductsQuery)(query);
         // return res.status(200).json(allProducts);
         const workbook = new exceljs_1.default.Workbook();
@@ -90,8 +102,3 @@ const products_export = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.products_export = products_export;
-const getYesterday = () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    return date.toISOString().split("T")[0];
-};

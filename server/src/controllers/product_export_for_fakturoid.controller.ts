@@ -4,15 +4,24 @@ import { GraphQLClient } from "graphql-request";
 import ExcelJS from "exceljs";
 import { allProductsQuery } from "../queries/products";
 import { addTagsMutation } from "../queries/commonObjects";
-
 dotenv.config();
-const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
+
+// Steps
+// 1. Get all products from collection with id 390902710501
+// 2. Add tag "DPH 12%" to all products
+// 3. Run export with vat standard
+// 4. Run export with vat reduced
+
+// TODO:
+// add Rozvoz for all program lengths
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const products_export = async (req: Request, res: Response) => {
   try {
     const vat = req.query.vat;
+    const tagProductsWithSpecialVat = req.query.tagProductsWithSpecialVat;
     const query = vat == "standard" ? "tag_not:'DPH 12%'" : "tag:'DPH 12%'";
     const vatTotal = vat == "standard" ? 121 : 112;
     const client = new GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
@@ -22,21 +31,23 @@ export const products_export = async (req: Request, res: Response) => {
       },
     });
 
-    // tag with DPH 12%
-    // const allProducts = await allProductsQuery("collection_id:390902710501");
-    // for (const [index, product] of allProducts.entries()) {
-    //   const tag = "DPH 12%";
-    //   const tagAdded = await client.request(addTagsMutation, {
-    //     id: product.node.id,
-    //     tags: [tag],
-    //   });
-    //   if (tagAdded.tagsAdd.userErrors.length > 0) {
-    //     console.error(`Error adding tag to product ${product.node.id}: ${tagAdded.tagsAdd.userErrors[0].message}`);
-    //   } else {
-    //     console.log(`Tag added to product ${product.node.id}`);
-    //   }
-    //   new Promise((resolve) => setTimeout(resolve, 200));
-    // }
+    if (tagProductsWithSpecialVat) {
+      const specialVatProducts = await allProductsQuery("collection_id:390902710501");
+      for (const [index, product] of specialVatProducts.entries()) {
+        const tag = "DPH 12%";
+        const tagAdded = await client.request(addTagsMutation, {
+          id: product.node.id,
+          tags: [tag],
+        });
+        if (tagAdded.tagsAdd.userErrors.length > 0) {
+          console.error(`Error adding tag to product ${product.node.id}: ${tagAdded.tagsAdd.userErrors[0].message}`);
+        } else {
+          console.log(`Tag added to product ${product.node.id}`);
+        }
+        new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      return res.status(200).json("OK");
+    }
 
     const allProducts = await allProductsQuery(query);
     // return res.status(200).json(allProducts);
@@ -80,10 +91,4 @@ export const products_export = async (req: Request, res: Response) => {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
-};
-
-const getYesterday = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return date.toISOString().split("T")[0];
 };
