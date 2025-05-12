@@ -222,7 +222,7 @@ export const orders_export = async (req: Request, res: Response) => {
             shippingInstructions,
             order.node?.note,
             customAttributes?.join("\n"),
-            addonsField ? addonsField : "",
+            i == 0 ? (addonsField ? addonsField : "") : "", // if line has qty > 1, add addons to the first item
             promoField ? promoField : "",
             programStartDate,
             programEndDate,

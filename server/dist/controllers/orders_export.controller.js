@@ -213,7 +213,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         shippingInstructions,
                         (_49 = order.node) === null || _49 === void 0 ? void 0 : _49.note,
                         customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.join("\n"),
-                        addonsField ? addonsField : "",
+                        i == 0 ? (addonsField ? addonsField : "") : "", // if line has qty > 1, add addons to the first item
                         promoField ? promoField : "",
                         programStartDate,
                         programEndDate,
