@@ -53,11 +53,12 @@ export const reviews_export = async (req: Request, res: Response) => {
         { header: "User", key: "user", width: 50 },
         { header: "User Profile", key: "userProfile", width: 50 },
       ];
+
       const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
       for (const rating of sortedRecipeTypeRatings) {
-        const shopifyUser = await client.request(customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` });
-        const user = shopifyUser.customer ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
-        const userAdminUrl = shopifyUser.customer ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";
+        const shopifyUser = rating.shopify_user_id ? await client.request(customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` }) : null;
+        const user = shopifyUser?.customer ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
+        const userAdminUrl = shopifyUser?.customer ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";
         worksheet.addRow({
           recipe_name: rating.recipe_name,
           recipe_type: rating.recipe_type,
