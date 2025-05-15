@@ -42,6 +42,9 @@ export async function allProductsQuery(query: string) {
                       title
                       price
                       sku
+                      inventoryItem {
+                        id
+                      }
                     }
                   }
                 }           

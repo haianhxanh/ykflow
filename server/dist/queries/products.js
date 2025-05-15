@@ -54,6 +54,9 @@ function allProductsQuery(query) {
                       title
                       price
                       sku
+                      inventoryItem {
+                        id
+                      }
                     }
                   }
                 }           

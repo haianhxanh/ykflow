@@ -18,6 +18,7 @@ import { products_export } from "../controllers/product_export_for_fakturoid.con
 import { reviews_export } from "../controllers/reviews_export";
 import { getEasterDiscount } from "../controllers/easter_discount.controller";
 import { validateEmail } from "../controllers/validate_email.controller";
+import { bulk_activate_inventory_at_location } from "../controllers/bulk_activate_inventory_at_location.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -36,6 +37,7 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create);
 router.get("/products/export", products_export);
 router.get("/reviews/export", reviews_export);
+router.get("/products/location/activate", bulk_activate_inventory_at_location);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
 
