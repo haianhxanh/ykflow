@@ -195,25 +195,25 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     if ((_24 = (_23 = order.node) === null || _23 === void 0 ? void 0 : _23.shippingAddress) === null || _24 === void 0 ? void 0 : _24.zip) {
                         fullAddressArray.push((_27 = (_26 = (_25 = order.node) === null || _25 === void 0 ? void 0 : _25.shippingAddress) === null || _26 === void 0 ? void 0 : _26.zip) === null || _27 === void 0 ? void 0 : _27.replace(/\s/g, ""));
                     }
+                    const location = yield client.request(locations_1.locationQueryByName, {
+                        query: `name:${(_29 = (_28 = order.node) === null || _28 === void 0 ? void 0 : _28.shippingLine) === null || _29 === void 0 ? void 0 : _29.title}`,
+                    });
+                    const pickupLocation = !shippingAddress && ((_31 = (_30 = order.node) === null || _30 === void 0 ? void 0 : _30.shippingLine) === null || _31 === void 0 ? void 0 : _31.title) == "Cukrááárna"
+                        ? `${(_33 = (_32 = order.node) === null || _32 === void 0 ? void 0 : _32.shippingLine) === null || _33 === void 0 ? void 0 : _33.title}, ${(_37 = (_36 = (_35 = (_34 = location === null || location === void 0 ? void 0 : location.locations) === null || _34 === void 0 ? void 0 : _34.edges[0]) === null || _35 === void 0 ? void 0 : _35.node) === null || _36 === void 0 ? void 0 : _36.address) === null || _37 === void 0 ? void 0 : _37.address1}, ${(_41 = (_40 = (_39 = (_38 = location === null || location === void 0 ? void 0 : location.locations) === null || _38 === void 0 ? void 0 : _38.edges[0]) === null || _39 === void 0 ? void 0 : _39.node) === null || _40 === void 0 ? void 0 : _40.address) === null || _41 === void 0 ? void 0 : _41.city}, ${(_45 = (_44 = (_43 = (_42 = location === null || location === void 0 ? void 0 : location.locations) === null || _42 === void 0 ? void 0 : _42.edges[0]) === null || _43 === void 0 ? void 0 : _43.node) === null || _44 === void 0 ? void 0 : _44.address) === null || _45 === void 0 ? void 0 : _45.zip}`
+                        : `Pickup ${(_47 = (_46 = order.node) === null || _46 === void 0 ? void 0 : _46.shippingLine) === null || _47 === void 0 ? void 0 : _47.title}`;
                     let fullAddress = fullAddressArray.join(", ");
                     if (!shippingAddress) {
-                        fullAddress = `Pickup ${(_29 = (_28 = order.node) === null || _28 === void 0 ? void 0 : _28.shippingLine) === null || _29 === void 0 ? void 0 : _29.title}`;
+                        fullAddress = pickupLocation;
                     }
                     let shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
-                    const location = yield client.request(locations_1.locationQueryByName, {
-                        query: `name:${(_31 = (_30 = order.node) === null || _30 === void 0 ? void 0 : _30.shippingLine) === null || _31 === void 0 ? void 0 : _31.title}`,
-                    });
-                    const pickupLocation = !shippingAddress && ((_33 = (_32 = order.node) === null || _32 === void 0 ? void 0 : _32.shippingLine) === null || _33 === void 0 ? void 0 : _33.title) == "Cukrááárna"
-                        ? `${(_35 = (_34 = order.node) === null || _34 === void 0 ? void 0 : _34.shippingLine) === null || _35 === void 0 ? void 0 : _35.title}, ${(_39 = (_38 = (_37 = (_36 = location === null || location === void 0 ? void 0 : location.locations) === null || _36 === void 0 ? void 0 : _36.edges[0]) === null || _37 === void 0 ? void 0 : _37.node) === null || _38 === void 0 ? void 0 : _38.address) === null || _39 === void 0 ? void 0 : _39.address1}, ${(_43 = (_42 = (_41 = (_40 = location === null || location === void 0 ? void 0 : location.locations) === null || _40 === void 0 ? void 0 : _40.edges[0]) === null || _41 === void 0 ? void 0 : _41.node) === null || _42 === void 0 ? void 0 : _42.address) === null || _43 === void 0 ? void 0 : _43.city}, ${(_47 = (_46 = (_45 = (_44 = location === null || location === void 0 ? void 0 : location.locations) === null || _44 === void 0 ? void 0 : _44.edges[0]) === null || _45 === void 0 ? void 0 : _45.node) === null || _46 === void 0 ? void 0 : _46.address) === null || _47 === void 0 ? void 0 : _47.zip}`
-                        : `Pickup ${(_49 = (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.shippingLine) === null || _49 === void 0 ? void 0 : _49.title}`;
                     const row = [
-                        (_50 = order.node) === null || _50 === void 0 ? void 0 : _50.name,
-                        (_51 = order.node) === null || _51 === void 0 ? void 0 : _51.displayFinancialStatus,
-                        (_53 = (_52 = order.node) === null || _52 === void 0 ? void 0 : _52.billingAddress) === null || _53 === void 0 ? void 0 : _53.name,
-                        ((_55 = (_54 = order.node) === null || _54 === void 0 ? void 0 : _54.shippingAddress) === null || _55 === void 0 ? void 0 : _55.name) || "",
-                        ((_57 = (_56 = order.node) === null || _56 === void 0 ? void 0 : _56.shippingAddress) === null || _57 === void 0 ? void 0 : _57.company) || "",
-                        ((_59 = (_58 = order.node) === null || _58 === void 0 ? void 0 : _58.shippingAddress) === null || _59 === void 0 ? void 0 : _59.phone) || ((_61 = (_60 = order.node) === null || _60 === void 0 ? void 0 : _60.billingAddress) === null || _61 === void 0 ? void 0 : _61.phone) || "",
-                        shippingAddress || pickupLocation || "",
+                        (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.name,
+                        (_49 = order.node) === null || _49 === void 0 ? void 0 : _49.displayFinancialStatus,
+                        (_51 = (_50 = order.node) === null || _50 === void 0 ? void 0 : _50.billingAddress) === null || _51 === void 0 ? void 0 : _51.name,
+                        ((_53 = (_52 = order.node) === null || _52 === void 0 ? void 0 : _52.shippingAddress) === null || _53 === void 0 ? void 0 : _53.name) || "",
+                        ((_55 = (_54 = order.node) === null || _54 === void 0 ? void 0 : _54.shippingAddress) === null || _55 === void 0 ? void 0 : _55.company) || "",
+                        ((_57 = (_56 = order.node) === null || _56 === void 0 ? void 0 : _56.shippingAddress) === null || _57 === void 0 ? void 0 : _57.phone) || ((_59 = (_58 = order.node) === null || _58 === void 0 ? void 0 : _58.billingAddress) === null || _59 === void 0 ? void 0 : _59.phone) || "",
+                        shippingAddress || `Pickup ${(_61 = (_60 = order.node) === null || _60 === void 0 ? void 0 : _60.shippingLine) === null || _61 === void 0 ? void 0 : _61.title}` || "",
                         ((_63 = (_62 = order.node) === null || _62 === void 0 ? void 0 : _62.shippingAddress) === null || _63 === void 0 ? void 0 : _63.city) || "",
                         ((_66 = (_65 = (_64 = order.node) === null || _64 === void 0 ? void 0 : _64.shippingAddress) === null || _65 === void 0 ? void 0 : _65.zip) === null || _66 === void 0 ? void 0 : _66.replace(/\s/g, "")) || "",
                         fullAddress,
