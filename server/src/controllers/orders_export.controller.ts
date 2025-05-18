@@ -7,6 +7,7 @@ import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
 import { convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
 import { getShippingInstructions } from "../utils/orderExportHelper";
+import { locationQueryByName } from "../queries/locations";
 
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
@@ -208,6 +209,15 @@ export const orders_export = async (req: Request, res: Response) => {
 
           let shippingInstructions = getShippingInstructions(order);
 
+          const location = await client.request(locationQueryByName, {
+            query: `name:${order.node?.shippingLine?.title}`,
+          });
+
+          const pickupLocation =
+            !shippingAddress && order.node?.shippingLine?.title == "Cukrááárna"
+              ? `${order.node?.shippingLine?.title}, ${location?.locations?.edges[0]?.node?.address?.address1}, ${location?.locations?.edges[0]?.node?.address?.city}, ${location?.locations?.edges[0]?.node?.address?.zip}`
+              : `Pickup ${order.node?.shippingLine?.title}`;
+
           const row = [
             order.node?.name,
             order.node?.displayFinancialStatus,
@@ -215,7 +225,7 @@ export const orders_export = async (req: Request, res: Response) => {
             order.node?.shippingAddress?.name || "",
             order.node?.shippingAddress?.company || "",
             order.node?.shippingAddress?.phone || order.node?.billingAddress?.phone || "",
-            shippingAddress || `Pickup ${order.node?.shippingLine?.title}` || "",
+            shippingAddress || pickupLocation || "",
             order.node?.shippingAddress?.city || "",
             order.node?.shippingAddress?.zip?.replace(/\s/g, "") || "",
             fullAddress,
