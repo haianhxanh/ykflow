@@ -27,7 +27,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESS
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73, _74;
     try {
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
@@ -198,39 +198,39 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     const location = yield client.request(locations_1.locationQueryByName, {
                         query: `name:${(_29 = (_28 = order.node) === null || _28 === void 0 ? void 0 : _28.shippingLine) === null || _29 === void 0 ? void 0 : _29.title}`,
                     });
-                    const pickupLocation = !shippingAddress && ((_31 = (_30 = order.node) === null || _30 === void 0 ? void 0 : _30.shippingLine) === null || _31 === void 0 ? void 0 : _31.title) == "Cukrááárna"
-                        ? `${(_33 = (_32 = order.node) === null || _32 === void 0 ? void 0 : _32.shippingLine) === null || _33 === void 0 ? void 0 : _33.title}, ${(_37 = (_36 = (_35 = (_34 = location === null || location === void 0 ? void 0 : location.locations) === null || _34 === void 0 ? void 0 : _34.edges[0]) === null || _35 === void 0 ? void 0 : _35.node) === null || _36 === void 0 ? void 0 : _36.address) === null || _37 === void 0 ? void 0 : _37.address1}, ${(_41 = (_40 = (_39 = (_38 = location === null || location === void 0 ? void 0 : location.locations) === null || _38 === void 0 ? void 0 : _38.edges[0]) === null || _39 === void 0 ? void 0 : _39.node) === null || _40 === void 0 ? void 0 : _40.address) === null || _41 === void 0 ? void 0 : _41.city}, ${(_45 = (_44 = (_43 = (_42 = location === null || location === void 0 ? void 0 : location.locations) === null || _42 === void 0 ? void 0 : _42.edges[0]) === null || _43 === void 0 ? void 0 : _43.node) === null || _44 === void 0 ? void 0 : _44.address) === null || _45 === void 0 ? void 0 : _45.zip}`
-                        : `Pickup ${(_47 = (_46 = order.node) === null || _46 === void 0 ? void 0 : _46.shippingLine) === null || _47 === void 0 ? void 0 : _47.title}`;
+                    const pickupLocationAddress = ((_32 = (_31 = (_30 = location === null || location === void 0 ? void 0 : location.locations) === null || _30 === void 0 ? void 0 : _30.edges[0]) === null || _31 === void 0 ? void 0 : _31.node) === null || _32 === void 0 ? void 0 : _32.address)
+                        ? `${(_34 = (_33 = order.node) === null || _33 === void 0 ? void 0 : _33.shippingLine) === null || _34 === void 0 ? void 0 : _34.title}, ${(_38 = (_37 = (_36 = (_35 = location === null || location === void 0 ? void 0 : location.locations) === null || _35 === void 0 ? void 0 : _35.edges[0]) === null || _36 === void 0 ? void 0 : _36.node) === null || _37 === void 0 ? void 0 : _37.address) === null || _38 === void 0 ? void 0 : _38.address1}, ${(_42 = (_41 = (_40 = (_39 = location === null || location === void 0 ? void 0 : location.locations) === null || _39 === void 0 ? void 0 : _39.edges[0]) === null || _40 === void 0 ? void 0 : _40.node) === null || _41 === void 0 ? void 0 : _41.address) === null || _42 === void 0 ? void 0 : _42.city}, ${(_46 = (_45 = (_44 = (_43 = location === null || location === void 0 ? void 0 : location.locations) === null || _43 === void 0 ? void 0 : _43.edges[0]) === null || _44 === void 0 ? void 0 : _44.node) === null || _45 === void 0 ? void 0 : _45.address) === null || _46 === void 0 ? void 0 : _46.zip}`
+                        : "";
                     let fullAddress = fullAddressArray.join(", ");
                     if (!shippingAddress) {
-                        fullAddress = pickupLocation;
+                        fullAddress = pickupLocationAddress;
                     }
                     let shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
                     const row = [
-                        (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.name,
-                        (_49 = order.node) === null || _49 === void 0 ? void 0 : _49.displayFinancialStatus,
-                        (_51 = (_50 = order.node) === null || _50 === void 0 ? void 0 : _50.billingAddress) === null || _51 === void 0 ? void 0 : _51.name,
-                        ((_53 = (_52 = order.node) === null || _52 === void 0 ? void 0 : _52.shippingAddress) === null || _53 === void 0 ? void 0 : _53.name) || "",
-                        ((_55 = (_54 = order.node) === null || _54 === void 0 ? void 0 : _54.shippingAddress) === null || _55 === void 0 ? void 0 : _55.company) || "",
-                        ((_57 = (_56 = order.node) === null || _56 === void 0 ? void 0 : _56.shippingAddress) === null || _57 === void 0 ? void 0 : _57.phone) || ((_59 = (_58 = order.node) === null || _58 === void 0 ? void 0 : _58.billingAddress) === null || _59 === void 0 ? void 0 : _59.phone) || "",
-                        shippingAddress || `Pickup ${(_61 = (_60 = order.node) === null || _60 === void 0 ? void 0 : _60.shippingLine) === null || _61 === void 0 ? void 0 : _61.title}` || "",
-                        ((_63 = (_62 = order.node) === null || _62 === void 0 ? void 0 : _62.shippingAddress) === null || _63 === void 0 ? void 0 : _63.city) || "",
-                        ((_66 = (_65 = (_64 = order.node) === null || _64 === void 0 ? void 0 : _64.shippingAddress) === null || _65 === void 0 ? void 0 : _65.zip) === null || _66 === void 0 ? void 0 : _66.replace(/\s/g, "")) || "",
+                        (_47 = order.node) === null || _47 === void 0 ? void 0 : _47.name,
+                        (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.displayFinancialStatus,
+                        (_50 = (_49 = order.node) === null || _49 === void 0 ? void 0 : _49.billingAddress) === null || _50 === void 0 ? void 0 : _50.name,
+                        ((_52 = (_51 = order.node) === null || _51 === void 0 ? void 0 : _51.shippingAddress) === null || _52 === void 0 ? void 0 : _52.name) || "",
+                        ((_54 = (_53 = order.node) === null || _53 === void 0 ? void 0 : _53.shippingAddress) === null || _54 === void 0 ? void 0 : _54.company) || "",
+                        ((_56 = (_55 = order.node) === null || _55 === void 0 ? void 0 : _55.shippingAddress) === null || _56 === void 0 ? void 0 : _56.phone) || ((_58 = (_57 = order.node) === null || _57 === void 0 ? void 0 : _57.billingAddress) === null || _58 === void 0 ? void 0 : _58.phone) || "",
+                        shippingAddress || `${((_60 = (_59 = order.node) === null || _59 === void 0 ? void 0 : _59.shippingLine) === null || _60 === void 0 ? void 0 : _60.title) ? `Pickup ${(_62 = (_61 = order.node) === null || _61 === void 0 ? void 0 : _61.shippingLine) === null || _62 === void 0 ? void 0 : _62.title}` : ""}` || "",
+                        ((_64 = (_63 = order.node) === null || _63 === void 0 ? void 0 : _63.shippingAddress) === null || _64 === void 0 ? void 0 : _64.city) || "",
+                        ((_67 = (_66 = (_65 = order.node) === null || _65 === void 0 ? void 0 : _65.shippingAddress) === null || _66 === void 0 ? void 0 : _66.zip) === null || _67 === void 0 ? void 0 : _67.replace(/\s/g, "")) || "",
                         fullAddress,
                         shippingInstructions,
-                        (_67 = order.node) === null || _67 === void 0 ? void 0 : _67.note,
+                        (_68 = order.node) === null || _68 === void 0 ? void 0 : _68.note,
                         customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.join("\n"),
                         i == 0 ? (addonsField ? addonsField : "") : "", // if line has qty > 1, add addons to the first item
                         promoField ? promoField : "",
                         programStartDate,
                         programEndDate,
-                        (_68 = line.node) === null || _68 === void 0 ? void 0 : _68.title,
+                        (_69 = line.node) === null || _69 === void 0 ? void 0 : _69.title,
                         programLength ? programLength : "",
-                        lineIsProgram ? (_71 = (_70 = (_69 = line.node) === null || _69 === void 0 ? void 0 : _69.title) === null || _70 === void 0 ? void 0 : _70.split(" | ")[1]) === null || _71 === void 0 ? void 0 : _71.replace(" kcal", "") : "",
+                        lineIsProgram ? (_72 = (_71 = (_70 = line.node) === null || _70 === void 0 ? void 0 : _70.title) === null || _71 === void 0 ? void 0 : _71.split(" | ")[1]) === null || _72 === void 0 ? void 0 : _72.replace(" kcal", "") : "",
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
-                        let allergens = (_73 = (_72 = line.node) === null || _72 === void 0 ? void 0 : _72.customAttributes) === null || _73 === void 0 ? void 0 : _73.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        let allergens = (_74 = (_73 = line.node) === null || _73 === void 0 ? void 0 : _73.customAttributes) === null || _74 === void 0 ? void 0 : _74.find((attr) => attr.key == "Alergeny" && attr.value != "");
                         if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
                             for (const attribute of order.node.customAttributes) {
                                 if (attribute.key.includes("Alergeny")) {
