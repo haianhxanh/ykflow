@@ -207,7 +207,7 @@ export const orders_export = async (req: Request, res: Response) => {
           });
 
           const pickupLocationAddress = location?.locations?.edges[0]?.node?.address
-            ? `${order.node?.shippingLine?.title}, ${location?.locations?.edges[0]?.node?.address?.address1}, ${location?.locations?.edges[0]?.node?.address?.city}, ${location?.locations?.edges[0]?.node?.address?.zip}`
+            ? `Pickup ${order.node?.shippingLine?.title}, ${location?.locations?.edges[0]?.node?.address?.address1}, ${location?.locations?.edges[0]?.node?.address?.city}, ${location?.locations?.edges[0]?.node?.address?.zip}`
             : "";
 
           let fullAddress = fullAddressArray.join(", ");
