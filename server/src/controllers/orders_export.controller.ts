@@ -32,7 +32,12 @@ export const orders_export = async (req: Request, res: Response) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
 
+    const disallowedFinancialStatuses = ["VOIDED", "EXPIRED", "REFUNDED", "PARTIALLY_REFUNDED"];
+
     for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
+      if (disallowedFinancialStatuses.includes(order.node?.displayFinancialStatus)) {
+        continue;
+      }
       if (orderIndex === 0) {
         let header = [
           { header: "Order name", key: "orderName", width: 10 },
