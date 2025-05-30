@@ -5,7 +5,7 @@ import { ordersQuery } from "../queries/orders";
 import ExcelJS from "exceljs";
 import { ALLERGENS } from "../utils/constants";
 import { sendNotification } from "../utils/notification";
-import { convertDateToISOString, convertDateToLocalString, getFutureBusinessDate } from "../utils/helpers";
+import { convertDateToISOString, convertDateToLocalString, getFutureBusinessDate, setProgramLengthWord } from "../utils/helpers";
 import { getShippingInstructions } from "../utils/orderExportHelper";
 import { locationQueryByName } from "../queries/locations";
 
@@ -26,16 +26,21 @@ export const orders_export = async (req: Request, res: Response) => {
     let yesterday = req.query.date ? req.query.date : getYesterday();
 
     const latestOrders = await client.request(ordersQuery, {
-      query: `(created_at:'${yesterday}' AND financial_status:'paid') OR (tag:'bank payment' AND created_at:'${yesterday}')`,
+      query: `(created_at:'${yesterday}')`,
     });
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
 
-    const disallowedFinancialStatuses = ["VOIDED", "EXPIRED", "REFUNDED", "PARTIALLY_REFUNDED"];
+    const disallowedFinancialStatuses = ["VOIDED", "EXPIRED", "REFUNDED"];
+    const allowedPaymentMethods = ["Platba na fakturu", "shopify_payments"];
 
     for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
       if (disallowedFinancialStatuses.includes(order.node?.displayFinancialStatus)) {
+        continue;
+      }
+      const paymentMethodIsAllowed = allowedPaymentMethods.some((method) => order.node?.paymentGatewayNames.includes(method));
+      if (!paymentMethodIsAllowed) {
         continue;
       }
       if (orderIndex === 0) {
@@ -129,7 +134,8 @@ export const orders_export = async (req: Request, res: Response) => {
         let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
 
         if (lineIsProgram) {
-          programLength = line.node?.variant?.title?.split("(")[1]?.split(")")[0];
+          programLength = line.node?.variant?.sku?.split("D")[0];
+          programLength = setProgramLengthWord(parseInt(programLength));
         }
 
         for (let i = 0; i < lineQuantity; i++) {

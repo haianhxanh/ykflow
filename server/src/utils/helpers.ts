@@ -51,3 +51,9 @@ export const getYesterday = () => {
   date.setDate(date.getDate() - 1);
   return date.toISOString().split("T")[0];
 };
+
+export const setProgramLengthWord = (programLength: number) => {
+  if (programLength === 1) return `${programLength} den`;
+  if (programLength === 2 || programLength === 3 || programLength === 4) return `${programLength} dny`;
+  return `${programLength} dní`;
+};

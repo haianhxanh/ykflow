@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
+exports.setProgramLengthWord = exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
 const getBusinessDatesCount = (start, end) => {
     // start date is included in the count
     // end date is not included in the count
@@ -58,3 +58,11 @@ const getYesterday = () => {
     return date.toISOString().split("T")[0];
 };
 exports.getYesterday = getYesterday;
+const setProgramLengthWord = (programLength) => {
+    if (programLength === 1)
+        return `${programLength} den`;
+    if (programLength === 2 || programLength === 3 || programLength === 4)
+        return `${programLength} dny`;
+    return `${programLength} dní`;
+};
+exports.setProgramLengthWord = setProgramLengthWord;
