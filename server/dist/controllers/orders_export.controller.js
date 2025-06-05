@@ -42,13 +42,9 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const workbook = new exceljs_1.default.Workbook();
         const worksheet = workbook.addWorksheet(`Objednávky ${yesterday}`);
         const disallowedFinancialStatuses = ["VOIDED", "EXPIRED", "REFUNDED"];
-        const allowedPaymentMethods = ["Platba na fakturu", "shopify_payments"];
+        // const allowedPaymentMethods = ["Platba na fakturu", "shopify_payments", "paypal"];
         for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
             if (disallowedFinancialStatuses.includes((_a = order.node) === null || _a === void 0 ? void 0 : _a.displayFinancialStatus)) {
-                continue;
-            }
-            const paymentMethodIsAllowed = allowedPaymentMethods.some((method) => { var _a; return (_a = order.node) === null || _a === void 0 ? void 0 : _a.paymentGatewayNames.includes(method); });
-            if (!paymentMethodIsAllowed) {
                 continue;
             }
             if (orderIndex === 0) {
@@ -280,8 +276,9 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             content: base64Content,
         };
         const shouldSendEmail = req.query.sendEmail !== "false";
+        const isRevisedDoc = req.query.revised === "true";
         if (shouldSendEmail) {
-            const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+            const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday} ${isRevisedDoc ? "(opravný export)" : ""}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
         }
         return res.status(200).json(attachment);
     }
