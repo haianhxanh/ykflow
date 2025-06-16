@@ -222,7 +222,8 @@ export const orders_export = async (req: Request, res: Response) => {
             fullAddress = pickupLocationAddress;
           }
 
-          let shippingInstructions = getShippingInstructions(order);
+          const shippingInstructions = getShippingInstructions(order);
+          const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title;
 
           const row = [
             order.node?.name,
@@ -242,7 +243,7 @@ export const orders_export = async (req: Request, res: Response) => {
             promoField ? promoField : "",
             programStartDate,
             programEndDate,
-            line.node?.title,
+            lineItemName,
             programLength ? programLength : "",
             lineIsProgram ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "") : "",
             severeAllergic ? "Ano" : "",

@@ -27,7 +27,7 @@ const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESS
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73, _74;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73;
     try {
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
             // @ts-ignore
@@ -211,7 +211,8 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     if (!shippingAddress) {
                         fullAddress = pickupLocationAddress;
                     }
-                    let shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
+                    const shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
+                    const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title;
                     const row = [
                         (_47 = order.node) === null || _47 === void 0 ? void 0 : _47.name,
                         (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.displayFinancialStatus,
@@ -230,13 +231,13 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         promoField ? promoField : "",
                         programStartDate,
                         programEndDate,
-                        (_69 = line.node) === null || _69 === void 0 ? void 0 : _69.title,
+                        lineItemName,
                         programLength ? programLength : "",
-                        lineIsProgram ? (_72 = (_71 = (_70 = line.node) === null || _70 === void 0 ? void 0 : _70.title) === null || _71 === void 0 ? void 0 : _71.split(" | ")[1]) === null || _72 === void 0 ? void 0 : _72.replace(" kcal", "") : "",
+                        lineIsProgram ? (_71 = (_70 = (_69 = line.node) === null || _69 === void 0 ? void 0 : _69.title) === null || _70 === void 0 ? void 0 : _70.split(" | ")[1]) === null || _71 === void 0 ? void 0 : _71.replace(" kcal", "") : "",
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
-                        let allergens = (_74 = (_73 = line.node) === null || _73 === void 0 ? void 0 : _73.customAttributes) === null || _74 === void 0 ? void 0 : _74.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        let allergens = (_73 = (_72 = line.node) === null || _72 === void 0 ? void 0 : _72.customAttributes) === null || _73 === void 0 ? void 0 : _73.find((attr) => attr.key == "Alergeny" && attr.value != "");
                         if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
                             for (const attribute of order.node.customAttributes) {
                                 if (attribute.key.includes("Alergeny")) {
