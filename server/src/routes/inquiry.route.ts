@@ -20,6 +20,7 @@ import { getEasterDiscount } from "../controllers/easter_discount.controller";
 import { validateEmail } from "../controllers/validate_email.controller";
 import { bulk_activate_inventory_at_location } from "../controllers/bulk_activate_inventory_at_location.controller";
 import { getSpreadsheetData } from "../controllers/azure.controller";
+import { custom_email } from "../controllers/custom_email.controller";
 
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
@@ -40,6 +41,7 @@ router.get("/products/export", products_export);
 router.get("/reviews/export", reviews_export);
 router.get("/products/location/activate", bulk_activate_inventory_at_location);
 router.get("/azure/get-spreadsheet-data", getSpreadsheetData);
+router.post("/custom/email", custom_email);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
 
