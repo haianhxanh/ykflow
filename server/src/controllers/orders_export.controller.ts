@@ -23,7 +23,7 @@ export const orders_export = async (req: Request, res: Response) => {
         "X-Shopify-Access-Token": ACCESS_TOKEN,
       },
     });
-    let yesterday = req.query.date ? req.query.date : getYesterday();
+    const yesterday = req.query.date ? req.query.date : getYesterday();
 
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}')`,
@@ -69,7 +69,7 @@ export const orders_export = async (req: Request, res: Response) => {
         worksheet.columns = header;
       }
 
-      let oneTypeOrder =
+      const oneTypeOrder =
         order.node.lineItems.edges.every((line: any) => {
           return line.node.variant.product.tags.includes("Programy");
         }) ||
@@ -78,12 +78,12 @@ export const orders_export = async (req: Request, res: Response) => {
         }) ||
         false;
 
-      let mixedOrder = oneTypeOrder ? false : true;
+      const mixedOrder = oneTypeOrder ? false : true;
 
-      let programsItems = order.node.lineItems.edges.filter((line: any) => {
+      const programsItems = order.node.lineItems.edges.filter((line: any) => {
         return line.node.variant.product.tags.includes("Programy");
       });
-      let nonProgramItems = order.node.lineItems.edges.filter((line: any) => {
+      const nonProgramItems = order.node.lineItems.edges.filter((line: any) => {
         return !line.node.variant.product.tags.includes("Programy");
       });
 
@@ -120,14 +120,14 @@ export const orders_export = async (req: Request, res: Response) => {
 
       for (const [lineIndex, line] of mainItems.entries()) {
         let programStartDate, programEndDate, programLength;
-        let lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
+        const lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
         const lineSku = line?.node?.variant?.sku;
-        let lineQuantity = line.node.quantity;
+        const lineQuantity = line.node.quantity;
         let promoField, addonsField;
-        let severeAllergicAttr =
+        const severeAllergicAttr =
           line?.node?.customAttributes?.find((attr: any) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))?.value ||
           order.node?.customAttributes?.find((attr: any) => attr.key.includes(`Alergik_${lineSku}`))?.value;
-        let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
+        const severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
 
         if (lineIsProgram) {
           programLength = line.node?.variant?.sku?.split("D")[0];
@@ -169,7 +169,7 @@ export const orders_export = async (req: Request, res: Response) => {
               }
             }
           }
-          let customAttributes = order.node?.customAttributes?.map((attr: any) => {
+          const customAttributes = order.node?.customAttributes?.map((attr: any) => {
             return `${attr.key}: ${attr.value}`;
           });
 
@@ -287,7 +287,7 @@ export const orders_export = async (req: Request, res: Response) => {
     const buffer = await workbook.xlsx.writeBuffer();
     const base64Content = Buffer.from(buffer).toString("base64");
 
-    let attachment = {
+    const attachment = {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       name: `orders-${yesterday}.xlsx`,
       content: base64Content,

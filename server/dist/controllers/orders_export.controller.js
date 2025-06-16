@@ -35,7 +35,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 "X-Shopify-Access-Token": ACCESS_TOKEN,
             },
         });
-        let yesterday = req.query.date ? req.query.date : getYesterday();
+        const yesterday = req.query.date ? req.query.date : getYesterday();
         const latestOrders = yield client.request(orders_1.ordersQuery, {
             query: `(created_at:'${yesterday}')`,
         });
@@ -76,18 +76,18 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 });
                 worksheet.columns = header;
             }
-            let oneTypeOrder = order.node.lineItems.edges.every((line) => {
+            const oneTypeOrder = order.node.lineItems.edges.every((line) => {
                 return line.node.variant.product.tags.includes("Programy");
             }) ||
                 order.node.lineItems.edges.every((line) => {
                     return !line.node.variant.product.tags.includes("Programy");
                 }) ||
                 false;
-            let mixedOrder = oneTypeOrder ? false : true;
-            let programsItems = order.node.lineItems.edges.filter((line) => {
+            const mixedOrder = oneTypeOrder ? false : true;
+            const programsItems = order.node.lineItems.edges.filter((line) => {
                 return line.node.variant.product.tags.includes("Programy");
             });
-            let nonProgramItems = order.node.lineItems.edges.filter((line) => {
+            const nonProgramItems = order.node.lineItems.edges.filter((line) => {
                 return !line.node.variant.product.tags.includes("Programy");
             });
             let mainItems = [];
@@ -122,13 +122,13 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             }
             for (const [lineIndex, line] of mainItems.entries()) {
                 let programStartDate, programEndDate, programLength;
-                let lineIsProgram = (_e = (_d = (_c = (_b = line === null || line === void 0 ? void 0 : line.node) === null || _b === void 0 ? void 0 : _b.variant) === null || _c === void 0 ? void 0 : _c.product) === null || _d === void 0 ? void 0 : _d.tags) === null || _e === void 0 ? void 0 : _e.includes("Programy");
+                const lineIsProgram = (_e = (_d = (_c = (_b = line === null || line === void 0 ? void 0 : line.node) === null || _b === void 0 ? void 0 : _b.variant) === null || _c === void 0 ? void 0 : _c.product) === null || _d === void 0 ? void 0 : _d.tags) === null || _e === void 0 ? void 0 : _e.includes("Programy");
                 const lineSku = (_g = (_f = line === null || line === void 0 ? void 0 : line.node) === null || _f === void 0 ? void 0 : _f.variant) === null || _g === void 0 ? void 0 : _g.sku;
-                let lineQuantity = line.node.quantity;
+                const lineQuantity = line.node.quantity;
                 let promoField, addonsField;
-                let severeAllergicAttr = ((_k = (_j = (_h = line === null || line === void 0 ? void 0 : line.node) === null || _h === void 0 ? void 0 : _h.customAttributes) === null || _j === void 0 ? void 0 : _j.find((attr) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))) === null || _k === void 0 ? void 0 : _k.value) ||
+                const severeAllergicAttr = ((_k = (_j = (_h = line === null || line === void 0 ? void 0 : line.node) === null || _h === void 0 ? void 0 : _h.customAttributes) === null || _j === void 0 ? void 0 : _j.find((attr) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))) === null || _k === void 0 ? void 0 : _k.value) ||
                     ((_o = (_m = (_l = order.node) === null || _l === void 0 ? void 0 : _l.customAttributes) === null || _m === void 0 ? void 0 : _m.find((attr) => attr.key.includes(`Alergik_${lineSku}`))) === null || _o === void 0 ? void 0 : _o.value);
-                let severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
+                const severeAllergic = severeAllergicAttr == "Yes" || severeAllergicAttr == "Ano" ? true : false;
                 if (lineIsProgram) {
                     programLength = (_r = (_q = (_p = line.node) === null || _p === void 0 ? void 0 : _p.variant) === null || _q === void 0 ? void 0 : _q.sku) === null || _r === void 0 ? void 0 : _r.split("D")[0];
                     programLength = (0, helpers_1.setProgramLengthWord)(parseInt(programLength));
@@ -164,7 +164,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             }
                         }
                     }
-                    let customAttributes = (_w = (_v = order.node) === null || _v === void 0 ? void 0 : _v.customAttributes) === null || _w === void 0 ? void 0 : _w.map((attr) => {
+                    const customAttributes = (_w = (_v = order.node) === null || _v === void 0 ? void 0 : _v.customAttributes) === null || _w === void 0 ? void 0 : _w.map((attr) => {
                         return `${attr.key}: ${attr.value}`;
                     });
                     if (lineIndex == 0 && mixedOrder) {
@@ -271,7 +271,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         yield workbook.xlsx.writeFile(`orders-${yesterday}.xlsx`);
         const buffer = yield workbook.xlsx.writeBuffer();
         const base64Content = Buffer.from(buffer).toString("base64");
-        let attachment = {
+        const attachment = {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             name: `orders-${yesterday}.xlsx`,
             content: base64Content,
