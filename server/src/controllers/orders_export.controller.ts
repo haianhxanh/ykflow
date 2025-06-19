@@ -174,16 +174,17 @@ export const orders_export = async (req: Request, res: Response) => {
           });
 
           if (lineIndex == 0 && mixedOrder) {
+            const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
             if (promo.length > 0)
               promoField = promo
                 .map((item: any) => {
-                  return `${item.node.quantity} x ${item.node.title}`;
+                  return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
                 })
                 .join("\n");
             if (addons.length > 0)
               addonsField = addons
                 .map((item: any) => {
-                  return `${item.node.quantity} x ${item.node.title} (${item.node.variant.title}) ; `;
+                  return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
                 })
                 .join("\n");
           }
@@ -223,7 +224,8 @@ export const orders_export = async (req: Request, res: Response) => {
           }
 
           const shippingInstructions = getShippingInstructions(order);
-          const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title;
+          const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
+          const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title + variantTitle;
 
           const row = [
             order.node?.name,

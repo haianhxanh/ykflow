@@ -168,16 +168,17 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         return `${attr.key}: ${attr.value}`;
                     });
                     if (lineIndex == 0 && mixedOrder) {
+                        const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
                         if (promo.length > 0)
                             promoField = promo
                                 .map((item) => {
-                                return `${item.node.quantity} x ${item.node.title}`;
+                                return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
                             })
                                 .join("\n");
                         if (addons.length > 0)
                             addonsField = addons
                                 .map((item) => {
-                                return `${item.node.quantity} x ${item.node.title} (${item.node.variant.title}) ; `;
+                                return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
                             })
                                 .join("\n");
                     }
@@ -212,7 +213,8 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         fullAddress = pickupLocationAddress;
                     }
                     const shippingInstructions = (0, orderExportHelper_1.getShippingInstructions)(order);
-                    const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title;
+                    const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
+                    const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title + variantTitle;
                     const row = [
                         (_47 = order.node) === null || _47 === void 0 ? void 0 : _47.name,
                         (_48 = order.node) === null || _48 === void 0 ? void 0 : _48.displayFinancialStatus,
