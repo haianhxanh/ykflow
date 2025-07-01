@@ -24,6 +24,7 @@ const reviews_export_1 = require("../controllers/reviews_export");
 const bulk_activate_inventory_at_location_controller_1 = require("../controllers/bulk_activate_inventory_at_location.controller");
 const azure_controller_1 = require("../controllers/azure.controller");
 const custom_email_controller_1 = require("../controllers/custom_email.controller");
+const notification_order_preparation_time_controller_1 = require("../controllers/notification_order_preparation_time.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -46,4 +47,5 @@ router.get("/azure/get-spreadsheet-data", azure_controller_1.getSpreadsheetData)
 router.post("/custom/email", custom_email_controller_1.custom_email);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
+router.post("/notification/order-preparation-time", notification_order_preparation_time_controller_1.notification_order_preparation_time);
 exports.default = router;

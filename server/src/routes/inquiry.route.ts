@@ -21,7 +21,7 @@ import { validateEmail } from "../controllers/validate_email.controller";
 import { bulk_activate_inventory_at_location } from "../controllers/bulk_activate_inventory_at_location.controller";
 import { getSpreadsheetData } from "../controllers/azure.controller";
 import { custom_email } from "../controllers/custom_email.controller";
-
+import { notification_order_preparation_time } from "../controllers/notification_order_preparation_time.controller";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -44,5 +44,6 @@ router.get("/azure/get-spreadsheet-data", getSpreadsheetData);
 router.post("/custom/email", custom_email);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
+router.post("/notification/order-preparation-time", notification_order_preparation_time);
 
 export default router;

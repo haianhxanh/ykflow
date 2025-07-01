@@ -84,6 +84,7 @@ export const reviews_export = async (req: Request, res: Response) => {
       `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
       recipientEmails,
       `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`,
+      null,
       MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
       attachment,
       true

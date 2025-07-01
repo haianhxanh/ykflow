@@ -281,7 +281,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const shouldSendEmail = req.query.sendEmail !== "false";
         const isRevisedDoc = req.query.revised === "true";
         if (shouldSendEmail) {
-            const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday} ${isRevisedDoc ? "(opravný export)" : ""}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+            const sendEmail = yield (0, notification_1.sendNotification)(`Objednávky ${yesterday} ${isRevisedDoc ? "(opravný export)" : ""}`, recipientEmails, `Objednávky ze dne ${yesterday} jsou připraveny k exportu`, null, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
         }
         return res.status(200).json(attachment);
     }

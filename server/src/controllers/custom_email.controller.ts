@@ -32,7 +32,7 @@ export const custom_email = async (req: Request, res: Response) => {
     const showSignature = false;
     const bbcEmail = "";
     // return res.status(200).json({ recipient, invoiceNo, subject, content, attachment, showSignature, bbcEmail });
-    const sendEmail = await sendNotification(subject, recipient as string, content, bbcEmail, attachment, showSignature);
+    const sendEmail = await sendNotification(subject, recipient as string, content, null, bbcEmail, attachment, showSignature);
     return res.status(200).send(sendEmail);
   } catch (error) {
     console.log(error);

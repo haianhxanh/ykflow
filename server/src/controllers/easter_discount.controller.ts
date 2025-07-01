@@ -75,7 +75,15 @@ export const getEasterDiscount = async (req: Request, res: Response) => {
   // Send email to customer
   const emailContent = easterHtmlContent(code, finalDiscount.discount_percentage);
 
-  const sendEmail = await sendNotification("Velikonoční nadílka právě dorazila!", email, emailContent, MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string, null, false);
+  const sendEmail = await sendNotification(
+    "Velikonoční nadílka právě dorazila!",
+    email,
+    emailContent,
+    null,
+    MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
+    null,
+    false
+  );
 
   return res.status(200).json({
     shopifyDiscount: shopifyDiscount,

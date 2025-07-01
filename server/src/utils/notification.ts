@@ -18,6 +18,7 @@ export const sendNotification = async (
   subject: string,
   customerEmail: string,
   content: string,
+  fromEmail: string | null,
   bbcEmail: string | null,
   attachment: any,
   showSignature: boolean
@@ -29,7 +30,7 @@ export const sendNotification = async (
   let message: Message = {
     text: content,
     html: showSignature ? content + "<br><br>---<br>Yes Krabičky" : content,
-    from_email: MANDRILL_MESSAGE_FROM_EMAIL as string,
+    from_email: fromEmail || (MANDRILL_MESSAGE_FROM_EMAIL as string),
     from_name: MANDRILL_MESSAGE_FROM_NAME as string,
     to: recipients,
     subject: subject,

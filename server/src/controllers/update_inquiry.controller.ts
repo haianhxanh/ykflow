@@ -127,6 +127,7 @@ export const update_inquiry = async (req: Request, res: Response) => {
         notificationSubject,
         inquiry.order_contact,
         message,
+        null,
         MANDRILL_MESSAGE_FROM_EMAIL as string,
         undefined,
         true

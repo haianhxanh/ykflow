@@ -302,6 +302,7 @@ export const orders_export = async (req: Request, res: Response) => {
         `Objednávky ${yesterday} ${isRevisedDoc ? "(opravný export)" : ""}`,
         recipientEmails,
         `Objednávky ze dne ${yesterday} jsou připraveny k exportu`,
+        null,
         MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
         attachment,
         true

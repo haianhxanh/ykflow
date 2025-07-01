@@ -44,7 +44,7 @@ const custom_email = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const showSignature = false;
         const bbcEmail = "";
         // return res.status(200).json({ recipient, invoiceNo, subject, content, attachment, showSignature, bbcEmail });
-        const sendEmail = yield (0, notification_1.sendNotification)(subject, recipient, content, bbcEmail, attachment, showSignature);
+        const sendEmail = yield (0, notification_1.sendNotification)(subject, recipient, content, null, bbcEmail, attachment, showSignature);
         return res.status(200).send(sendEmail);
     }
     catch (error) {

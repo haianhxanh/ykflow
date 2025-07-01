@@ -101,7 +101,7 @@ const update_inquiry = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (req.body.status == constants_1.STATUS.APPROVED && inquiry) {
             let message = `Váš požadavek o pozastavení krabičky ${inquiry.item_title} (obj. č. ${inquiry.order_name}) od ${pauseStartDate} do ${pauseEndDate} (včetně) byl schválen. Krabičky budeme nově rozvážet od  ${newStartDate} do ${newEndDate} (včetně).`;
             let notificationSubject = `Vaše žádost o pozastavení Yes Krabičky (obj. ${inquiry.order_name}) byla schválena`;
-            const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, inquiry.order_contact, message, MANDRILL_MESSAGE_FROM_EMAIL, undefined, true);
+            const sendNotificationToMerchant = yield (0, notification_1.sendNotification)(notificationSubject, inquiry.order_contact, message, null, MANDRILL_MESSAGE_FROM_EMAIL, undefined, true);
         }
         return res.status(200).json({
             message: `Status of the inquiry has been updated`,
