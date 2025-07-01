@@ -168,17 +168,16 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         return `${attr.key}: ${attr.value}`;
                     });
                     if (lineIndex == 0 && mixedOrder) {
-                        const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
                         if (promo.length > 0)
                             promoField = promo
                                 .map((item) => {
-                                return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
+                                return `${item.node.quantity} x ${item.node.title}`;
                             })
                                 .join("\n");
                         if (addons.length > 0)
                             addonsField = addons
                                 .map((item) => {
-                                return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
+                                return `${item.node.quantity} x ${item.node.title}`;
                             })
                                 .join("\n");
                     }
