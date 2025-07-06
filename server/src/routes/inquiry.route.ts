@@ -22,6 +22,7 @@ import { bulk_activate_inventory_at_location } from "../controllers/bulk_activat
 import { getSpreadsheetData } from "../controllers/azure.controller";
 import { custom_email } from "../controllers/custom_email.controller";
 import { notification_order_preparation_time } from "../controllers/notification_order_preparation_time.controller";
+import { reviews_export_rewards } from "../controllers/reviews_export_rewards";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -39,6 +40,7 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer);
 router.post("/recipe/rating/create", recipe_rating_create);
 router.get("/products/export", products_export);
 router.get("/reviews/export", reviews_export);
+router.get("/reviews/rewards/export", reviews_export_rewards);
 router.get("/products/location/activate", bulk_activate_inventory_at_location);
 router.get("/azure/get-spreadsheet-data", getSpreadsheetData);
 router.post("/custom/email", custom_email);

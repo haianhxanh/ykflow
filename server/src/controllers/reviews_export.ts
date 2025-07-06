@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { Request, Response } from "express";
 import dotenv from "dotenv";
-import { getYesterday } from "../utils/helpers";
+import { czechDate, getLastSundayAndPrecedingMonday, getWeekNumber, getYesterday } from "../utils/helpers";
 import Rating from "../model/rating.model";
 import { Op } from "sequelize";
 import { meals } from "./meal_rating.controller";
@@ -19,13 +19,14 @@ const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 export const reviews_export = async (req: Request, res: Response) => {
   try {
     const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-    const ratings = await Rating.findAll({
+    const ratings = (await Rating.findAll({
       where: {
+        // @ts-ignore
         createdAt: {
           [Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
         },
       },
-    });
+    })) as Rating[];
 
     if (!ratings) {
       return res.status(404).json({ error: "No ratings found" });
@@ -33,16 +34,18 @@ export const reviews_export = async (req: Request, res: Response) => {
 
     // group by recipe_type
     const recipeTypeRatings = ratings.reduce((acc, rating) => {
+      // @ts-ignore
       if (!acc[rating.recipe_type]) {
         acc[rating.recipe_type] = [];
       }
       acc[rating.recipe_type].push(rating);
       return acc;
-    }, {});
+    }, {} as Record<string, Rating[]>);
 
     const workbook = new ExcelJS.Workbook();
 
     for (let i = 0; i < 5; i++) {
+      // @ts-ignore
       const mealType = meals && meals[i]?.name;
       const worksheet = workbook.addWorksheet(`${mealType}`);
       worksheet.columns = [
@@ -96,37 +99,6 @@ export const reviews_export = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-function getLastSundayAndPrecedingMonday() {
-  let today = new Date();
-  let dayOfWeek = today.getDay();
-  let lastSunday = new Date(today);
-  lastSunday.setDate(today.getDate() - dayOfWeek - (dayOfWeek === 0 ? 7 : 0));
-  let precedingMonday = new Date(lastSunday);
-  precedingMonday.setDate(lastSunday.getDate() - 6);
-
-  return {
-    precedingMonday: precedingMonday.toISOString().split("T")[0],
-    lastSunday: lastSunday.toISOString().split("T")[0],
-  };
-}
-
-function getWeekNumber(mondayDate: string) {
-  let date = new Date(mondayDate);
-  date.setHours(0, 0, 0, 0);
-  let firstThursday = new Date(date.getFullYear(), 0, 4);
-  firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7));
-  let diff = Math.round((date - firstThursday) / (7 * 24 * 60 * 60 * 1000));
-  return diff + 1;
-}
-
-function czechDate(date: string) {
-  const dateObj = new Date(date);
-  const day = dateObj.getDate();
-  const month = dateObj.getMonth() + 1;
-  const year = dateObj.getFullYear();
-  return `${day}.${month}.${year}`;
-}
 
 const client = new GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
   // @ts-ignore

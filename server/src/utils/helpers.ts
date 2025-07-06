@@ -57,3 +57,45 @@ export const setProgramLengthWord = (programLength: number) => {
   if (programLength === 2 || programLength === 3 || programLength === 4) return `${programLength} dny`;
   return `${programLength} dní`;
 };
+
+export const getLastSundayAndPrecedingMonday = () => {
+  let today = new Date();
+  let dayOfWeek = today.getDay();
+  let lastSunday = new Date(today);
+  lastSunday.setDate(today.getDate() - dayOfWeek - (dayOfWeek === 0 ? 7 : 0));
+  let precedingMonday = new Date(lastSunday);
+  precedingMonday.setDate(lastSunday.getDate() - 6);
+
+  return {
+    precedingMonday: precedingMonday.toISOString().split("T")[0],
+    lastSunday: lastSunday.toISOString().split("T")[0],
+  };
+};
+
+export const getWeekNumber = (mondayDate: string) => {
+  let date = new Date(mondayDate);
+  date.setHours(0, 0, 0, 0);
+  let firstThursday = new Date(date.getFullYear(), 0, 4);
+  firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7));
+  let diff = Math.round((date.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000));
+  return diff + 1;
+};
+
+export const czechDate = (date: string) => {
+  const dateObj = new Date(date);
+  const day = dateObj.getDate();
+  const month = dateObj.getMonth() + 1;
+  const year = dateObj.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
+export const getWorkDatesBetweenDates = (startDate: string, endDate: string) => {
+  let start = new Date(startDate);
+  let end = new Date(endDate);
+  let workDates = [];
+  while (start < end) {
+    if (start.getDay() !== 0 && start.getDay() !== 6) workDates.push(start.toISOString().split("T")[0]);
+    start.setDate(start.getDate() + 1);
+  }
+  return workDates;
+};

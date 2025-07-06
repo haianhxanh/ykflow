@@ -34,6 +34,10 @@ Rating.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
+    meal_date: {
+        type: sequelize_1.DataTypes.DATE,
+        allowNull: true,
+    },
 }, {
     sequelize: db_connect_1.db,
     tableName: "Rating",

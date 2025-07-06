@@ -18,7 +18,7 @@ const recipe_model_1 = __importDefault(require("../model/recipe.model"));
 const rating_model_1 = __importDefault(require("../model/rating.model"));
 dotenv_1.default.config();
 const recipe_rating_create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     let recipe = {};
     yield recipe_model_1.default.findOrCreate({
         where: { name: req.body.recipe_name, type: req.body.recipe_type },
@@ -32,6 +32,7 @@ const recipe_rating_create = (req, res) => __awaiter(void 0, void 0, void 0, fun
         recipe_type: recipe.type,
         shopify_user_id: ((_a = req.body) === null || _a === void 0 ? void 0 : _a.shopify_user_id) || null,
         comment: ((_b = req.body) === null || _b === void 0 ? void 0 : _b.comment) || null,
+        meal_date: ((_c = req.body) === null || _c === void 0 ? void 0 : _c.meal_date) || null,
     }, { returning: true });
     console.log("New rating with comment", rating === null || rating === void 0 ? void 0 : rating.dataValues);
     return res.status(200).json(rating);

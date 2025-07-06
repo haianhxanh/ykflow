@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.reviews_export = void 0;
 const exceljs_1 = __importDefault(require("exceljs"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const helpers_1 = require("../utils/helpers");
 const rating_model_1 = __importDefault(require("../model/rating.model"));
 const sequelize_1 = require("sequelize");
 const meal_rating_controller_1 = require("./meal_rating.controller");
@@ -29,19 +30,21 @@ const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-        const ratings = yield rating_model_1.default.findAll({
+        const { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
+        const ratings = (yield rating_model_1.default.findAll({
             where: {
+                // @ts-ignore
                 createdAt: {
                     [sequelize_1.Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
                 },
             },
-        });
+        }));
         if (!ratings) {
             return res.status(404).json({ error: "No ratings found" });
         }
         // group by recipe_type
         const recipeTypeRatings = ratings.reduce((acc, rating) => {
+            // @ts-ignore
             if (!acc[rating.recipe_type]) {
                 acc[rating.recipe_type] = [];
             }
@@ -50,6 +53,7 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }, {});
         const workbook = new exceljs_1.default.Workbook();
         for (let i = 0; i < 5; i++) {
+            // @ts-ignore
             const mealType = meal_rating_controller_1.meals && ((_a = meal_rating_controller_1.meals[i]) === null || _a === void 0 ? void 0 : _a.name);
             const worksheet = workbook.addWorksheet(`${mealType}`);
             worksheet.columns = [
@@ -75,7 +79,7 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 });
             }
         }
-        const weekNumber = getWeekNumber(precedingMonday);
+        const weekNumber = (0, helpers_1.getWeekNumber)(precedingMonday);
         yield workbook.xlsx.writeFile(`hodnoceni-receptu-tyden-${weekNumber}.xlsx`);
         const buffer = yield workbook.xlsx.writeBuffer();
         const base64Content = Buffer.from(buffer).toString("base64");
@@ -84,7 +88,7 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
             name: `hodnoceni-receptu-tyden-${weekNumber}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`, null, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+        const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)} jsou připravena k exportu`, null, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
         return res.status(200).json(attachment);
     }
     catch (error) {
@@ -93,33 +97,6 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.reviews_export = reviews_export;
-function getLastSundayAndPrecedingMonday() {
-    let today = new Date();
-    let dayOfWeek = today.getDay();
-    let lastSunday = new Date(today);
-    lastSunday.setDate(today.getDate() - dayOfWeek - (dayOfWeek === 0 ? 7 : 0));
-    let precedingMonday = new Date(lastSunday);
-    precedingMonday.setDate(lastSunday.getDate() - 6);
-    return {
-        precedingMonday: precedingMonday.toISOString().split("T")[0],
-        lastSunday: lastSunday.toISOString().split("T")[0],
-    };
-}
-function getWeekNumber(mondayDate) {
-    let date = new Date(mondayDate);
-    date.setHours(0, 0, 0, 0);
-    let firstThursday = new Date(date.getFullYear(), 0, 4);
-    firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7));
-    let diff = Math.round((date - firstThursday) / (7 * 24 * 60 * 60 * 1000));
-    return diff + 1;
-}
-function czechDate(date) {
-    const dateObj = new Date(date);
-    const day = dateObj.getDate();
-    const month = dateObj.getMonth() + 1;
-    const year = dateObj.getFullYear();
-    return `${day}.${month}.${year}`;
-}
 const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
     // @ts-ignore
     headers: {

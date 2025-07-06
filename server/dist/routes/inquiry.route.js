@@ -25,6 +25,7 @@ const bulk_activate_inventory_at_location_controller_1 = require("../controllers
 const azure_controller_1 = require("../controllers/azure.controller");
 const custom_email_controller_1 = require("../controllers/custom_email.controller");
 const notification_order_preparation_time_controller_1 = require("../controllers/notification_order_preparation_time.controller");
+const reviews_export_rewards_1 = require("../controllers/reviews_export_rewards");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -42,6 +43,7 @@ router.post("/campaigns/fuck-cancer", campaign_fuck_cancer_controller_1.campaign
 router.post("/recipe/rating/create", recipe_rating_create_controller_1.recipe_rating_create);
 router.get("/products/export", product_export_for_fakturoid_controller_1.products_export);
 router.get("/reviews/export", reviews_export_1.reviews_export);
+router.get("/reviews/rewards/export", reviews_export_rewards_1.reviews_export_rewards);
 router.get("/products/location/activate", bulk_activate_inventory_at_location_controller_1.bulk_activate_inventory_at_location);
 router.get("/azure/get-spreadsheet-data", azure_controller_1.getSpreadsheetData);
 router.post("/custom/email", custom_email_controller_1.custom_email);

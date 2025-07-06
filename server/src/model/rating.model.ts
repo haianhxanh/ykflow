@@ -9,6 +9,7 @@ class Rating extends Model<InferAttributes<Rating>, InferCreationAttributes<Rati
   declare recipe_type: string;
   declare shopify_user_id: number;
   declare comment: string;
+  declare meal_date: Date;
 }
 
 Rating.init(
@@ -40,6 +41,10 @@ Rating.init(
     },
     comment: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    meal_date: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setProgramLengthWord = exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
+exports.getWorkDatesBetweenDates = exports.czechDate = exports.getWeekNumber = exports.getLastSundayAndPrecedingMonday = exports.setProgramLengthWord = exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
 const getBusinessDatesCount = (start, end) => {
     // start date is included in the count
     // end date is not included in the count
@@ -66,3 +66,45 @@ const setProgramLengthWord = (programLength) => {
     return `${programLength} dní`;
 };
 exports.setProgramLengthWord = setProgramLengthWord;
+const getLastSundayAndPrecedingMonday = () => {
+    let today = new Date();
+    let dayOfWeek = today.getDay();
+    let lastSunday = new Date(today);
+    lastSunday.setDate(today.getDate() - dayOfWeek - (dayOfWeek === 0 ? 7 : 0));
+    let precedingMonday = new Date(lastSunday);
+    precedingMonday.setDate(lastSunday.getDate() - 6);
+    return {
+        precedingMonday: precedingMonday.toISOString().split("T")[0],
+        lastSunday: lastSunday.toISOString().split("T")[0],
+    };
+};
+exports.getLastSundayAndPrecedingMonday = getLastSundayAndPrecedingMonday;
+const getWeekNumber = (mondayDate) => {
+    let date = new Date(mondayDate);
+    date.setHours(0, 0, 0, 0);
+    let firstThursday = new Date(date.getFullYear(), 0, 4);
+    firstThursday.setDate(firstThursday.getDate() - ((firstThursday.getDay() + 6) % 7));
+    let diff = Math.round((date.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    return diff + 1;
+};
+exports.getWeekNumber = getWeekNumber;
+const czechDate = (date) => {
+    const dateObj = new Date(date);
+    const day = dateObj.getDate();
+    const month = dateObj.getMonth() + 1;
+    const year = dateObj.getFullYear();
+    return `${day}.${month}.${year}`;
+};
+exports.czechDate = czechDate;
+const getWorkDatesBetweenDates = (startDate, endDate) => {
+    let start = new Date(startDate);
+    let end = new Date(endDate);
+    let workDates = [];
+    while (start < end) {
+        if (start.getDay() !== 0 && start.getDay() !== 6)
+            workDates.push(start.toISOString().split("T")[0]);
+        start.setDate(start.getDate() + 1);
+    }
+    return workDates;
+};
+exports.getWorkDatesBetweenDates = getWorkDatesBetweenDates;
