@@ -23,6 +23,7 @@ export const orders_export = async (req: Request, res: Response) => {
         "X-Shopify-Access-Token": ACCESS_TOKEN,
       },
     });
+
     const yesterday = req.query.date ? req.query.date : getYesterday();
 
     const latestOrders = await client.request(ordersQuery, {
@@ -59,6 +60,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Start Date", key: "startDate", width: 15 },
           { header: "End Date", key: "endDate", width: 15 },
           { header: "Line Item Name", key: "lineItemName", width: 30 },
+          { header: "Single Portions", key: "singlePortions", width: 15 },
           { header: "Program Length", key: "programLength", width: 10 },
           { header: "Kcal", key: "kcal", width: 10 },
           { header: "Prudký alergik", key: "severeAllergic", width: 10 },
@@ -71,20 +73,20 @@ export const orders_export = async (req: Request, res: Response) => {
 
       const oneTypeOrder =
         order.node.lineItems.edges.every((line: any) => {
-          return line.node.variant.product.tags.includes("Programy");
+          return line.node.variant.product?.tags?.includes("Programy");
         }) ||
         order.node.lineItems.edges.every((line: any) => {
-          return !line.node.variant.product.tags.includes("Programy");
+          return !line.node.variant.product?.tags?.includes("Programy");
         }) ||
         false;
 
       const mixedOrder = oneTypeOrder ? false : true;
 
       const programsItems = order.node.lineItems.edges.filter((line: any) => {
-        return line.node.variant.product.tags.includes("Programy");
+        return line.node.variant.product?.tags?.includes("Programy");
       });
       const nonProgramItems = order.node.lineItems.edges.filter((line: any) => {
-        return !line.node.variant.product.tags.includes("Programy");
+        return !line.node.variant.product?.tags?.includes("Programy") && !line.node.variant.product?.tags?.includes("Monoporce");
       });
 
       let mainItems = [];
@@ -104,10 +106,13 @@ export const orders_export = async (req: Request, res: Response) => {
 
       let addons = [];
       let promo = [];
+      let singlePortions = order.node.lineItems.edges.filter((line: any) => {
+        return line.node.variant.product?.tags?.includes("Monoporce");
+      });
 
       if (mixedOrder) {
         for (const [lineIndex, line] of secondaryItems.entries()) {
-          if (line.node.variant.product.tags.includes("excluded-from-export")) {
+          if (line.node.variant.product?.tags?.includes("excluded-from-export") || line.node.variant.product?.tags?.includes("Monoporce")) {
             continue;
           }
           if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
@@ -228,6 +233,22 @@ export const orders_export = async (req: Request, res: Response) => {
           const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
           const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title + variantTitle;
 
+          // check if line has associated single portions
+          const lineProgramId = lineIsProgram ? line.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value : null;
+          const programSinglePortions = singlePortions.filter(
+            (item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId
+          );
+
+          const singlePortionsCol =
+            programSinglePortions.length > 0
+              ? programSinglePortions
+                  .map((item: any) => {
+                    const variantTitle = item.node.variant.title == "Default Title" ? "" : ` (${item.node.variant.title})`;
+                    return `${item.node.quantity} x ${item.node.title} ${variantTitle}`;
+                  })
+                  .join("\n")
+              : "";
+
           const row = [
             order.node?.name,
             order.node?.displayFinancialStatus,
@@ -247,6 +268,7 @@ export const orders_export = async (req: Request, res: Response) => {
             programStartDate,
             programEndDate,
             lineItemName,
+            singlePortionsCol,
             programLength ? programLength : "",
             lineIsProgram ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "") : "",
             severeAllergic ? "Ano" : "",
