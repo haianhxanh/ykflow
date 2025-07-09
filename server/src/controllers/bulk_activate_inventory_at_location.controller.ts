@@ -26,7 +26,8 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
       },
     });
 
-    const query = "tag:Programy";
+    const locationId = req.query.locationId as string;
+    const query = "tag:Programy OR tag:Monoporce";
     const products = await allProductsQuery(query);
     for (const product of products) {
       for (const variant of product.node.variants.edges) {
@@ -34,7 +35,7 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
           inventoryItemId: variant.node.inventoryItem.id,
           inventoryItemUpdates: [
             {
-              locationId: "gid://shopify/Location/105545269595",
+              locationId: `gid://shopify/Location/${locationId}`,
               activate: true,
             },
           ],
