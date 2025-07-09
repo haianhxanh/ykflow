@@ -274,11 +274,13 @@ export const orders_export = async (req: Request, res: Response) => {
             severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {
-            let allergens = line.node?.customAttributes?.find((attr: any) => attr.key == "Alergeny" && attr.value != "");
+            let allergens = line.node?.customAttributes?.find(
+              (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != ""
+            );
 
             if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
               for (const attribute of order.node.customAttributes) {
-                if (attribute.key.includes("Alergeny")) {
+                if (attribute.key.includes("Vyřazeno") || attribute.key.includes("Excluded") || attribute.key.includes("Alergeny")) {
                   const sku = line.node.variant.sku;
                   if (attribute.key.includes(sku)) {
                     allergens = attribute;

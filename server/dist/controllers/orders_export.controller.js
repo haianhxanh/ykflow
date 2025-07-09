@@ -261,10 +261,10 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
-                        let allergens = (_78 = (_77 = line.node) === null || _77 === void 0 ? void 0 : _77.customAttributes) === null || _78 === void 0 ? void 0 : _78.find((attr) => attr.key == "Alergeny" && attr.value != "");
+                        let allergens = (_78 = (_77 = line.node) === null || _77 === void 0 ? void 0 : _77.customAttributes) === null || _78 === void 0 ? void 0 : _78.find((attr) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != "");
                         if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
                             for (const attribute of order.node.customAttributes) {
-                                if (attribute.key.includes("Alergeny")) {
+                                if (attribute.key.includes("Vyřazeno") || attribute.key.includes("Excluded") || attribute.key.includes("Alergeny")) {
                                     const sku = line.node.variant.sku;
                                     if (attribute.key.includes(sku)) {
                                         allergens = attribute;
