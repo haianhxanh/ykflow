@@ -14,7 +14,7 @@ export const notification_order_preparation_time = async (req: Request, res: Res
       <div style="font-family: Arial, sans-serif; color: #000000; background-color: #f7f7f7; padding: 20px; max-width: 600px; margin: auto;">
       <div style="background-color: #ffffff; padding: 20px; border-radius: 4px; line-height: 1.5;">
         <p style="margin-top: 0;">Dobrý den,</p>
-        <p>Zvolili jste vyzvednutí Vašich krabiček na odběrném místě 
+        <p>zvolili jste vyzvednutí Vašich krabiček na odběrném místě 
           <a href="https://maps.app.goo.gl/k2Z3ZyqAfHngWBN79" style="color: #333333; text-decoration: underline;">Cukrááárna - Mratín</a>. 
           <br>
           Vaše krabičky budou vždy připraveny k vyzvednutí v <strong>16:00</strong>.
