@@ -10,21 +10,32 @@ import { GraphQLClient } from "graphql-request";
 import { customerQuery } from "../queries/customers";
 
 dotenv.config();
-const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS, REVIEWS_EXPORT_CC_ADDRESS } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
-const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
+const recipientEmails = [
+  {
+    email: REVIEWS_EXPORT_RECIPIENTS as string,
+    type: "to",
+  },
+  {
+    email: REVIEWS_EXPORT_CC_ADDRESS as string,
+    type: "cc",
+  },
+];
+
+const bccEmail = MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string;
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const reviews_export_rewards = async (req: Request, res: Response) => {
   try {
     let { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-    precedingMonday = "2025-06-30";
-    lastSunday = "2025-07-06";
+    // precedingMonday = "2025-06-30";
+    // lastSunday = "2025-07-06";
     const ratings = (await Rating.findAll({
       where: {
         // @ts-ignore
-        createdAt: {
+        meal_date: {
           [Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
         },
       },
@@ -103,25 +114,23 @@ export const reviews_export_rewards = async (req: Request, res: Response) => {
     const buffer = await workbook.xlsx.writeBuffer();
     const base64Content = Buffer.from(buffer).toString("base64");
 
-    return res.status(200).json("OK");
+    let attachment = {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      name: `odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`,
+      content: base64Content,
+    };
 
-    // let attachment = {
-    //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    //   name: `odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`,
-    //   content: base64Content,
-    // };
+    const sendEmail = await sendNotification(
+      `Odměny za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
+      recipientEmails,
+      `Je připraven export odměn za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
+      null,
+      bccEmail,
+      attachment,
+      true
+    );
 
-    // const sendEmail = await sendNotification(
-    //   `Odměny za hodnoceni receptu od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-    //   recipientEmails,
-    //   `Je připraven export odměn za hodnoceni receptu od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-    //   null,
-    //   MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
-    //   attachment,
-    //   true
-    // );
-
-    // return res.status(200).json(attachment);
+    return res.status(200).json(sendEmail);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

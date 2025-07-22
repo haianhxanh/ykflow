@@ -16,7 +16,7 @@ const mailchimp = require("@mailchimp/mailchimp_transactional")(MANDRILL_API_KEY
 
 export const sendNotification = async (
   subject: string,
-  customerEmail: string,
+  customerEmail: string | { email: string; type: string }[],
   content: string,
   fromEmail: string | null,
   bbcEmail: string | null,
@@ -24,9 +24,14 @@ export const sendNotification = async (
   showSignature: boolean
 ) => {
   // axios post request to send email
-  let recipients = customerEmail.split(",").map((email) => {
-    return { email: email.trim(), type: "to" };
-  });
+  let recipients = [];
+  if (typeof customerEmail === "string") {
+    recipients = customerEmail.split(",").map((email) => {
+      return { email: email.trim(), type: "to" };
+    });
+  } else {
+    recipients = customerEmail;
+  }
   let message: Message = {
     text: content,
     html: showSignature ? content + "<br><br>---<br>Yes Krabičky" : content,

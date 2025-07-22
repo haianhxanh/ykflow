@@ -18,23 +18,34 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const helpers_1 = require("../utils/helpers");
 const rating_model_1 = __importDefault(require("../model/rating.model"));
 const sequelize_1 = require("sequelize");
+const notification_1 = require("../utils/notification");
 const graphql_request_1 = require("graphql-request");
 const customers_1 = require("../queries/customers");
 dotenv_1.default.config();
-const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
+const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS, REVIEWS_EXPORT_CC_ADDRESS } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
-const recipientEmails = ORDER_EXPORT_RECIPIENTS;
+const recipientEmails = [
+    {
+        email: REVIEWS_EXPORT_RECIPIENTS,
+        type: "to",
+    },
+    {
+        email: REVIEWS_EXPORT_CC_ADDRESS,
+        type: "cc",
+    },
+];
+const bccEmail = MANDRILL_MESSAGE_BCC_ADDRESS_DEV;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const reviews_export_rewards = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         let { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
-        precedingMonday = "2025-06-30";
-        lastSunday = "2025-07-06";
+        // precedingMonday = "2025-06-30";
+        // lastSunday = "2025-07-06";
         const ratings = (yield rating_model_1.default.findAll({
             where: {
                 // @ts-ignore
-                createdAt: {
+                meal_date: {
                     [sequelize_1.Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
                 },
             },
@@ -98,22 +109,13 @@ const reviews_export_rewards = (req, res) => __awaiter(void 0, void 0, void 0, f
         yield workbook.xlsx.writeFile(`odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`);
         const buffer = yield workbook.xlsx.writeBuffer();
         const base64Content = Buffer.from(buffer).toString("base64");
-        return res.status(200).json("OK");
-        // let attachment = {
-        //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        //   name: `odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`,
-        //   content: base64Content,
-        // };
-        // const sendEmail = await sendNotification(
-        //   `Odměny za hodnoceni receptu od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-        //   recipientEmails,
-        //   `Je připraven export odměn za hodnoceni receptu od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-        //   null,
-        //   MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
-        //   attachment,
-        //   true
-        // );
-        // return res.status(200).json(attachment);
+        let attachment = {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            name: `odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`,
+            content: base64Content,
+        };
+        const sendEmail = yield (0, notification_1.sendNotification)(`Odměny za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Je připraven export odměn za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, null, bccEmail, attachment, true);
+        return res.status(200).json(sendEmail);
     }
     catch (error) {
         console.error(error);
