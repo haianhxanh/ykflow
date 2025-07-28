@@ -96,12 +96,14 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 return !((_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Programy")) && !((_d = (_c = line.node.variant.product) === null || _c === void 0 ? void 0 : _c.tags) === null || _d === void 0 ? void 0 : _d.includes("Monoporce"));
             });
             let mainItems = [];
+            let nonProgramOrder = false;
             if (oneTypeOrder) {
                 if (programsItems.length > 0) {
                     mainItems = programsItems;
                 }
                 else if (nonProgramItems.length > 0) {
                     mainItems = nonProgramItems;
+                    nonProgramOrder = true;
                 }
             }
             else {
@@ -133,7 +135,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 let programStartDate, programEndDate, programLength;
                 const lineIsProgram = (_j = (_h = (_g = (_f = line === null || line === void 0 ? void 0 : line.node) === null || _f === void 0 ? void 0 : _f.variant) === null || _g === void 0 ? void 0 : _g.product) === null || _h === void 0 ? void 0 : _h.tags) === null || _j === void 0 ? void 0 : _j.includes("Programy");
                 const lineSku = (_l = (_k = line === null || line === void 0 ? void 0 : line.node) === null || _k === void 0 ? void 0 : _k.variant) === null || _l === void 0 ? void 0 : _l.sku;
-                const lineQuantity = line.node.quantity;
+                const lineQuantity = nonProgramOrder ? 1 : line.node.quantity;
                 let promoField, addonsField;
                 const severeAllergicAttr = ((_p = (_o = (_m = line === null || line === void 0 ? void 0 : line.node) === null || _m === void 0 ? void 0 : _m.customAttributes) === null || _o === void 0 ? void 0 : _o.find((attr) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))) === null || _p === void 0 ? void 0 : _p.value) ||
                     ((_s = (_r = (_q = order.node) === null || _q === void 0 ? void 0 : _q.customAttributes) === null || _r === void 0 ? void 0 : _r.find((attr) => attr.key.includes(`Alergik_${lineSku}`))) === null || _s === void 0 ? void 0 : _s.value);

@@ -90,11 +90,13 @@ export const orders_export = async (req: Request, res: Response) => {
       });
 
       let mainItems = [];
+      let nonProgramOrder = false;
       if (oneTypeOrder) {
         if (programsItems.length > 0) {
           mainItems = programsItems;
         } else if (nonProgramItems.length > 0) {
           mainItems = nonProgramItems;
+          nonProgramOrder = true;
         }
       } else {
         mainItems = programsItems;
@@ -127,7 +129,7 @@ export const orders_export = async (req: Request, res: Response) => {
         let programStartDate, programEndDate, programLength;
         const lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
         const lineSku = line?.node?.variant?.sku;
-        const lineQuantity = line.node.quantity;
+        const lineQuantity = nonProgramOrder ? 1 : line.node.quantity;
         let promoField, addonsField;
         const severeAllergicAttr =
           line?.node?.customAttributes?.find((attr: any) => attr.key.includes("severe allergy") || attr.key.includes("alergik"))?.value ||
