@@ -22,26 +22,16 @@ const notification_1 = require("../utils/notification");
 const graphql_request_1 = require("graphql-request");
 const customers_1 = require("../queries/customers");
 dotenv_1.default.config();
-const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS, REVIEWS_EXPORT_CC_ADDRESS } = process.env;
+const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
-const recipientEmails = [
-    {
-        email: REVIEWS_EXPORT_RECIPIENTS,
-        type: "to",
-    },
-    {
-        email: REVIEWS_EXPORT_CC_ADDRESS,
-        type: "cc",
-    },
-];
+const recipientEmails = REVIEWS_EXPORT_RECIPIENTS === null || REVIEWS_EXPORT_RECIPIENTS === void 0 ? void 0 : REVIEWS_EXPORT_RECIPIENTS.split(",").map((email) => ({ email, type: "to" }));
 const bccEmail = MANDRILL_MESSAGE_BCC_ADDRESS_DEV;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const reviews_export_rewards = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         let { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
-        // precedingMonday = "2025-06-30";
-        // lastSunday = "2025-07-06";
+        const shouldSendEmail = req.query.sendEmail === "true";
         const ratings = (yield rating_model_1.default.findAll({
             where: {
                 // @ts-ignore
@@ -114,8 +104,13 @@ const reviews_export_rewards = (req, res) => __awaiter(void 0, void 0, void 0, f
             name: `odmeny-za-hodnoceni-tyden-${weekNumber}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Odměny za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Je připraven export odměn za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, null, bccEmail, attachment, true);
-        return res.status(200).json(sendEmail);
+        if (shouldSendEmail) {
+            const sendEmail = yield (0, notification_1.sendNotification)(`Odměny za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Je připraven export odměn za hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, null, bccEmail, attachment, true);
+            return res.status(200).json(sendEmail);
+        }
+        else {
+            return res.status(200).json(attachment);
+        }
     }
     catch (error) {
         console.error(error);

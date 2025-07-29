@@ -10,18 +10,9 @@ import { GraphQLClient } from "graphql-request";
 import { customerQuery } from "../queries/customers";
 
 dotenv.config();
-const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS, REVIEWS_EXPORT_CC_ADDRESS } = process.env;
+const { MANDRILL_MESSAGE_BCC_ADDRESS_DEV, REVIEWS_EXPORT_RECIPIENTS } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
-const recipientEmails = [
-  {
-    email: REVIEWS_EXPORT_RECIPIENTS as string,
-    type: "to",
-  },
-  {
-    email: REVIEWS_EXPORT_CC_ADDRESS as string,
-    type: "cc",
-  },
-];
+const recipientEmails = REVIEWS_EXPORT_RECIPIENTS?.split(",").map((email) => ({ email, type: "to" })) as { email: string; type: string }[];
 
 const bccEmail = MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string;
 
@@ -30,8 +21,7 @@ const bccEmail = MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string;
 export const reviews_export_rewards = async (req: Request, res: Response) => {
   try {
     let { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-    // precedingMonday = "2025-06-30";
-    // lastSunday = "2025-07-06";
+    const shouldSendEmail = req.query.sendEmail === "true";
     const ratings = (await Rating.findAll({
       where: {
         // @ts-ignore
@@ -120,17 +110,20 @@ export const reviews_export_rewards = async (req: Request, res: Response) => {
       content: base64Content,
     };
 
-    const sendEmail = await sendNotification(
-      `Odměny za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-      recipientEmails,
-      `Je připraven export odměn za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-      null,
-      bccEmail,
-      attachment,
-      true
-    );
-
-    return res.status(200).json(sendEmail);
+    if (shouldSendEmail) {
+      const sendEmail = await sendNotification(
+        `Odměny za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
+        recipientEmails,
+        `Je připraven export odměn za hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
+        null,
+        bccEmail,
+        attachment,
+        true
+      );
+      return res.status(200).json(sendEmail);
+    } else {
+      return res.status(200).json(attachment);
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
