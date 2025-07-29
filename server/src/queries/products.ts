@@ -44,6 +44,17 @@ export async function allProductsQuery(query: string) {
                       sku
                       inventoryItem {
                         id
+                        tracked
+                        inventoryLevels(first: 1) {
+                          edges {
+                            node {
+                              quantities(names: ["available"]) {
+                                name
+                                quantity
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }

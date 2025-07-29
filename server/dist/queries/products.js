@@ -56,6 +56,17 @@ function allProductsQuery(query) {
                       sku
                       inventoryItem {
                         id
+                        tracked
+                        inventoryLevels(first: 1) {
+                          edges {
+                            node {
+                              quantities(names: ["available"]) {
+                                name
+                                quantity
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
