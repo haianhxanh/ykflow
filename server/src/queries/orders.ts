@@ -84,6 +84,7 @@ export const ordersQuery = gql`
 export const orderQuery = gql`
   query ($id: ID!) {
     order(id: $id) {
+      createdAt
       customAttributes {
         key
         value
@@ -115,6 +116,17 @@ export const orderQuery = gql`
       }
       billingAddress {
         phone
+      }
+      lineItems(first: 250) {
+        edges {
+          node {
+            sku
+            variant {
+              id
+              sku
+            }
+          }
+        }
       }
     }
   }

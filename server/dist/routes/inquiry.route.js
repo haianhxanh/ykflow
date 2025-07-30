@@ -27,6 +27,7 @@ const custom_email_controller_1 = require("../controllers/custom_email.controlle
 const notification_order_preparation_time_controller_1 = require("../controllers/notification_order_preparation_time.controller");
 const reviews_export_rewards_1 = require("../controllers/reviews_export_rewards");
 const bulk_activate_inventory_at_locations_controller_1 = require("../controllers/bulk_activate_inventory_at_locations.controller");
+const program_start_date_validation_controller_1 = require("../controllers/program_start_date_validation.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -52,4 +53,5 @@ router.post("/custom/email", custom_email_controller_1.custom_email);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
 router.post("/notification/order-preparation-time", notification_order_preparation_time_controller_1.notification_order_preparation_time);
+router.post("/programs/start-date/validation", program_start_date_validation_controller_1.program_start_date_validation);
 exports.default = router;

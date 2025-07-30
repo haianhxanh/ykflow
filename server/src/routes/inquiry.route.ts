@@ -24,6 +24,7 @@ import { custom_email } from "../controllers/custom_email.controller";
 import { notification_order_preparation_time } from "../controllers/notification_order_preparation_time.controller";
 import { reviews_export_rewards } from "../controllers/reviews_export_rewards";
 import { bulk_activate_inventory_at_locations } from "../controllers/bulk_activate_inventory_at_locations.controller";
+import { program_start_date_validation } from "../controllers/program_start_date_validation.controller";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -49,5 +50,7 @@ router.post("/custom/email", custom_email);
 // router.post("/easter/discount", getEasterDiscount);
 // router.post("/validate/email", validateEmail);
 router.post("/notification/order-preparation-time", notification_order_preparation_time);
+
+router.post("/programs/start-date/validation", program_start_date_validation);
 
 export default router;

@@ -97,6 +97,7 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
 exports.orderQuery = (0, graphql_request_1.gql) `
   query ($id: ID!) {
     order(id: $id) {
+      createdAt
       customAttributes {
         key
         value
@@ -128,6 +129,17 @@ exports.orderQuery = (0, graphql_request_1.gql) `
       }
       billingAddress {
         phone
+      }
+      lineItems(first: 250) {
+        edges {
+          node {
+            sku
+            variant {
+              id
+              sku
+            }
+          }
+        }
       }
     }
   }
