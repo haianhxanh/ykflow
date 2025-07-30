@@ -24,3 +24,57 @@ export const createDiscountCodeMutation = gql`
     }
   }
 `;
+
+export const discountQuery = gql`
+  query Discount($discountGid: ID!) {
+    discountNode(id: $discountGid) {
+      discount {
+        ... on DiscountAutomaticBasic {
+          title
+          startsAt
+          endsAt
+          status
+          customerGets {
+            items {
+              ... on DiscountCollections {
+                collections(first: 100) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+              ... on DiscountProducts {
+                products(first: 250) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+                productVariants(first: 250) {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+            value {
+              ... on DiscountAmount {
+                amount {
+                  amount
+                }
+              }
+              ... on DiscountPercentage {
+                percentage
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

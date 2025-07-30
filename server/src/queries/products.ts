@@ -81,3 +81,15 @@ export async function allProductsQuery(query: string) {
 
   return products;
 }
+
+export const allProgramsQuery = gql`
+  query {
+    programs(first: 250) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+`;

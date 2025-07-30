@@ -61,3 +61,19 @@ export const metaobjectUpdateMutation = gql`
     }
   }
 `;
+
+export const metafieldsDeleteMutation = gql`
+  mutation MetafieldsDelete($metafields: [MetafieldIdentifierInput!]!) {
+    metafieldsDelete(metafields: $metafields) {
+      deletedMetafields {
+        key
+        namespace
+        ownerId
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;

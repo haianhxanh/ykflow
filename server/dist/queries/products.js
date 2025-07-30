@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allProductsQuery = exports.productsQuery = void 0;
+exports.allProgramsQuery = exports.allProductsQuery = exports.productsQuery = void 0;
 const graphql_request_1 = require("graphql-request");
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -91,3 +91,14 @@ function allProductsQuery(query) {
     });
 }
 exports.allProductsQuery = allProductsQuery;
+exports.allProgramsQuery = (0, graphql_request_1.gql) `
+  query {
+    programs(first: 250) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+`;
