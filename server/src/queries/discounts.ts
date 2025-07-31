@@ -50,6 +50,14 @@ export const discountQuery = gql`
                   edges {
                     node {
                       id
+                      variants(first: 250) {
+                        edges {
+                          node {
+                            id
+                            sku
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -57,6 +65,7 @@ export const discountQuery = gql`
                   edges {
                     node {
                       id
+                      sku
                     }
                   }
                 }

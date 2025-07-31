@@ -51,6 +51,14 @@ exports.discountQuery = (0, graphql_request_1.gql) `
                   edges {
                     node {
                       id
+                      variants(first: 250) {
+                        edges {
+                          node {
+                            id
+                            sku
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -58,6 +66,7 @@ exports.discountQuery = (0, graphql_request_1.gql) `
                   edges {
                     node {
                       id
+                      sku
                     }
                   }
                 }

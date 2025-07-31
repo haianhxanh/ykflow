@@ -93,3 +93,33 @@ export const allProgramsQuery = gql`
     }
   }
 `;
+
+export const productsQueryWithVariants = gql`
+  query {
+    products(first: 250) {
+      edges {
+        node {
+          id
+          variants(first: 250) {
+            edges {
+              node {
+                id
+                sku
+                metafields(first: 10, namespace: "campaign") {
+                  edges {
+                    node {
+                      id
+                      namespace
+                      key
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

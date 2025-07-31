@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { GraphQLClient } from "graphql-request";
 import { discountQuery } from "../queries/discounts";
-import { productsQuery } from "../queries/products";
+import { productsQueryWithVariants } from "../queries/products";
 import { collectionQuery } from "../queries/collections";
 import { metafieldsDeleteMutation, metafieldsSetMutation } from "../queries/metafields";
 import { variantByIdQuery } from "../queries/variants";
@@ -70,18 +70,15 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
     // 3. Check if discount is inactive
     // Proceed with removing variant metafields
 
-    let variants = [];
-    let metafieldsToUpdate = [];
+    let variants: any[] = [];
     const discount = (await client.request(discountQuery, { discountGid }))?.discountNode?.discount;
     if (!discount) {
       return res.status(200).json({ error: "Discount not found" });
     }
     const discountStatus = discount?.status;
-    // return res.status(200).json(discount);
-    const discountType = discount?.customerGets?.value?.percentage ? "PERCENTAGE" : "FIXED";
 
     const discountedCollections = discount.customerGets.items.collections?.edges.map((edge: any) => edge.node.id);
-    const discountedProducts = discount.customerGets.items.products?.edges.map((edge: any) => edge.node.id);
+    const discountedProducts = discount.customerGets.items.products?.edges;
     const discountedVariants = discount.customerGets.items.productVariants?.edges.map((edge: any) => edge.node.id);
 
     if (discountedCollections) {
@@ -106,11 +103,31 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
     }
 
     if (discountedProducts) {
-      // for (const productId of discountedProducts) {
-      //   const product = await client.request(productQuery, { productGid: productId });
-      //   const variants = product?.product?.variants?.edges?.map((edge: any) => edge.node.id);
-      //   variants = variants.concat(productVariants.filter((variant: any) => variant !== undefined));
-      // }
+      // return res.status(200).json(discountedProducts);
+      const discountedProductsVariants = discountedProducts
+        .map((product: any) => {
+          return product?.node?.variants?.edges?.map((edge: any) => {
+            if (ALLOWED_SKU_PREFIXES.some((prefix: string) => edge?.node?.sku?.startsWith(prefix))) {
+              return edge.node.id;
+            }
+          });
+        })
+        .flat()
+        .filter((variant: any) => variant !== undefined);
+      // return res.status(200).json(discountedProductsVariants);
+      for (const variantId of discountedProductsVariants) {
+        const variant = await client.request(variantByIdQuery, { variantGid: variantId });
+        if (
+          variant?.productVariant?.product?.tags?.includes("Programy") &&
+          ALLOWED_SKU_PREFIXES.some((prefix: string) => variant?.productVariant?.sku?.startsWith(prefix))
+        ) {
+          variants.push({
+            id: variant.productVariant.id,
+            sku: variant.productVariant.sku,
+            metafields: variant.productVariant.metafields,
+          });
+        }
+      }
     }
 
     if (discountedVariants) {
@@ -131,46 +148,11 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
 
     if (discountStatus === "ACTIVE") {
       // if evaluated as active discount, first remove metafields
-      // const variantsWithMetafields = variants.filter((variant: any) => variant?.metafields?.edges?.length > 0);
-      // const metafieldsToDelete = variantsWithMetafields.flatMap((variant: any) =>
-      //   variant.metafields?.edges?.map((metafield: any) => ({
-      //     ownerId: variant.id,
-      //     namespace: "campaign",
-      //     key: metafield.node.key,
-      //   }))
-      // );
-      // if (metafieldsToDelete.length > 0) {
-      //   const deletedMetafields = await client.request(metafieldsDeleteMutation, {
-      //     metafields: metafieldsToDelete,
-      //   });
-      // }
-      // const metafieldsToSet = [];
-      // for (const variant of variants) {
-      //   const metafield = createMetafieldsData(variant.id, variant.price, discountGid);
-      // }
+      await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const metafieldsToSet = [];
       for (const variant of variants) {
-        // get metafield campaign.data and update it
-        // const existingCampaignDataMeta = variant.metafields.edges.find((metafield: any) => metafield.node.key === "data");
-        // const isSameDiscount = existingCampaignDataMeta ? JSON.parse(existingCampaignDataMeta?.node?.value)?.id == discountGid : false;
-
-        // if (existingCampaignDataMeta && !isSameDiscount) {
-        //   // if existing but not the same, then evaluate the discount and update the meta
-        //   console.log("this is running");
-        //   return res.status(200).json(existingCampaignDataMeta);
-
-        //   // TODO: check existing data and update it with new metaobject or remove current object and update current data
-        // } else {
-        //   // if not existing, or existing but the same, then just update the metafield right away
-        //   metafieldsToSet.push({
-        //     ownerId: variant.id,
-        //     namespace: "campaign",
-        //     key: "data",
-        //     value: JSON.stringify(createDiscountObject(discount, discountGid)),
-        //   });
-        // }
-
         metafieldsToSet.push({
           ownerId: variant.id,
           namespace: "campaign",
@@ -184,72 +166,27 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
           const metafieldsSetResponse = await client.request(metafieldsSetMutation, {
             metafields: metafieldsToSet.slice(i, i + BATCH_SIZE),
           });
-          console.log(metafieldsSetResponse);
+          if (metafieldsSetResponse?.metafieldsSet?.userErrors?.length > 0) {
+            console.log("Error setting metafields", metafieldsToSet.slice(i, i + BATCH_SIZE));
+          } else {
+            console.log(
+              "Metafields set",
+              metafieldsToSet.slice(i, i + BATCH_SIZE).map((metafield: any) => metafield.ownerId)
+            );
+          }
         }
-        return res.status(200).json(metafieldsToSet);
       }
+
+      return res.status(200).json(discount);
     } else {
-      // remove metafields from variants
-      console.log("DISABLED");
+      // if evaluated as inactive discount, then remove metafields with matching discount
+      await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
     }
 
-    return res.status(200).json(variants);
-
-    const products = await client.request(productsQuery, { collectionGids: discountedCollections });
-
-    return res.status(200).json(discountedCollections);
     return res.status(200).json(discount);
   } catch (error) {
-    console.log(error);
+    return res.status(200).json({ error: "Internal server error", errorDetails: error });
   }
-};
-
-const priceCalculation = (price: number, discountType: string, discountValue: number) => {
-  if (discountType === "PERCENTAGE") {
-    return price * (1 - discountValue / 100);
-  }
-  return price - discountValue;
-};
-
-const createMetafieldsData = (variantId: string, price: number, discountData: DiscountData) => {
-  const metafields = [];
-  metafields.push({
-    ownerId: variantId,
-    namespace: "campaign",
-    key: "id",
-    value: discountData.id,
-  });
-
-  if (discountData.startsAt) {
-    metafields.push({
-      ownerId: variantId,
-      namespace: "campaign",
-      key: "starts_at",
-      value: discountData.startsAt,
-    });
-  }
-
-  if (discountData.endsAt) {
-    metafields.push({
-      ownerId: variantId,
-      namespace: "campaign",
-      key: "ends_at",
-      value: discountData.endsAt,
-    });
-  }
-
-  if (discountData.customerGets.value.percentage) {
-    metafields.push({
-      ownerId: variantId,
-      namespace: "campaign",
-      key: "discount_percentage",
-      value: discountData.customerGets.value.percentage.toString(),
-    });
-  }
-
-  return metafields;
-
-  // TODO: add for amount
 };
 
 const createDiscountObject = (discountData: DiscountData, discountId: string) => {
@@ -262,4 +199,59 @@ const createDiscountObject = (discountData: DiscountData, discountId: string) =>
     discount_amount: discountData.customerGets?.value?.amount?.amount || null,
     discount_type: discountData.customerGets?.value?.percentage ? "PERCENTAGE" : "FIXED",
   };
+};
+
+const deleteMetafieldsWithMatchingDiscount = async (discountGid: string, client: GraphQLClient, discountStatus: string) => {
+  const metafieldsToDelete = [];
+  const programProducts = await client.request(productsQueryWithVariants, {
+    query: "tags:Programy",
+  });
+  // return varaints with metafields length > 0
+  const variantsWithMetafields: any[] = [];
+  programProducts?.products?.edges?.forEach((edge: any) => {
+    edge.node?.variants?.edges?.forEach((variant: any) => {
+      if (variant?.node?.metafields?.edges?.length > 0) {
+        variantsWithMetafields.push({
+          id: variant.node.id,
+          sku: variant.node.sku,
+          metafields: variant.node.metafields,
+        });
+      }
+    });
+  });
+
+  for (const variant of variantsWithMetafields) {
+    if (variant.metafields?.edges?.find((metafield: any) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) {
+      const campaignData = JSON.parse(
+        variant.metafields.edges.find((metafield: any) => metafield.node.key === "data" && metafield.node.namespace == "campaign")?.node?.value
+      );
+      const matchingCampaign = campaignData?.id == discountGid;
+      if (matchingCampaign) {
+        metafieldsToDelete.push({
+          ownerId: variant.id,
+          namespace: "campaign",
+          key: "data",
+        });
+      }
+    }
+  }
+
+  if (metafieldsToDelete.length > 0) {
+    const deletedMetafields = await client.request(metafieldsDeleteMutation, {
+      metafields: metafieldsToDelete,
+    });
+    if (deletedMetafields?.metafieldsDelete?.userErrors?.length == 0) {
+      console.log(
+        `Deleted metafields as discount is ${discountStatus}`,
+        variantsWithMetafields?.map((variant: any) => variant.sku)
+      );
+    } else {
+      console.log(
+        `Error deleting metafields as discount is ${discountStatus}`,
+        variantsWithMetafields?.map((variant: any) => variant.sku)
+      );
+    }
+  }
+
+  return metafieldsToDelete;
 };
