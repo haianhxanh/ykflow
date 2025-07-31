@@ -27,6 +27,11 @@ const BATCH_SIZE = 25; // max 25 metafields per request
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+    const timeout = setTimeout(() => {
+        if (!res.headersSent) {
+            return res.status(200).json({ error: "Request timeout" });
+        }
+    }, 300000);
     try {
         console.log(req.body);
         // return res.status(200).json(req.body);
@@ -144,9 +149,11 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
             // if evaluated as inactive discount, then remove metafields with matching discount
             yield deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
         }
+        clearTimeout(timeout);
         return res.status(200).json(discount);
     }
     catch (error) {
+        clearTimeout(timeout);
         return res.status(200).json({ error: "Internal server error", errorDetails: error });
     }
 });
