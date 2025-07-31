@@ -185,7 +185,10 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
     }
 
     console.log(`Request completed successfully in ${Date.now() - startTime}ms`);
-    return res.status(200).json(discount);
+
+    return res.status(200).json({
+      message: "Discount updated successfully",
+    });
   } catch (error) {
     console.log(`Request failed after ${Date.now() - startTime}ms:`, error);
     return res.status(500).json({ error: "Internal server error", errorDetails: error });

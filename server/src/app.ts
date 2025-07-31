@@ -14,6 +14,7 @@ var corsOptions = {
     "https://yeskrabickyflow-dev-frontend.onrender.com",
     "https://yeskrabickyflow.onrender.com",
     "https://yes-krabicky-dev.myshopify.com",
+    "https://test-store-yes-krabicky.myshopify.com",
     "https://yes-krabicky-checkout.myshopify.com",
     "https://test-yes-krabicky.myshopify.com",
     "https://yeskrabicky.cz",
