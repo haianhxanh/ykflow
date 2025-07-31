@@ -57,8 +57,7 @@ export const program_start_date_validation = async (req: Request, res: Response)
     }
 
     const createdAt = order.createdAt;
-    // const customerEmail = order.customer?.email;
-    const customerEmail = "hana.nguyen@plavecmedia.cz";
+    const customerEmail = order.customer?.email;
     const closestStartDate = getClosestStartDate(createdAt);
     const formattedClosestStartDate = convertDateToISOString(closestStartDate);
 

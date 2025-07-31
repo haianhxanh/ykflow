@@ -43,7 +43,7 @@ const DAYS_IN_CZECH_REPUBLIC = {
     0: "Neděle",
 };
 const program_start_date_validation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     try {
         const orderId = req.body.orderId;
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
@@ -61,8 +61,7 @@ const program_start_date_validation = (req, res) => __awaiter(void 0, void 0, vo
             return res.status(200).json({ error: "Start date not found" });
         }
         const createdAt = order.createdAt;
-        // const customerEmail = order.customer?.email;
-        const customerEmail = "hana.nguyen@plavecmedia.cz";
+        const customerEmail = (_b = order.customer) === null || _b === void 0 ? void 0 : _b.email;
         const closestStartDate = getClosestStartDate(createdAt);
         const formattedClosestStartDate = (0, helpers_1.convertDateToISOString)(closestStartDate);
         const startDateValid = new Date(normalizedStartDate) >= new Date(closestStartDate);
