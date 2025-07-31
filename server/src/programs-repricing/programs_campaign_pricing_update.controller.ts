@@ -48,11 +48,8 @@ type DiscountData = {
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const programs_campaign_pricing_update = async (req: Request, res: Response) => {
-  const timeout = setTimeout(() => {
-    if (!res.headersSent) {
-      return res.status(200).json({ error: "Request timeout" });
-    }
-  }, 300000);
+  const startTime = Date.now();
+  console.log(`Starting request at ${new Date().toISOString()}`);
 
   try {
     console.log(req.body);
@@ -189,11 +186,11 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
       await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
     }
 
-    clearTimeout(timeout);
+    console.log(`Request completed successfully in ${Date.now() - startTime}ms`);
     return res.status(200).json(discount);
   } catch (error) {
-    clearTimeout(timeout);
-    return res.status(200).json({ error: "Internal server error", errorDetails: error });
+    console.log(`Request failed after ${Date.now() - startTime}ms:`, error);
+    return res.status(500).json({ error: "Internal server error", errorDetails: error });
   }
 };
 

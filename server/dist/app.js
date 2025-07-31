@@ -35,6 +35,19 @@ const { PORT } = process.env;
 app.use(express_1.default.json());
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.urlencoded({ extended: false }));
+// Global timeout middleware (3 minutes)
+app.use((req, res, next) => {
+    const timeout = setTimeout(() => {
+        if (!res.headersSent) {
+            console.log(`Request timeout for ${req.method} ${req.path}`);
+            return res.status(408).json({ error: "Request timeout" });
+        }
+    }, 300000);
+    // Clear timeout when response is sent
+    res.on("finish", () => clearTimeout(timeout));
+    res.on("close", () => clearTimeout(timeout));
+    next();
+});
 app.use("/", inquiry_route_1.default);
 /*----Checking Database Connection-------------*/
 db_connect_1.db.sync({ alter: true })

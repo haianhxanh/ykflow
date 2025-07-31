@@ -35,6 +35,22 @@ app.use(express.json());
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: false }));
 
+// Global timeout middleware (3 minutes)
+app.use((req, res, next) => {
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      console.log(`Request timeout for ${req.method} ${req.path}`);
+      return res.status(408).json({ error: "Request timeout" });
+    }
+  }, 300000);
+
+  // Clear timeout when response is sent
+  res.on("finish", () => clearTimeout(timeout));
+  res.on("close", () => clearTimeout(timeout));
+
+  next();
+});
+
 app.use("/", get_inquries_route);
 
 /*----Checking Database Connection-------------*/
