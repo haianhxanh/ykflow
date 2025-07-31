@@ -179,8 +179,6 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
           }
         }
       }
-
-      return res.status(200).json(discount);
     } else {
       // if evaluated as inactive discount, then remove metafields with matching discount
       await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
