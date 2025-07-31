@@ -3,6 +3,7 @@ import logger from "morgan";
 import dotenv from "dotenv";
 import get_inquries_route from "./routes/inquiry.route";
 import { db } from "./database_connection/db_connect";
+import timeout from "connect-timeout";
 
 /*------Importing ExpressJs----------*/
 import express from "express";
@@ -36,6 +37,7 @@ app.use(logger("dev"));
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/", get_inquries_route);
+app.use(timeout("5m"));
 
 /*----Checking Database Connection-------------*/
 db.sync({ alter: true })

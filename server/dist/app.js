@@ -8,6 +8,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const inquiry_route_1 = __importDefault(require("./routes/inquiry.route"));
 const db_connect_1 = require("./database_connection/db_connect");
+const connect_timeout_1 = __importDefault(require("connect-timeout"));
 /*------Importing ExpressJs----------*/
 const express_1 = __importDefault(require("express"));
 var cors = require("cors");
@@ -36,6 +37,7 @@ app.use(express_1.default.json());
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use("/", inquiry_route_1.default);
+app.use((0, connect_timeout_1.default)("5m"));
 /*----Checking Database Connection-------------*/
 db_connect_1.db.sync({ alter: true })
     .then(() => {
