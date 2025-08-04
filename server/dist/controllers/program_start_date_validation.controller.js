@@ -133,9 +133,18 @@ const program_start_date_validation = (req, res) => __awaiter(void 0, void 0, vo
 exports.program_start_date_validation = program_start_date_validation;
 const getClosestStartDate = (createdAt) => {
     const startDay = new Date(createdAt).getDay();
-    const daysToAdd = CUT_OFF_TIMES[startDay] - 1;
-    const closestStartDate = (0, helpers_1.getFutureBusinessDate)(createdAt, daysToAdd);
-    return closestStartDate;
+    const daysToAdd = CUT_OFF_TIMES[startDay] + 1;
+    let count = 0;
+    let startDate = new Date(createdAt);
+    while (count < daysToAdd) {
+        startDate.setDate(startDate.getDate() + 1);
+        count++;
+    }
+    let future_year = new Date(startDate).getFullYear();
+    let future_month = String(new Date(startDate).getMonth() + 1).padStart(2, "0");
+    let future_date = String(new Date(startDate).getDate()).padStart(2, "0");
+    const result = `${future_year}-${future_month}-${future_date}`;
+    return result;
 };
 const sendProgramDateUpdatedEmail = (customerEmail, order, oldStartDate, newStartDate) => __awaiter(void 0, void 0, void 0, function* () {
     const subject = `Aktualizace termínu začátku Vašeho programu - obj. ${order.name}`;

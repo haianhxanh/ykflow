@@ -134,9 +134,22 @@ export const program_start_date_validation = async (req: Request, res: Response)
 
 const getClosestStartDate = (createdAt: string) => {
   const startDay = new Date(createdAt).getDay();
-  const daysToAdd = CUT_OFF_TIMES[startDay as keyof typeof CUT_OFF_TIMES] - 1;
-  const closestStartDate = getFutureBusinessDate(createdAt, daysToAdd);
-  return closestStartDate;
+  const daysToAdd = CUT_OFF_TIMES[startDay as keyof typeof CUT_OFF_TIMES] + 1;
+
+  let count = 0;
+  let startDate = new Date(createdAt);
+
+  while (count < daysToAdd) {
+    startDate.setDate(startDate.getDate() + 1);
+    count++;
+  }
+
+  let future_year = new Date(startDate).getFullYear();
+  let future_month = String(new Date(startDate).getMonth() + 1).padStart(2, "0");
+  let future_date = String(new Date(startDate).getDate()).padStart(2, "0");
+  const result = `${future_year}-${future_month}-${future_date}`;
+
+  return result;
 };
 
 const sendProgramDateUpdatedEmail = async (customerEmail: string, order: any, oldStartDate: string, newStartDate: string) => {
