@@ -37,6 +37,7 @@ router.post("/inquiry/delete", authorization_1.auth, delete_inquiry_controller_1
 router.get("/order-inquiries?:order_id", get_order_inquiries_controller_1.get_order_inquiries);
 router.get("/fulfill", fulfill_order_controller_1.fulfill);
 router.get("/orders/export", orders_export_controller_1.orders_export);
+router.get("/orders/district/export", orders_district_export_controller_1.orders_district_export);
 router.get("/order/update/attributes", order_update_attributes_controller_1.order_update_attributes);
 router.post("/checkout/address/validation", checkout_address_validation_controller_1.checkout_address_validation);
 router.get("/checkout/pickup/availability/check", checkout_pickup_availability_check_controller_1.checkout_pickup_availability_check);

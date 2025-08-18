@@ -34,6 +34,7 @@ router.post("/inquiry/delete", auth, delete_inquiry);
 router.get("/order-inquiries?:order_id", get_order_inquiries);
 router.get("/fulfill", fulfill);
 router.get("/orders/export", orders_export);
+router.get("/orders/district/export", orders_district_export);
 router.get("/order/update/attributes", order_update_attributes);
 router.post("/checkout/address/validation", checkout_address_validation);
 router.get("/checkout/pickup/availability/check", checkout_pickup_availability_check);
