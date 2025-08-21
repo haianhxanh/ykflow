@@ -39,6 +39,7 @@ export async function allProductsQuery(query: string) {
                 variants(first: 250) {
                   edges {
                     node {
+                      id
                       title
                       price
                       sku
@@ -119,6 +120,77 @@ export const productsQueryWithVariants = gql`
             }
           }
         }
+      }
+    }
+  }
+`;
+
+export const productCreateQuery = gql`
+  mutation mutationProductCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
+    productCreate(input: $input, media: $media) {
+      product {
+        id
+        title
+        variants(first: 250) {
+          edges {
+            node {
+              id
+              inventoryItem {
+                id
+              }
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const productOptionsCreateQuery = gql`
+  mutation createOptions($productId: ID!, $options: [OptionCreateInput!]!) {
+    productOptionsCreate(productId: $productId, options: $options) {
+      product {
+        id
+        variants(first: 1) {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+export const productSetQuery = gql`
+  mutation createProductAsynchronous($productSet: ProductSetInput!, $synchronous: Boolean!) {
+    productSet(synchronous: $synchronous, input: $productSet) {
+      product {
+        id
+      }
+      productSetOperation {
+        id
+        status
+        userErrors {
+          code
+          field
+          message
+        }
+      }
+      userErrors {
+        code
+        field
+        message
       }
     }
   }

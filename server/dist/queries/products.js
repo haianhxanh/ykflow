@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.productsQueryWithVariants = exports.allProgramsQuery = exports.allProductsQuery = exports.productsQuery = void 0;
+exports.productSetQuery = exports.productOptionsCreateQuery = exports.productCreateQuery = exports.productsQueryWithVariants = exports.allProgramsQuery = exports.allProductsQuery = exports.productsQuery = void 0;
 const graphql_request_1 = require("graphql-request");
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -51,6 +51,7 @@ function allProductsQuery(query) {
                 variants(first: 250) {
                   edges {
                     node {
+                      id
                       title
                       price
                       sku
@@ -127,6 +128,74 @@ exports.productsQueryWithVariants = (0, graphql_request_1.gql) `
             }
           }
         }
+      }
+    }
+  }
+`;
+exports.productCreateQuery = (0, graphql_request_1.gql) `
+  mutation mutationProductCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
+    productCreate(input: $input, media: $media) {
+      product {
+        id
+        title
+        variants(first: 250) {
+          edges {
+            node {
+              id
+              inventoryItem {
+                id
+              }
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+exports.productOptionsCreateQuery = (0, graphql_request_1.gql) `
+  mutation createOptions($productId: ID!, $options: [OptionCreateInput!]!) {
+    productOptionsCreate(productId: $productId, options: $options) {
+      product {
+        id
+        variants(first: 1) {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+exports.productSetQuery = (0, graphql_request_1.gql) `
+  mutation createProductAsynchronous($productSet: ProductSetInput!, $synchronous: Boolean!) {
+    productSet(synchronous: $synchronous, input: $productSet) {
+      product {
+        id
+      }
+      productSetOperation {
+        id
+        status
+        userErrors {
+          code
+          field
+          message
+        }
+      }
+      userErrors {
+        code
+        field
+        message
       }
     }
   }

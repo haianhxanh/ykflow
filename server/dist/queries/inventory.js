@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.inventorySetQuantities = exports.inventoryBulkToggleActivation = void 0;
+exports.inventoryItemUpdate = exports.inventorySetQuantities = exports.inventoryBulkToggleActivation = void 0;
 const graphql_request_1 = require("graphql-request");
 exports.inventoryBulkToggleActivation = (0, graphql_request_1.gql) `
   mutation inventoryBulkToggleActivation($inventoryItemId: ID!, $inventoryItemUpdates: [InventoryBulkToggleActivationInput!]!) {
@@ -40,6 +40,19 @@ exports.inventorySetQuantities = (0, graphql_request_1.gql) `
       }
       userErrors {
         field
+        message
+      }
+    }
+  }
+`;
+exports.inventoryItemUpdate = (0, graphql_request_1.gql) `
+  mutation inventoryItemUpdate($id: ID!, $input: InventoryItemInput!) {
+    inventoryItemUpdate(id: $id, input: $input) {
+      inventoryItem {
+        id
+        tracked
+      }
+      userErrors {
         message
       }
     }

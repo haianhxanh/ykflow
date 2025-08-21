@@ -21,6 +21,27 @@ export const ordersQuery = gql`
           displayFinancialStatus
           paymentGatewayNames
           tags
+          fulfillmentOrders(first: 10) {
+            edges {
+              node {
+                id
+                deliveryMethod {
+                  methodType
+                }
+                assignedLocation {
+                  location {
+                    address {
+                      address1
+                      address2
+                      city
+                      zip
+                      country
+                    }
+                  }
+                }
+              }
+            }
+          }
           billingAddress {
             name
             company
@@ -38,6 +59,7 @@ export const ordersQuery = gql`
             address2
             city
             zip
+            country
           }
           shippingLine {
             title

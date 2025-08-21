@@ -86,7 +86,10 @@ export const orders_district_export = async (req: Request, res: Response) => {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    return res.status(200).json("ok");
+    return res.status(200).json({
+      success: true,
+      message: "Orders district update completed",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error exporting orders" });

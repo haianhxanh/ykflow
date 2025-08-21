@@ -88,7 +88,10 @@ const orders_district_export = (req, res) => __awaiter(void 0, void 0, void 0, f
             }
             yield new Promise((resolve) => setTimeout(resolve, 100));
         }
-        return res.status(200).json("ok");
+        return res.status(200).json({
+            success: true,
+            message: "Orders district update completed",
+        });
     }
     catch (error) {
         console.log(error);
