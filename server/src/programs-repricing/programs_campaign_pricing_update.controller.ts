@@ -6,6 +6,7 @@ import { productsQueryWithVariants } from "../queries/products";
 import { collectionQuery } from "../queries/collections";
 import { metafieldsDeleteMutation, metafieldsSetMutation } from "../queries/metafields";
 import { variantByIdQuery } from "../queries/variants";
+import AutomaticDiscounts from "../model/automaticDiscounts.model";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 
@@ -62,6 +63,19 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
 
     const discountGid = req.body.admin_graphql_api_id;
 
+    const activeStatus = req.body?.status == "ACTIVE";
+
+    if (!activeStatus) {
+      // check in DB if discount is related to program discount
+      const discountId = await AutomaticDiscounts.findOne({ where: { gid: discountGid.split("/").pop() as string } });
+      if (discountId) {
+        const status = req.body?.status || "DELETED";
+        await deleteMetafieldsWithMatchingDiscount(discountGid, client, status);
+        return res.status(200).json({ message: "Discount data removed from associated variant metafields" });
+      }
+      return res.status(200).json({ message: "Discount not related to program discount" });
+    }
+
     if (!discountGid.includes("DiscountAutomaticNode")) {
       return res.status(200).json({ error: "Discount is not an automatic discount" });
     }
@@ -69,9 +83,6 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
     // 1. Check related products and variants - only proceed if those are programs and includes allowed SKU prefixes ["5D", "10D", "15D", "20D", "60D"]
     // 2. Check if discount is active
     // Proceed with updating variant metafields
-
-    // 3. Check if discount is inactive
-    // Proceed with removing variant metafields
 
     let variants: any[] = [];
     const discount = (await client.request(discountQuery, { discountGid }))?.discountNode?.discount;
@@ -179,8 +190,11 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
           }
         }
       }
+
+      await AutomaticDiscounts.create({
+        gid: discountGid.split("/").pop() as string,
+      });
     } else {
-      // if evaluated as inactive discount, then remove metafields with matching discount
       await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
     }
 
