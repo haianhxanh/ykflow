@@ -12,6 +12,7 @@ import { locationQueryByName } from "../queries/locations";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
+const programRelatedTags = ["Programy", "Monoporce", "Ecobox"];
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
@@ -63,6 +64,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Single Portions", key: "singlePortions", width: 15 },
           { header: "Program Length", key: "programLength", width: 10 },
           { header: "Kcal", key: "kcal", width: 10 },
+          { header: "Krabičky", key: "ecobox", width: 15 },
           { header: "Prudký alergik", key: "severeAllergic", width: 10 },
         ];
         ALLERGENS.split(",").forEach((allergen) => {
@@ -86,7 +88,7 @@ export const orders_export = async (req: Request, res: Response) => {
         return line.node.variant.product?.tags?.includes("Programy");
       });
       const nonProgramItems = order.node.lineItems.edges.filter((line: any) => {
-        return !line.node.variant.product?.tags?.includes("Programy") && !line.node.variant.product?.tags?.includes("Monoporce");
+        return !line.node.variant.product?.tags?.some((tag: string) => programRelatedTags.includes(tag));
       });
 
       let mainItems = [];
@@ -108,8 +110,11 @@ export const orders_export = async (req: Request, res: Response) => {
 
       let addons = [];
       let promo = [];
-      let singlePortions = order.node.lineItems.edges.filter((line: any) => {
+      const singlePortions = order.node.lineItems.edges.filter((line: any) => {
         return line.node.variant.product?.tags?.includes("Monoporce");
+      });
+      const ecobox = order.node.lineItems.edges.filter((line: any) => {
+        return line.node.variant.product?.tags?.includes("Ecobox");
       });
 
       if (mixedOrder) {
@@ -240,6 +245,7 @@ export const orders_export = async (req: Request, res: Response) => {
           const programSinglePortions = singlePortions.filter(
             (item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId
           );
+          const programEcobox = ecobox.filter((item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId);
 
           const singlePortionsCol =
             programSinglePortions.length > 0
@@ -250,6 +256,8 @@ export const orders_export = async (req: Request, res: Response) => {
                   })
                   .join("\n")
               : "";
+
+          const ecoboxCol = programEcobox.length > 0 ? "EKO" : "";
 
           const row = [
             order.node?.name,
@@ -273,6 +281,7 @@ export const orders_export = async (req: Request, res: Response) => {
             singlePortionsCol,
             programLength ? programLength : "",
             lineIsProgram ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "") : "",
+            ecoboxCol,
             severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {

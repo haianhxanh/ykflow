@@ -25,6 +25,7 @@ const locations_1 = require("../queries/locations");
 dotenv_1.default.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
+const programRelatedTags = ["Programy", "Monoporce", "Ecobox"];
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, _71, _72, _73, _74, _75, _76, _77, _78;
@@ -70,6 +71,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     { header: "Single Portions", key: "singlePortions", width: 15 },
                     { header: "Program Length", key: "programLength", width: 10 },
                     { header: "Kcal", key: "kcal", width: 10 },
+                    { header: "Krabičky", key: "ecobox", width: 15 },
                     { header: "Prudký alergik", key: "severeAllergic", width: 10 },
                 ];
                 constants_1.ALLERGENS.split(",").forEach((allergen) => {
@@ -92,8 +94,8 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 return (_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Programy");
             });
             const nonProgramItems = order.node.lineItems.edges.filter((line) => {
-                var _a, _b, _c, _d;
-                return !((_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Programy")) && !((_d = (_c = line.node.variant.product) === null || _c === void 0 ? void 0 : _c.tags) === null || _d === void 0 ? void 0 : _d.includes("Monoporce"));
+                var _a, _b;
+                return !((_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.some((tag) => programRelatedTags.includes(tag)));
             });
             let mainItems = [];
             let nonProgramOrder = false;
@@ -114,9 +116,13 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
             let addons = [];
             let promo = [];
-            let singlePortions = order.node.lineItems.edges.filter((line) => {
+            const singlePortions = order.node.lineItems.edges.filter((line) => {
                 var _a, _b;
                 return (_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Monoporce");
+            });
+            const ecobox = order.node.lineItems.edges.filter((line) => {
+                var _a, _b;
+                return (_b = (_a = line.node.variant.product) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Ecobox");
             });
             if (mixedOrder) {
                 for (const [lineIndex, line] of secondaryItems.entries()) {
@@ -230,6 +236,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     // check if line has associated single portions
                     const lineProgramId = lineIsProgram ? (_51 = line.node.customAttributes.find((attr) => attr.key == "_program_id")) === null || _51 === void 0 ? void 0 : _51.value : null;
                     const programSinglePortions = singlePortions.filter((item) => { var _a; return ((_a = item.node.customAttributes.find((attr) => attr.key == "_program_id")) === null || _a === void 0 ? void 0 : _a.value) == lineProgramId; });
+                    const programEcobox = ecobox.filter((item) => { var _a; return ((_a = item.node.customAttributes.find((attr) => attr.key == "_program_id")) === null || _a === void 0 ? void 0 : _a.value) == lineProgramId; });
                     const singlePortionsCol = programSinglePortions.length > 0
                         ? programSinglePortions
                             .map((item) => {
@@ -238,6 +245,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         })
                             .join("\n")
                         : "";
+                    const ecoboxCol = programEcobox.length > 0 ? "EKO" : "";
                     const row = [
                         (_52 = order.node) === null || _52 === void 0 ? void 0 : _52.name,
                         (_53 = order.node) === null || _53 === void 0 ? void 0 : _53.displayFinancialStatus,
@@ -260,6 +268,7 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         singlePortionsCol,
                         programLength ? programLength : "",
                         lineIsProgram ? (_76 = (_75 = (_74 = line.node) === null || _74 === void 0 ? void 0 : _74.title) === null || _75 === void 0 ? void 0 : _75.split(" | ")[1]) === null || _76 === void 0 ? void 0 : _76.replace(" kcal", "") : "",
+                        ecoboxCol,
                         severeAllergic ? "Ano" : "",
                     ];
                     if (lineIsProgram) {
