@@ -91,9 +91,9 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
     }
     const discountStatus = discount?.status;
 
-    const discountedCollections = discount.customerGets.items.collections?.edges.map((edge: any) => edge.node.id);
-    const discountedProducts = discount.customerGets.items.products?.edges;
-    const discountedVariants = discount.customerGets.items.productVariants?.edges.map((edge: any) => edge.node.id);
+    const discountedCollections = discount.customerGets.items?.collections?.edges.map((edge: any) => edge.node.id);
+    const discountedProducts = discount.customerGets.items?.products?.edges;
+    const discountedVariants = discount.customerGets.items?.productVariants?.edges.map((edge: any) => edge.node.id);
 
     if (discountedCollections) {
       for (const collectionId of discountedCollections) {

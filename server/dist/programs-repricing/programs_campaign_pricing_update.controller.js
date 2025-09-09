@@ -27,7 +27,7 @@ const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D"];
 const BATCH_SIZE = 25; // max 25 metafields per request
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0;
     const startTime = Date.now();
     console.log(`Starting request at ${new Date().toISOString()}`);
     try {
@@ -62,16 +62,16 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
             return res.status(200).json({ error: "Discount not found" });
         }
         const discountStatus = discount === null || discount === void 0 ? void 0 : discount.status;
-        const discountedCollections = (_f = discount.customerGets.items.collections) === null || _f === void 0 ? void 0 : _f.edges.map((edge) => edge.node.id);
-        const discountedProducts = (_g = discount.customerGets.items.products) === null || _g === void 0 ? void 0 : _g.edges;
-        const discountedVariants = (_h = discount.customerGets.items.productVariants) === null || _h === void 0 ? void 0 : _h.edges.map((edge) => edge.node.id);
+        const discountedCollections = (_g = (_f = discount.customerGets.items) === null || _f === void 0 ? void 0 : _f.collections) === null || _g === void 0 ? void 0 : _g.edges.map((edge) => edge.node.id);
+        const discountedProducts = (_j = (_h = discount.customerGets.items) === null || _h === void 0 ? void 0 : _h.products) === null || _j === void 0 ? void 0 : _j.edges;
+        const discountedVariants = (_l = (_k = discount.customerGets.items) === null || _k === void 0 ? void 0 : _k.productVariants) === null || _l === void 0 ? void 0 : _l.edges.map((edge) => edge.node.id);
         if (discountedCollections) {
             for (const collectionId of discountedCollections) {
                 const collection = yield client.request(collections_1.collectionQuery, { collectionGid: collectionId });
-                const programs = (_l = (_k = (_j = collection === null || collection === void 0 ? void 0 : collection.collection) === null || _j === void 0 ? void 0 : _j.products) === null || _k === void 0 ? void 0 : _k.edges) === null || _l === void 0 ? void 0 : _l.filter((edge) => { var _a, _b; return (_b = (_a = edge.node) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Programy"); });
+                const programs = (_p = (_o = (_m = collection === null || collection === void 0 ? void 0 : collection.collection) === null || _m === void 0 ? void 0 : _m.products) === null || _o === void 0 ? void 0 : _o.edges) === null || _p === void 0 ? void 0 : _p.filter((edge) => { var _a, _b; return (_b = (_a = edge.node) === null || _a === void 0 ? void 0 : _a.tags) === null || _b === void 0 ? void 0 : _b.includes("Programy"); });
                 if (programs.length > 0) {
                     for (const program of programs) {
-                        const programVariants = (_p = (_o = (_m = program === null || program === void 0 ? void 0 : program.node) === null || _m === void 0 ? void 0 : _m.variants) === null || _o === void 0 ? void 0 : _o.edges) === null || _p === void 0 ? void 0 : _p.map((edge) => {
+                        const programVariants = (_s = (_r = (_q = program === null || program === void 0 ? void 0 : program.node) === null || _q === void 0 ? void 0 : _q.variants) === null || _r === void 0 ? void 0 : _r.edges) === null || _s === void 0 ? void 0 : _s.map((edge) => {
                             if (ALLOWED_SKU_PREFIXES.some((prefix) => { var _a, _b; return (_b = (_a = edge === null || edge === void 0 ? void 0 : edge.node) === null || _a === void 0 ? void 0 : _a.sku) === null || _b === void 0 ? void 0 : _b.startsWith(prefix); })) {
                                 return {
                                     id: edge.node.id,
@@ -101,7 +101,7 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
             // return res.status(200).json(discountedProductsVariants);
             for (const variantId of discountedProductsVariants) {
                 const variant = yield client.request(variants_1.variantByIdQuery, { variantGid: variantId });
-                if (((_s = (_r = (_q = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _q === void 0 ? void 0 : _q.product) === null || _r === void 0 ? void 0 : _r.tags) === null || _s === void 0 ? void 0 : _s.includes("Programy")) &&
+                if (((_v = (_u = (_t = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _t === void 0 ? void 0 : _t.product) === null || _u === void 0 ? void 0 : _u.tags) === null || _v === void 0 ? void 0 : _v.includes("Programy")) &&
                     ALLOWED_SKU_PREFIXES.some((prefix) => { var _a, _b; return (_b = (_a = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _a === void 0 ? void 0 : _a.sku) === null || _b === void 0 ? void 0 : _b.startsWith(prefix); })) {
                     variants.push({
                         id: variant.productVariant.id,
@@ -114,7 +114,7 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
         if (discountedVariants) {
             for (const variantId of discountedVariants) {
                 const variant = yield client.request(variants_1.variantByIdQuery, { variantGid: variantId });
-                if (((_v = (_u = (_t = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _t === void 0 ? void 0 : _t.product) === null || _u === void 0 ? void 0 : _u.tags) === null || _v === void 0 ? void 0 : _v.includes("Programy")) &&
+                if (((_y = (_x = (_w = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _w === void 0 ? void 0 : _w.product) === null || _x === void 0 ? void 0 : _x.tags) === null || _y === void 0 ? void 0 : _y.includes("Programy")) &&
                     ALLOWED_SKU_PREFIXES.some((prefix) => { var _a, _b; return (_b = (_a = variant === null || variant === void 0 ? void 0 : variant.productVariant) === null || _a === void 0 ? void 0 : _a.sku) === null || _b === void 0 ? void 0 : _b.startsWith(prefix); })) {
                     variants.push({
                         id: variant.productVariant.id,
@@ -142,7 +142,7 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
                     const metafieldsSetResponse = yield client.request(metafields_1.metafieldsSetMutation, {
                         metafields: metafieldsToSet.slice(i, i + BATCH_SIZE),
                     });
-                    if (((_x = (_w = metafieldsSetResponse === null || metafieldsSetResponse === void 0 ? void 0 : metafieldsSetResponse.metafieldsSet) === null || _w === void 0 ? void 0 : _w.userErrors) === null || _x === void 0 ? void 0 : _x.length) > 0) {
+                    if (((_0 = (_z = metafieldsSetResponse === null || metafieldsSetResponse === void 0 ? void 0 : metafieldsSetResponse.metafieldsSet) === null || _z === void 0 ? void 0 : _z.userErrors) === null || _0 === void 0 ? void 0 : _0.length) > 0) {
                         console.log("Error setting metafields", metafieldsToSet.slice(i, i + BATCH_SIZE));
                     }
                     else {
@@ -181,14 +181,14 @@ const createDiscountObject = (discountData, discountId) => {
     };
 };
 const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatus) => __awaiter(void 0, void 0, void 0, function* () {
-    var _y, _z, _0, _1, _2, _3, _4, _5;
+    var _1, _2, _3, _4, _5, _6, _7, _8;
     const metafieldsToDelete = [];
     const programProducts = yield client.request(products_1.productsQueryWithVariants, {
         query: "tags:Programy",
     });
     // return varaints with metafields length > 0
     const variantsWithMetafields = [];
-    (_z = (_y = programProducts === null || programProducts === void 0 ? void 0 : programProducts.products) === null || _y === void 0 ? void 0 : _y.edges) === null || _z === void 0 ? void 0 : _z.forEach((edge) => {
+    (_2 = (_1 = programProducts === null || programProducts === void 0 ? void 0 : programProducts.products) === null || _1 === void 0 ? void 0 : _1.edges) === null || _2 === void 0 ? void 0 : _2.forEach((edge) => {
         var _a, _b, _c;
         (_c = (_b = (_a = edge.node) === null || _a === void 0 ? void 0 : _a.variants) === null || _b === void 0 ? void 0 : _b.edges) === null || _c === void 0 ? void 0 : _c.forEach((variant) => {
             var _a, _b, _c;
@@ -202,8 +202,8 @@ const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatu
         });
     });
     for (const variant of variantsWithMetafields) {
-        if ((_1 = (_0 = variant.metafields) === null || _0 === void 0 ? void 0 : _0.edges) === null || _1 === void 0 ? void 0 : _1.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) {
-            const campaignData = JSON.parse((_3 = (_2 = variant.metafields.edges.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) === null || _2 === void 0 ? void 0 : _2.node) === null || _3 === void 0 ? void 0 : _3.value);
+        if ((_4 = (_3 = variant.metafields) === null || _3 === void 0 ? void 0 : _3.edges) === null || _4 === void 0 ? void 0 : _4.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) {
+            const campaignData = JSON.parse((_6 = (_5 = variant.metafields.edges.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) === null || _5 === void 0 ? void 0 : _5.node) === null || _6 === void 0 ? void 0 : _6.value);
             const matchingCampaign = (campaignData === null || campaignData === void 0 ? void 0 : campaignData.id) == discountGid;
             if (matchingCampaign) {
                 metafieldsToDelete.push({
@@ -218,7 +218,7 @@ const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatu
         const deletedMetafields = yield client.request(metafields_1.metafieldsDeleteMutation, {
             metafields: metafieldsToDelete,
         });
-        if (((_5 = (_4 = deletedMetafields === null || deletedMetafields === void 0 ? void 0 : deletedMetafields.metafieldsDelete) === null || _4 === void 0 ? void 0 : _4.userErrors) === null || _5 === void 0 ? void 0 : _5.length) == 0) {
+        if (((_8 = (_7 = deletedMetafields === null || deletedMetafields === void 0 ? void 0 : deletedMetafields.metafieldsDelete) === null || _7 === void 0 ? void 0 : _7.userErrors) === null || _8 === void 0 ? void 0 : _8.length) == 0) {
             console.log(`Deleted metafields as discount is ${discountStatus}`, variantsWithMetafields === null || variantsWithMetafields === void 0 ? void 0 : variantsWithMetafields.map((variant) => variant.sku));
         }
         else {
