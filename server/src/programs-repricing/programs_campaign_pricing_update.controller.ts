@@ -63,7 +63,7 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
 
     const discountGid = req.body.admin_graphql_api_id;
 
-    const activeStatus = req.body?.status == "ACTIVE";
+    const activeStatus = req.body?.status == "ACTIVE" || req.body?.status == "SCHEDULED";
 
     if (!activeStatus) {
       // check in DB if discount is related to program discount
