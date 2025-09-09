@@ -124,7 +124,7 @@ const programs_campaign_pricing_update = (req, res) => __awaiter(void 0, void 0,
                 }
             }
         }
-        if (discountStatus === "ACTIVE") {
+        if (discountStatus === "ACTIVE" || discountStatus === "SCHEDULED") {
             // if evaluated as active discount, first remove metafields
             yield deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
             yield new Promise((resolve) => setTimeout(resolve, 500));

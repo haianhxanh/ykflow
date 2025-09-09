@@ -160,7 +160,7 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
       }
     }
 
-    if (discountStatus === "ACTIVE") {
+    if (discountStatus === "ACTIVE" || discountStatus === "SCHEDULED") {
       // if evaluated as active discount, first remove metafields
       await deleteMetafieldsWithMatchingDiscount(discountGid, client, discountStatus);
       await new Promise((resolve) => setTimeout(resolve, 500));
