@@ -26,7 +26,6 @@ export const orders_export = async (req: Request, res: Response) => {
     });
 
     const yesterday = req.query.date ? req.query.date : getYesterday();
-
     const latestOrders = await client.request(ordersQuery, {
       query: `(created_at:'${yesterday}')`,
     });
@@ -37,10 +36,11 @@ export const orders_export = async (req: Request, res: Response) => {
     const disallowedFinancialStatuses = ["VOIDED", "EXPIRED", "REFUNDED"];
     // const allowedPaymentMethods = ["Platba na fakturu", "shopify_payments", "paypal"];
 
-    for (const [orderIndex, order] of latestOrders.orders.edges.entries()) {
-      if (disallowedFinancialStatuses.includes(order.node?.displayFinancialStatus)) {
-        continue;
-      }
+    const filteredOrders = latestOrders.orders.edges.filter((order: any) => {
+      return !disallowedFinancialStatuses.includes(order.node?.displayFinancialStatus);
+    });
+
+    for (const [orderIndex, order] of filteredOrders.entries()) {
       if (orderIndex === 0) {
         let header = [
           { header: "Order name", key: "orderName", width: 10 },
