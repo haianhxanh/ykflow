@@ -147,6 +147,9 @@ export const orderQuery = gql`
               id
               sku
             }
+            product {
+              tags
+            }
           }
         }
       }

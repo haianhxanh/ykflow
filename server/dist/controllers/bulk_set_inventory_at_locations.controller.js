@@ -32,7 +32,7 @@ const bulk_set_inventory_at_locations = (req, res) => __awaiter(void 0, void 0, 
         });
         const locations = yield client.request(locations_1.locationsQuery);
         const locationIds = locations.locations.edges.map((location) => location.node.id);
-        const allProducts = yield (0, products_1.allProductsQuery)("vendor:BrainMarket");
+        const allProducts = yield (0, products_1.allProductsQuery)("tag:Programy");
         // return res.status(200).json(allProducts);
         for (const [locationIndex, locationId] of locationIds.entries()) {
             console.log(`Activating inventory at location ${locationId} ===============================`);

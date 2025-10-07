@@ -60,16 +60,86 @@ export const program_start_date_validation = async (req: Request, res: Response)
     const customerEmail = order.customer?.email;
     const closestStartDate = getClosestStartDate(createdAt);
     const formattedClosestStartDate = convertDateToISOString(closestStartDate);
-
     const startDateValid = new Date(normalizedStartDate) >= new Date(closestStartDate);
+    const attributes = order.customAttributes;
 
     if (startDateValid) {
+      // validate end date attributes
+      const startDateAttribute = order.customAttributes.find((attr: any) => attr.key === "Datum začátku Yes Krabiček");
+      const endDateAttributes = order.customAttributes.filter((attr: any) => attr.key.includes("Konec_"));
+      const normalizedStartDate = convertDateToISOString(startDateAttribute?.value);
+      const newEndDates: { key: any; value: string }[] = [];
+
+      // End date attributes validation
+      for (const endDateAttribute of endDateAttributes) {
+        const variantId = parseInt(endDateAttribute.key.split("_")[1]);
+        const line = order.lineItems.edges.find((item: any) => item.node.variant.id === `gid://shopify/ProductVariant/${variantId}`);
+        const lineSku = line.node.sku;
+        const programLength = parseInt(lineSku.split("D")[0]) - 1;
+        const expectedEndDate = getFutureBusinessDate(normalizedStartDate, programLength);
+        if (expectedEndDate != normalizedStartDate) {
+          newEndDates.push({
+            key: endDateAttribute.key,
+            value: convertDateToISOString(expectedEndDate),
+          });
+        }
+      }
+
+      // If there's no end dates, get all programs and calculate end dates
+      if (newEndDates.length == 0) {
+        const programsItems = order.lineItems.edges.filter((line: any) => {
+          return line.node?.product?.tags?.includes("Programy");
+        });
+
+        if (programsItems.length == 0) {
+          return res.status(200).json({ success: true, message: "No programs found" });
+        }
+
+        for (const program of programsItems) {
+          const programLength = parseInt(program.node?.sku?.split("D")[0]) - 1;
+          const expectedEndDate = getFutureBusinessDate(normalizedStartDate, programLength);
+          if (expectedEndDate && expectedEndDate != normalizedStartDate) {
+            newEndDates.push({
+              key: `Konec_${program.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`,
+              value: convertDateToISOString(expectedEndDate),
+            });
+            attributes.push({
+              key: `Konec_${program.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`,
+              value: convertDateToISOString(expectedEndDate),
+            });
+          }
+        }
+      }
+
+      if (newEndDates.length > 0) {
+        const newAttributes = attributes.map((attr: any) => {
+          const newEndDate = newEndDates.find((newEndDate: { key: any; value: string }) => newEndDate.key === attr.key);
+          if (newEndDate) {
+            return newEndDate;
+          }
+          return attr;
+        });
+
+        const updateOrderAttributes = await client.request(orderUpdateMutation, {
+          input: {
+            id: orderId,
+            customAttributes: newAttributes,
+          },
+        });
+
+        if (updateOrderAttributes.orderUpdate.userErrors.length > 0) {
+          return res.status(400).json({ error: updateOrderAttributes.orderUpdate.userErrors[0].message });
+        }
+
+        return res.status(200).json({ success: true, message: "End date attributes updated", newAttributes });
+      }
+
       return res.status(200).json({
-        startDateValid,
+        success: true,
+        message: "End date attributes are valid",
       });
     }
 
-    const attributes = order.customAttributes;
     const newAttributes = attributes.map((attr: any) => {
       if (attr.key === "Datum začátku Yes Krabiček") {
         return {

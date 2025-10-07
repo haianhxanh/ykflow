@@ -43,7 +43,7 @@ const DAYS_IN_CZECH_REPUBLIC = {
     0: "Neděle",
 };
 const program_start_date_validation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     try {
         const orderId = req.body.orderId;
         const client = new graphql_request_1.GraphQLClient(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
@@ -65,12 +65,75 @@ const program_start_date_validation = (req, res) => __awaiter(void 0, void 0, vo
         const closestStartDate = getClosestStartDate(createdAt);
         const formattedClosestStartDate = (0, helpers_1.convertDateToISOString)(closestStartDate);
         const startDateValid = new Date(normalizedStartDate) >= new Date(closestStartDate);
+        const attributes = order.customAttributes;
         if (startDateValid) {
+            // validate end date attributes
+            const startDateAttribute = order.customAttributes.find((attr) => attr.key === "Datum začátku Yes Krabiček");
+            const endDateAttributes = order.customAttributes.filter((attr) => attr.key.includes("Konec_"));
+            const normalizedStartDate = (0, helpers_1.convertDateToISOString)(startDateAttribute === null || startDateAttribute === void 0 ? void 0 : startDateAttribute.value);
+            const newEndDates = [];
+            // End date attributes validation
+            for (const endDateAttribute of endDateAttributes) {
+                const variantId = parseInt(endDateAttribute.key.split("_")[1]);
+                const line = order.lineItems.edges.find((item) => item.node.variant.id === `gid://shopify/ProductVariant/${variantId}`);
+                const lineSku = line.node.sku;
+                const programLength = parseInt(lineSku.split("D")[0]) - 1;
+                const expectedEndDate = (0, helpers_1.getFutureBusinessDate)(normalizedStartDate, programLength);
+                if (expectedEndDate != normalizedStartDate) {
+                    newEndDates.push({
+                        key: endDateAttribute.key,
+                        value: (0, helpers_1.convertDateToISOString)(expectedEndDate),
+                    });
+                }
+            }
+            // If there's no end dates, get all programs and calculate end dates
+            if (newEndDates.length == 0) {
+                const programsItems = order.lineItems.edges.filter((line) => {
+                    var _a, _b, _c;
+                    return (_c = (_b = (_a = line.node) === null || _a === void 0 ? void 0 : _a.product) === null || _b === void 0 ? void 0 : _b.tags) === null || _c === void 0 ? void 0 : _c.includes("Programy");
+                });
+                if (programsItems.length == 0) {
+                    return res.status(200).json({ success: true, message: "No programs found" });
+                }
+                for (const program of programsItems) {
+                    const programLength = parseInt((_d = (_c = program.node) === null || _c === void 0 ? void 0 : _c.sku) === null || _d === void 0 ? void 0 : _d.split("D")[0]) - 1;
+                    const expectedEndDate = (0, helpers_1.getFutureBusinessDate)(normalizedStartDate, programLength);
+                    if (expectedEndDate && expectedEndDate != normalizedStartDate) {
+                        newEndDates.push({
+                            key: `Konec_${(_g = (_f = (_e = program.node) === null || _e === void 0 ? void 0 : _e.variant) === null || _f === void 0 ? void 0 : _f.id) === null || _g === void 0 ? void 0 : _g.replace("gid://shopify/ProductVariant/", "")}`,
+                            value: (0, helpers_1.convertDateToISOString)(expectedEndDate),
+                        });
+                        attributes.push({
+                            key: `Konec_${(_k = (_j = (_h = program.node) === null || _h === void 0 ? void 0 : _h.variant) === null || _j === void 0 ? void 0 : _j.id) === null || _k === void 0 ? void 0 : _k.replace("gid://shopify/ProductVariant/", "")}`,
+                            value: (0, helpers_1.convertDateToISOString)(expectedEndDate),
+                        });
+                    }
+                }
+            }
+            if (newEndDates.length > 0) {
+                const newAttributes = attributes.map((attr) => {
+                    const newEndDate = newEndDates.find((newEndDate) => newEndDate.key === attr.key);
+                    if (newEndDate) {
+                        return newEndDate;
+                    }
+                    return attr;
+                });
+                const updateOrderAttributes = yield client.request(orders_1.orderUpdateMutation, {
+                    input: {
+                        id: orderId,
+                        customAttributes: newAttributes,
+                    },
+                });
+                if (updateOrderAttributes.orderUpdate.userErrors.length > 0) {
+                    return res.status(400).json({ error: updateOrderAttributes.orderUpdate.userErrors[0].message });
+                }
+                return res.status(200).json({ success: true, message: "End date attributes updated", newAttributes });
+            }
             return res.status(200).json({
-                startDateValid,
+                success: true,
+                message: "End date attributes are valid",
             });
         }
-        const attributes = order.customAttributes;
         const newAttributes = attributes.map((attr) => {
             if (attr.key === "Datum začátku Yes Krabiček") {
                 return {

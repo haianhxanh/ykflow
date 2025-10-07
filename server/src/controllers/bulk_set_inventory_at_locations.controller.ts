@@ -22,7 +22,7 @@ export const bulk_set_inventory_at_locations = async (req: Request, res: Respons
     const locations = await client.request(locationsQuery);
     const locationIds = locations.locations.edges.map((location: any) => location.node.id);
 
-    const allProducts = await allProductsQuery("vendor:BrainMarket");
+    const allProducts = await allProductsQuery("tag:Programy");
 
     // return res.status(200).json(allProducts);
 

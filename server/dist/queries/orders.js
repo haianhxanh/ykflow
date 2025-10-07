@@ -160,6 +160,9 @@ exports.orderQuery = (0, graphql_request_1.gql) `
               id
               sku
             }
+            product {
+              tags
+            }
           }
         }
       }
