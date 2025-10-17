@@ -52,13 +52,13 @@ export const brainmarkets_products_import = async (req: Request, res: Response) 
     // const missingItems = preferredItems.filter((item: any) => !itemsToImport.some((i: any) => i.title === item));
     // console.log("missing items", missingItems.length);
 
-    const products = createProductObjects(itemsToImport);
+    const products: ProductInputs[] = createProductObjects(itemsToImport);
     const variants = createVariantObjects(itemsToImport);
 
     const locations = await client.request(locationsQuery);
     const locationIds = locations.locations.edges.map((location: any) => location.node.id);
 
-    for (const product of products) {
+    for (const product of products as unknown as ProductInput[]) {
       const productExists = await client.request(productsQuery, {
         query: `title:${product.product.title}`,
       });
@@ -191,7 +191,7 @@ const createProductObjects = (items: any) => {
     if (item.vat == "12") {
       input.product.tags.push("DPH 12%");
     }
-    products.push(input);
+    products.push([input]);
   }
   return products;
 };

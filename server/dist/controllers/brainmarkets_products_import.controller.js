@@ -188,7 +188,7 @@ const createProductObjects = (items) => {
         if (item.vat == "12") {
             input.product.tags.push("DPH 12%");
         }
-        products.push(input);
+        products.push([input]);
     }
     return products;
 };
