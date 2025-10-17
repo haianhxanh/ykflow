@@ -28,18 +28,18 @@ const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     try {
         const shouldSendEmail = req.query.sendEmail === "true";
         const { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
-        const ratings = (yield rating_model_1.default.findAll({
+        const ratings = (_a = (yield rating_model_1.default.findAll({
             where: {
                 // @ts-ignore
                 createdAt: {
                     [sequelize_1.Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
                 },
             },
-        }));
+        }))) === null || _a === void 0 ? void 0 : _a.filter((rating) => rating.meal_date >= new Date(precedingMonday) && rating.meal_date <= new Date(lastSunday));
         if (!ratings) {
             return res.status(404).json({ error: "No ratings found" });
         }
@@ -53,18 +53,19 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return acc;
         }, {});
         const workbook = new exceljs_1.default.Workbook();
+        const worksheet = workbook.addWorksheet(`Všechna hodnocení`);
+        worksheet.columns = [
+            { header: "Recipe Name", key: "recipe_name", width: 50 },
+            { header: "Type", key: "recipe_type", width: 20 },
+            { header: "Meal Date", key: "meal_date", width: 10 },
+            { header: "Rating", key: "rating", width: 10 },
+            { header: "Comment", key: "comment", width: 20 },
+            { header: "User", key: "user", width: 40 },
+            { header: "User Profile", key: "userProfile", width: 40 },
+        ];
         for (let i = 0; i < 5; i++) {
             // @ts-ignore
-            const mealType = meal_rating_controller_1.meals && ((_a = meal_rating_controller_1.meals[i]) === null || _a === void 0 ? void 0 : _a.name);
-            const worksheet = workbook.addWorksheet(`${mealType}`);
-            worksheet.columns = [
-                { header: "Recipe Name", key: "recipe_name", width: 20 },
-                { header: "Type", key: "recipe_type", width: 20 },
-                { header: "Rating", key: "rating", width: 10 },
-                { header: "Comment", key: "comment", width: 20 },
-                { header: "User", key: "user", width: 50 },
-                { header: "User Profile", key: "userProfile", width: 50 },
-            ];
+            const mealType = meal_rating_controller_1.meals && ((_b = meal_rating_controller_1.meals[i]) === null || _b === void 0 ? void 0 : _b.name);
             const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
             for (const rating of sortedRecipeTypeRatings) {
                 const shopifyUser = rating.shopify_user_id ? yield client.request(customers_1.customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` }) : null;
@@ -73,6 +74,7 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 worksheet.addRow({
                     recipe_name: rating.recipe_name,
                     recipe_type: rating.recipe_type,
+                    meal_date: rating.meal_date,
                     rating: rating.rating,
                     comment: rating.comment,
                     user: user,

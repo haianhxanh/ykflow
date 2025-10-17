@@ -20,14 +20,16 @@ export const reviews_export = async (req: Request, res: Response) => {
   try {
     const shouldSendEmail = req.query.sendEmail === "true";
     const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-    const ratings = (await Rating.findAll({
-      where: {
-        // @ts-ignore
-        createdAt: {
-          [Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
+    const ratings = (
+      await Rating.findAll({
+        where: {
+          // @ts-ignore
+          createdAt: {
+            [Op.between]: [`${precedingMonday}T00:00:00.000Z`, `${lastSunday}T23:59:59.999Z`],
+          },
         },
-      },
-    })) as Rating[];
+      })
+    )?.filter((rating) => rating.meal_date >= new Date(precedingMonday) && rating.meal_date <= new Date(lastSunday)) as Rating[];
 
     if (!ratings) {
       return res.status(404).json({ error: "No ratings found" });
@@ -45,19 +47,20 @@ export const reviews_export = async (req: Request, res: Response) => {
 
     const workbook = new ExcelJS.Workbook();
 
+    const worksheet = workbook.addWorksheet(`Všechna hodnocení`);
+    worksheet.columns = [
+      { header: "Recipe Name", key: "recipe_name", width: 50 },
+      { header: "Type", key: "recipe_type", width: 20 },
+      { header: "Meal Date", key: "meal_date", width: 10 },
+      { header: "Rating", key: "rating", width: 10 },
+      { header: "Comment", key: "comment", width: 20 },
+      { header: "User", key: "user", width: 40 },
+      { header: "User Profile", key: "userProfile", width: 40 },
+    ];
+
     for (let i = 0; i < 5; i++) {
       // @ts-ignore
       const mealType = meals && meals[i]?.name;
-      const worksheet = workbook.addWorksheet(`${mealType}`);
-      worksheet.columns = [
-        { header: "Recipe Name", key: "recipe_name", width: 20 },
-        { header: "Type", key: "recipe_type", width: 20 },
-        { header: "Rating", key: "rating", width: 10 },
-        { header: "Comment", key: "comment", width: 20 },
-        { header: "User", key: "user", width: 50 },
-        { header: "User Profile", key: "userProfile", width: 50 },
-      ];
-
       const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
       for (const rating of sortedRecipeTypeRatings) {
         const shopifyUser = rating.shopify_user_id ? await client.request(customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` }) : null;
@@ -66,6 +69,7 @@ export const reviews_export = async (req: Request, res: Response) => {
         worksheet.addRow({
           recipe_name: rating.recipe_name,
           recipe_type: rating.recipe_type,
+          meal_date: rating.meal_date,
           rating: rating.rating,
           comment: rating.comment,
           user: user,
@@ -73,6 +77,7 @@ export const reviews_export = async (req: Request, res: Response) => {
         });
       }
     }
+
     const weekNumber = getWeekNumber(precedingMonday);
     await workbook.xlsx.writeFile(`hodnoceni-receptu-tyden-${weekNumber}.xlsx`);
     const buffer = await workbook.xlsx.writeBuffer();
