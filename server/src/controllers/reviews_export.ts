@@ -18,6 +18,7 @@ const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
 export const reviews_export = async (req: Request, res: Response) => {
   try {
+    const shouldSendEmail = req.query.sendEmail === "true";
     const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
     const ratings = (await Rating.findAll({
       where: {
@@ -77,23 +78,26 @@ export const reviews_export = async (req: Request, res: Response) => {
     const buffer = await workbook.xlsx.writeBuffer();
     const base64Content = Buffer.from(buffer).toString("base64");
 
-    let attachment = {
+    const attachment = {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       name: `hodnoceni-receptu-tyden-${weekNumber}.xlsx`,
       content: base64Content,
     };
 
-    const sendEmail = await sendNotification(
-      `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
-      recipientEmails,
-      `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`,
-      null,
-      MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
-      attachment,
-      true
-    );
-
-    return res.status(200).json(attachment);
+    if (shouldSendEmail) {
+      const sendEmail = await sendNotification(
+        `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)}`,
+        recipientEmails,
+        `Hodnocení receptů od ${czechDate(precedingMonday)} do ${czechDate(lastSunday)} jsou připravena k exportu`,
+        null,
+        MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
+        attachment,
+        true
+      );
+      return res.status(200).json(sendEmail);
+    } else {
+      return res.status(200).json(attachment);
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

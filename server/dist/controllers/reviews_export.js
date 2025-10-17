@@ -30,6 +30,7 @@ const recipientEmails = ORDER_EXPORT_RECIPIENTS;
 const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
+        const shouldSendEmail = req.query.sendEmail === "true";
         const { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
         const ratings = (yield rating_model_1.default.findAll({
             where: {
@@ -83,13 +84,18 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
         yield workbook.xlsx.writeFile(`hodnoceni-receptu-tyden-${weekNumber}.xlsx`);
         const buffer = yield workbook.xlsx.writeBuffer();
         const base64Content = Buffer.from(buffer).toString("base64");
-        let attachment = {
+        const attachment = {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             name: `hodnoceni-receptu-tyden-${weekNumber}.xlsx`,
             content: base64Content,
         };
-        const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)} jsou připravena k exportu`, null, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
-        return res.status(200).json(attachment);
+        if (shouldSendEmail) {
+            const sendEmail = yield (0, notification_1.sendNotification)(`Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)}`, recipientEmails, `Hodnocení receptů od ${(0, helpers_1.czechDate)(precedingMonday)} do ${(0, helpers_1.czechDate)(lastSunday)} jsou připravena k exportu`, null, MANDRILL_MESSAGE_BCC_ADDRESS_DEV, attachment, true);
+            return res.status(200).json(sendEmail);
+        }
+        else {
+            return res.status(200).json(attachment);
+        }
     }
     catch (error) {
         console.error(error);
