@@ -38,7 +38,9 @@ export const reviews_export_rewards = async (req: Request, res: Response) => {
     const workDays = getWorkDatesBetweenDates(precedingMonday, lastSunday);
 
     // filter out ratings without shopify_user_id
-    const filteredRatings = ratings.filter((rating) => rating.shopify_user_id && rating.meal_date);
+    const filteredRatings = ratings.filter(
+      (rating) => rating.shopify_user_id && rating.meal_date && rating.meal_date >= new Date(precedingMonday) && rating.meal_date <= new Date(lastSunday)
+    );
 
     // group by users
     const users = filteredRatings.reduce((acc: Record<number, Rating[]>, rating: Rating) => {
