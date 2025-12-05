@@ -27,30 +27,72 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
     });
 
     const locationId = req.query.locationId as string;
-    const query = "tag:Programy OR tag:Monoporce";
+    const query = "tag_not:Programy";
     const products = await allProductsQuery(query);
-    for (const product of products) {
+    console.log(`Total products to process: ${products.length}`);
+
+    res.status(202).json({
+      message: "Processing started",
+      totalProducts: products.length,
+      locationId: locationId,
+    });
+
+    const progress = {
+      totalProducts: products.length,
+      processedProducts: 0,
+      processedVariants: 0,
+      errors: [] as any[],
+    };
+
+    for (let productIndex = 0; productIndex < products.length; productIndex++) {
+      const product = products[productIndex];
+
       for (const variant of product.node.variants.edges) {
-        const locationActivate = await client.request(inventoryBulkToggleActivation, {
-          inventoryItemId: variant.node.inventoryItem.id,
-          inventoryItemUpdates: [
-            {
-              locationId: `gid://shopify/Location/${locationId}`,
-              activate: true,
-            },
-          ],
-        });
-        console.log(variant.node.sku);
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        if (locationActivate.inventoryBulkToggleActivation.userErrors.length > 0) {
-          console.log(variant.node.inventoryItem.id, locationActivate.inventoryBulkToggleActivation.userErrors);
+        try {
+          const locationActivate = await client.request(inventoryBulkToggleActivation, {
+            inventoryItemId: variant.node.inventoryItem.id,
+            inventoryItemUpdates: [
+              {
+                locationId: `gid://shopify/Location/${locationId}`,
+                activate: true,
+              },
+            ],
+          });
+          console.log(variant.node.sku ? variant.node.sku : variant.node.title);
+          progress.processedVariants++;
+
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          if (locationActivate.inventoryBulkToggleActivation.userErrors.length > 0) {
+            const errorInfo = {
+              inventoryItemId: variant.node.inventoryItem.id,
+              errors: locationActivate.inventoryBulkToggleActivation.userErrors,
+            };
+            progress.errors.push(errorInfo);
+            console.log(variant.node.inventoryItem.id, locationActivate.inventoryBulkToggleActivation.userErrors);
+          }
+        } catch (variantError) {
+          console.error(`Error processing variant ${variant.node.inventoryItem.id}:`, variantError);
+          progress.errors.push({
+            inventoryItemId: variant.node.inventoryItem.id,
+            errors: [{ message: String(variantError) }],
+          });
         }
       }
+
+      progress.processedProducts++;
+      console.log(`Progress: ${progress.processedProducts}/${progress.totalProducts} products completed`);
     }
 
-    return res.status(200).json({ products });
+    console.log("=== Processing Completed ===");
+    console.log(`Total products: ${progress.totalProducts}`);
+    console.log(`Processed products: ${progress.processedProducts}`);
+    console.log(`Processed variants: ${progress.processedVariants}`);
+    console.log(`Errors: ${progress.errors.length}`);
+    if (progress.errors.length > 0) {
+      console.log("Error details:", progress.errors);
+    }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error during background processing:", error);
   }
 };
