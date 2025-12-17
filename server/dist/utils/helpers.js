@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWorkDatesBetweenDates = exports.czechDate = exports.getWeekNumber = exports.getLastSundayAndPrecedingMonday = exports.setProgramLengthWord = exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
+exports.getWeekWorkDates = exports.getNextNextWeekMondayToFriday = exports.getThisWeekMondayToFriday = exports.getWorkDatesBetweenDates = exports.czechDate = exports.getWeekNumber = exports.getLastSundayAndPrecedingMonday = exports.setProgramLengthWord = exports.getYesterday = exports.isWeekDay = exports.convertDateToLocalString = exports.convertDateToISOString = exports.convertDate = exports.getFutureBusinessDate = exports.getBusinessDatesCount = void 0;
 const getBusinessDatesCount = (start, end) => {
     // start date is included in the count
     // end date is not included in the count
@@ -108,3 +108,50 @@ const getWorkDatesBetweenDates = (startDate, endDate) => {
     return workDates;
 };
 exports.getWorkDatesBetweenDates = getWorkDatesBetweenDates;
+const getThisWeekMondayToFriday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysToMonday);
+    return Array.from({ length: 5 }, (_, i) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        return formatDate(date);
+    });
+};
+exports.getThisWeekMondayToFriday = getThisWeekMondayToFriday;
+const getNextNextWeekMondayToFriday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay();
+    const daysToThisMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const thisMonday = new Date(today);
+    thisMonday.setDate(today.getDate() - daysToThisMonday);
+    const nextNextMonday = new Date(thisMonday);
+    nextNextMonday.setDate(thisMonday.getDate() + 14);
+    return Array.from({ length: 5 }, (_, i) => {
+        const date = new Date(nextNextMonday);
+        date.setDate(nextNextMonday.getDate() + i);
+        return formatDate(date);
+    });
+};
+exports.getNextNextWeekMondayToFriday = getNextNextWeekMondayToFriday;
+const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+const getWeekWorkDates = (mondayDate) => {
+    const monday = new Date(mondayDate);
+    const weekWorkDates = [];
+    for (let i = 0; i < 5; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        weekWorkDates.push(formatDate(date));
+    }
+    return weekWorkDates;
+};
+exports.getWeekWorkDates = getWeekWorkDates;
