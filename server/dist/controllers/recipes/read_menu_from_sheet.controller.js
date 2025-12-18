@@ -37,11 +37,6 @@ const MEAL_TYPES_MAPPING = {
     "3": "Svačina 2",
     "4": "Večeře",
 };
-const HEATING_OPTIONS_MAPPING = {
-    A: "true",
-    "A/N": "true",
-    N: "false",
-};
 const formatNumber = (number) => {
     return number.replace(",", ".");
 };
@@ -169,8 +164,8 @@ const buildMealFields = (date, mealIndex, mealData) => {
             value: JSON.stringify(((_a = mealData["ALERGENY"]) === null || _a === void 0 ? void 0 : _a.split(",").map((allergen) => allergen.trim()).filter((allergen) => allergen !== "").filter((allergen) => ALLERGEN_VALUES.includes(allergen))) || []),
         },
         {
-            key: "suitable_for_heating",
-            value: HEATING_OPTIONS_MAPPING[mealData["OHŘEV"]],
+            key: "heating_option",
+            value: mealData["OHŘEV"],
         },
     ];
     // Add numeric fields for large and small portions

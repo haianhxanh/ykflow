@@ -24,11 +24,6 @@ const MEAL_TYPES_MAPPING = {
   "3": "Svačina 2",
   "4": "Večeře",
 };
-const HEATING_OPTIONS_MAPPING = {
-  A: "true",
-  "A/N": "true",
-  N: "false",
-};
 const formatNumber = (number: string) => {
   return number.replace(",", ".");
 };
@@ -170,8 +165,8 @@ const buildMealFields = (date: string, mealIndex: number, mealData: Record<strin
       ),
     },
     {
-      key: "suitable_for_heating",
-      value: HEATING_OPTIONS_MAPPING[mealData["OHŘEV"] as keyof typeof HEATING_OPTIONS_MAPPING],
+      key: "heating_option",
+      value: mealData["OHŘEV"],
     },
   ];
 
