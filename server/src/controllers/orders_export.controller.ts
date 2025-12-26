@@ -156,21 +156,20 @@ export const orders_export = async (req: Request, res: Response) => {
                 programEndDate = attribute.value;
 
                 // change program end date of AKCE items to be after the main program
-                continue;
                 if (line.node.customAttributes.find((attr: any) => attr.key == "AKCE")) {
                   // add note about AKCE to the main program
-                  if (!programLength.includes("AKCE zdarma")) {
+                  if (programLength && !programLength.includes("AKCE zdarma")) {
                     programLength += `| AKCE zdarma, navazuje na hlavní program`;
                   }
 
                   console.log(order.node.id, line.node.title);
 
                   // find the main program
-                  let mainProgram = order.node.lineItems.edges.find((mainLine: any) => {
+                  const mainProgram = order.node.lineItems.edges.find((mainLine: any) => {
                     return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr: any) => attr.key == "AKCE");
                   });
 
-                  let mainProgramEndDate = order.node.customAttributes.find((attr: any) => {
+                  const mainProgramEndDate = order.node.customAttributes.find((attr: any) => {
                     return attr.key === `Konec_${mainProgram?.node?.variant?.id?.replace("gid://shopify/ProductVariant/", "")}`;
                   });
 
@@ -288,6 +287,19 @@ export const orders_export = async (req: Request, res: Response) => {
             let allergens = line.node?.customAttributes?.find(
               (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != ""
             );
+
+            // AKCE zdarma
+            const isAKCE = line.node.customAttributes.find((attr: any) => attr.key == "AKCE");
+            const mainProgram = order.node.lineItems.edges.find((mainLine: any) => {
+              return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr: any) => attr.key == "AKCE");
+            });
+
+            if (isAKCE && mainProgram) {
+              allergens = mainProgram.node.customAttributes.find(
+                (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != ""
+              );
+            }
+            // AKCE zdarma
 
             if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
               for (const attribute of order.node.customAttributes) {

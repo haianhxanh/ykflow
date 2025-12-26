@@ -160,18 +160,17 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                             if (attribute.key === `Konec_${(_x = (_w = (_v = line.node) === null || _v === void 0 ? void 0 : _v.variant) === null || _w === void 0 ? void 0 : _w.id) === null || _x === void 0 ? void 0 : _x.replace("gid://shopify/ProductVariant/", "")}`) {
                                 programEndDate = attribute.value;
                                 // change program end date of AKCE items to be after the main program
-                                continue;
                                 if (line.node.customAttributes.find((attr) => attr.key == "AKCE")) {
                                     // add note about AKCE to the main program
-                                    if (!programLength.includes("AKCE zdarma")) {
+                                    if (programLength && !programLength.includes("AKCE zdarma")) {
                                         programLength += `| AKCE zdarma, navazuje na hlavní program`;
                                     }
                                     console.log(order.node.id, line.node.title);
                                     // find the main program
-                                    let mainProgram = order.node.lineItems.edges.find((mainLine) => {
+                                    const mainProgram = order.node.lineItems.edges.find((mainLine) => {
                                         return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr) => attr.key == "AKCE");
                                     });
-                                    let mainProgramEndDate = order.node.customAttributes.find((attr) => {
+                                    const mainProgramEndDate = order.node.customAttributes.find((attr) => {
                                         var _a, _b, _c;
                                         return attr.key === `Konec_${(_c = (_b = (_a = mainProgram === null || mainProgram === void 0 ? void 0 : mainProgram.node) === null || _a === void 0 ? void 0 : _a.variant) === null || _b === void 0 ? void 0 : _b.id) === null || _c === void 0 ? void 0 : _c.replace("gid://shopify/ProductVariant/", "")}`;
                                     });
@@ -274,6 +273,15 @@ const orders_export = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     ];
                     if (lineIsProgram) {
                         let allergens = (_77 = (_76 = line.node) === null || _76 === void 0 ? void 0 : _76.customAttributes) === null || _77 === void 0 ? void 0 : _77.find((attr) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != "");
+                        // AKCE zdarma
+                        const isAKCE = line.node.customAttributes.find((attr) => attr.key == "AKCE");
+                        const mainProgram = order.node.lineItems.edges.find((mainLine) => {
+                            return line.node.title === mainLine.node.title && !mainLine.node.customAttributes.find((attr) => attr.key == "AKCE");
+                        });
+                        if (isAKCE && mainProgram) {
+                            allergens = mainProgram.node.customAttributes.find((attr) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != "");
+                        }
+                        // AKCE zdarma
                         if (order.node.customAttributes && order.node.sourceName == "shopify_draft_order") {
                             for (const attribute of order.node.customAttributes) {
                                 if (attribute.key.includes("Vyřazeno") || attribute.key.includes("Excluded") || attribute.key.includes("Alergeny")) {
