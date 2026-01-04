@@ -30,6 +30,7 @@ import { orders_district_export } from "../controllers/orders_district_export.co
 import { bulk_set_inventory_at_locations } from "../controllers/bulk_set_inventory_at_locations.controller";
 import { brainmarkets_products_import } from "../controllers/brainmarkets_products_import.controller";
 import { read_menu_from_sheet } from "../controllers/recipes/read_menu_from_sheet.controller";
+import { toggle_variant_campaign_data } from "../controllers/toggle_variant_campaign_data.controller";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -61,4 +62,5 @@ router.post("/programs/campaign/pricing/update", programs_campaign_pricing_updat
 router.post("/programs/start-date/validation", program_start_date_validation);
 router.get("/brainmarkets/products/import", brainmarkets_products_import);
 router.get("/menu/read", read_menu_from_sheet);
+router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data);
 export default router;

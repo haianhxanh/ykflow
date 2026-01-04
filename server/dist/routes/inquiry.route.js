@@ -33,6 +33,7 @@ const orders_district_export_controller_1 = require("../controllers/orders_distr
 const bulk_set_inventory_at_locations_controller_1 = require("../controllers/bulk_set_inventory_at_locations.controller");
 const brainmarkets_products_import_controller_1 = require("../controllers/brainmarkets_products_import.controller");
 const read_menu_from_sheet_controller_1 = require("../controllers/recipes/read_menu_from_sheet.controller");
+const toggle_variant_campaign_data_controller_1 = require("../controllers/toggle_variant_campaign_data.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -64,4 +65,5 @@ router.post("/programs/campaign/pricing/update", programs_campaign_pricing_updat
 router.post("/programs/start-date/validation", program_start_date_validation_controller_1.program_start_date_validation);
 router.get("/brainmarkets/products/import", brainmarkets_products_import_controller_1.brainmarkets_products_import);
 router.get("/menu/read", read_menu_from_sheet_controller_1.read_menu_from_sheet);
+router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data_controller_1.toggle_variant_campaign_data);
 exports.default = router;

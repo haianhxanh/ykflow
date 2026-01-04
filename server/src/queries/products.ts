@@ -125,6 +125,36 @@ export const productsQueryWithVariants = gql`
   }
 `;
 
+export const programsQueryWithVariants = gql`
+  query {
+    products(first: 250, query: "tags:Programy AND status:ACTIVE") {
+      edges {
+        node {
+          id
+          variants(first: 250) {
+            edges {
+              node {
+                id
+                sku
+                metafields(first: 10, namespace: "campaign") {
+                  edges {
+                    node {
+                      id
+                      namespace
+                      key
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const productCreateQuery = gql`
   mutation mutationProductCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
     productCreate(input: $input, media: $media) {
