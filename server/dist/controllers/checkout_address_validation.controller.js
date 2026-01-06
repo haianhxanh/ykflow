@@ -109,6 +109,11 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
                 if ((_c = (_b = (_a = placemark === null || placemark === void 0 ? void 0 : placemark.Polygon) === null || _a === void 0 ? void 0 : _a.outerBoundaryIs) === null || _b === void 0 ? void 0 : _b.LinearRing) === null || _c === void 0 ? void 0 : _c.coordinates) {
                     coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
                 }
+                if (placemark === null || placemark === void 0 ? void 0 : placemark.MultiGeometry) {
+                    for (const polygon of placemark.MultiGeometry.Polygon) {
+                        coordinates.push(polygon.outerBoundaryIs.LinearRing.coordinates);
+                    }
+                }
             }
         }
         let coordinatesArray = coordinates.map((c) => {

@@ -69,6 +69,11 @@ export const checkout_address_validation = async (req: Request, res: Response) =
         if (placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
           coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
         }
+        if (placemark?.MultiGeometry) {
+          for (const polygon of placemark.MultiGeometry.Polygon) {
+            coordinates.push(polygon.outerBoundaryIs.LinearRing.coordinates);
+          }
+        }
       }
     }
 
