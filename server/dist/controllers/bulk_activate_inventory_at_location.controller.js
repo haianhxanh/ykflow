@@ -35,8 +35,8 @@ const bulk_activate_inventory_at_location = (req, res) => __awaiter(void 0, void
             },
         });
         const locationId = req.query.locationId;
-        const query = "tag_not:Programy";
-        const products = yield (0, products_1.allProductsQuery)(query);
+        const query = req.query.query;
+        const products = yield (0, products_1.allProductsQuery)(query || "");
         console.log(`Total products to process: ${products.length}`);
         res.status(202).json({
             message: "Processing started",

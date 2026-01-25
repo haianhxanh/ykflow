@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { GraphQLClient } from "graphql-request";
-import ExcelJS from "exceljs";
 import { allProductsQuery } from "../queries/products";
-import { addTagsMutation } from "../queries/commonObjects";
 import { inventoryBulkToggleActivation } from "../queries/inventory";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
@@ -27,8 +25,8 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
     });
 
     const locationId = req.query.locationId as string;
-    const query = "tag_not:Programy";
-    const products = await allProductsQuery(query);
+    const query = req.query.query as string;
+    const products = await allProductsQuery(query || "");
     console.log(`Total products to process: ${products.length}`);
 
     res.status(202).json({
