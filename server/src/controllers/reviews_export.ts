@@ -77,7 +77,7 @@ export const reviews_export = async (req: Request, res: Response) => {
           comment: rating.comment,
           user: user,
           userProfile: userAdminUrl,
-          keep_menu: rating.keep_menu != null ? (rating.keep_menu ? "Ano" : "Ne") : null,
+          keep_menu: rating.keep_menu != null ? (rating.keep_menu ? true : false) : null,
           keep_menu_note: rating.keep_menu_note,
         });
       }
