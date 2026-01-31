@@ -38,6 +38,15 @@ Rating.init({
         type: sequelize_1.DataTypes.DATE,
         allowNull: true,
     },
+    keep_menu: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: null,
+    },
+    keep_menu_note: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     sequelize: db_connect_1.db,
     tableName: "Rating",

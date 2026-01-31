@@ -36,14 +36,17 @@ export const reviews_export = async (req: Request, res: Response) => {
     }
 
     // group by recipe_type
-    const recipeTypeRatings = ratings.reduce((acc, rating) => {
-      // @ts-ignore
-      if (!acc[rating.recipe_type]) {
-        acc[rating.recipe_type] = [];
-      }
-      acc[rating.recipe_type].push(rating);
-      return acc;
-    }, {} as Record<string, Rating[]>);
+    const recipeTypeRatings = ratings.reduce(
+      (acc, rating) => {
+        // @ts-ignore
+        if (!acc[rating.recipe_type]) {
+          acc[rating.recipe_type] = [];
+        }
+        acc[rating.recipe_type].push(rating);
+        return acc;
+      },
+      {} as Record<string, Rating[]>,
+    );
 
     const workbook = new ExcelJS.Workbook();
 
@@ -74,6 +77,8 @@ export const reviews_export = async (req: Request, res: Response) => {
           comment: rating.comment,
           user: user,
           userProfile: userAdminUrl,
+          keep_menu: rating.keep_menu != null ? (rating.keep_menu ? "Ano" : "Ne") : null,
+          keep_menu_note: rating.keep_menu_note,
         });
       }
     }
@@ -97,7 +102,7 @@ export const reviews_export = async (req: Request, res: Response) => {
         null,
         MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
         attachment,
-        true
+        true,
       );
       return res.status(200).json(sendEmail);
     } else {

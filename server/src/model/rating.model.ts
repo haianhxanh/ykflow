@@ -10,6 +10,8 @@ class Rating extends Model<InferAttributes<Rating>, InferCreationAttributes<Rati
   declare shopify_user_id: number;
   declare comment: string;
   declare meal_date: Date;
+  declare keep_menu: boolean | null;
+  declare keep_menu_note: string | null;
 }
 
 Rating.init(
@@ -47,12 +49,21 @@ Rating.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    keep_menu: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: null,
+    },
+    keep_menu_note: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize: db,
     tableName: "Rating",
     modelName: "Rating",
-  }
+  },
 );
 
 export default Rating;
