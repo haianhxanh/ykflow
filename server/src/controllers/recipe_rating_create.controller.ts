@@ -26,7 +26,7 @@ export const recipe_rating_create = async (req: Request, res: Response) => {
       shopify_user_id: req.body?.shopify_user_id || null,
       comment: req.body?.comment || null,
       meal_date: req.body?.meal_date || null,
-      keep_menu: req.body?.keep_menu || null,
+      keep_menu: req.body?.keep_menu != null ? (req.body?.keep_menu ? true : false) : null,
       keep_menu_note: req.body?.keep_menu_note || null,
     },
     { returning: true },
