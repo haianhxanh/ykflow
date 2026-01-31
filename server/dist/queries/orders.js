@@ -203,6 +203,7 @@ function allOrdersQuery(query) {
               node {
                 id
                 name
+                createdAt
                 customAttributes {
                   key
                   value
@@ -216,6 +217,11 @@ function allOrdersQuery(query) {
                       id 
                       title
                       quantity
+                      discountedUnitPriceSet {
+                        shopMoney {
+                          amount
+                        }
+                      }
                       variant {
                         id
                         title
@@ -223,6 +229,11 @@ function allOrdersQuery(query) {
                           title
                           tags
                         }
+                        sku
+                      }
+                      customAttributes {
+                        key
+                        value
                       }
                     }
                   }

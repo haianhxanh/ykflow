@@ -161,7 +161,8 @@ const buildMealFields = (date: string, mealIndex: number, mealData: Record<strin
           ?.split(",")
           .map((allergen: string) => allergen.trim())
           .filter((allergen: string) => allergen !== "")
-          .filter((allergen: string) => ALLERGEN_VALUES.includes(allergen)) || []
+          .filter((allergen: string) => ALLERGEN_VALUES.includes(allergen))
+          .filter((allergen: string, index: number, self: string[]) => self.indexOf(allergen) === index) || [],
       ),
     },
     {

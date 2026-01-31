@@ -161,7 +161,7 @@ const buildMealFields = (date, mealIndex, mealData) => {
         { key: "name", value: mealData["PO"] },
         {
             key: "allergens",
-            value: JSON.stringify(((_a = mealData["ALERGENY"]) === null || _a === void 0 ? void 0 : _a.split(",").map((allergen) => allergen.trim()).filter((allergen) => allergen !== "").filter((allergen) => ALLERGEN_VALUES.includes(allergen))) || []),
+            value: JSON.stringify(((_a = mealData["ALERGENY"]) === null || _a === void 0 ? void 0 : _a.split(",").map((allergen) => allergen.trim()).filter((allergen) => allergen !== "").filter((allergen) => ALLERGEN_VALUES.includes(allergen)).filter((allergen, index, self) => self.indexOf(allergen) === index)) || []),
         },
         {
             key: "heating_option",

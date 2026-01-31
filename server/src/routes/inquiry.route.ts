@@ -31,6 +31,7 @@ import { bulk_set_inventory_at_locations } from "../controllers/bulk_set_invento
 import { brainmarkets_products_import } from "../controllers/brainmarkets_products_import.controller";
 import { read_menu_from_sheet } from "../controllers/recipes/read_menu_from_sheet.controller";
 import { toggle_variant_campaign_data } from "../controllers/toggle_variant_campaign_data.controller";
+import { upsell_performance } from "../controllers/exports/upsell_performance.controller";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -63,4 +64,5 @@ router.post("/programs/start-date/validation", program_start_date_validation);
 router.get("/brainmarkets/products/import", brainmarkets_products_import);
 router.get("/menu/read", read_menu_from_sheet);
 router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data);
+router.get("/exports/upsell-performance", upsell_performance);
 export default router;

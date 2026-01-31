@@ -193,6 +193,7 @@ export async function allOrdersQuery(query: string) {
               node {
                 id
                 name
+                createdAt
                 customAttributes {
                   key
                   value
@@ -206,6 +207,11 @@ export async function allOrdersQuery(query: string) {
                       id 
                       title
                       quantity
+                      discountedUnitPriceSet {
+                        shopMoney {
+                          amount
+                        }
+                      }
                       variant {
                         id
                         title
@@ -213,6 +219,11 @@ export async function allOrdersQuery(query: string) {
                           title
                           tags
                         }
+                        sku
+                      }
+                      customAttributes {
+                        key
+                        value
                       }
                     }
                   }
