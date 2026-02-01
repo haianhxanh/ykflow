@@ -57,6 +57,8 @@ export const reviews_export = async (req: Request, res: Response) => {
       { header: "Meal Date", key: "meal_date", width: 10 },
       { header: "Rating", key: "rating", width: 10 },
       { header: "Comment", key: "comment", width: 20 },
+      { header: "Keep Menu", key: "keep_menu", width: 10 },
+      { header: "Keep Menu Note", key: "keep_menu_note", width: 20 },
       { header: "User", key: "user", width: 40 },
       { header: "User Profile", key: "userProfile", width: 40 },
     ];
@@ -75,10 +77,10 @@ export const reviews_export = async (req: Request, res: Response) => {
           meal_date: rating.meal_date,
           rating: rating.rating,
           comment: rating.comment,
-          user: user,
-          userProfile: userAdminUrl,
           keep_menu: rating.keep_menu != null ? (rating.keep_menu ? true : false) : null,
           keep_menu_note: rating.keep_menu_note,
+          user: user,
+          userProfile: userAdminUrl,
         });
       }
     }
