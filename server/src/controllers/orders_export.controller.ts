@@ -130,6 +130,42 @@ export const orders_export = async (req: Request, res: Response) => {
         }
       }
 
+      let shippingAddress;
+      if (order.node?.shippingAddress?.address1 && !order.node?.shippingAddress?.address2) {
+        shippingAddress = order.node?.shippingAddress?.address1;
+      } else if (order.node?.shippingAddress?.address1 && order.node?.shippingAddress?.address2) {
+        shippingAddress = `${order.node?.shippingAddress?.address1} ${order.node?.shippingAddress?.address2}`;
+      }
+
+      const fullAddressArray = [];
+      if (order.node?.shippingAddress?.address1) {
+        fullAddressArray.push(order.node?.shippingAddress?.address1);
+      }
+      if (order.node?.shippingAddress?.address2) {
+        fullAddressArray.push(order.node?.shippingAddress?.address2);
+      }
+      if (order.node?.shippingAddress?.city) {
+        fullAddressArray.push(order.node?.shippingAddress?.city);
+      }
+      if (order.node?.shippingAddress?.zip) {
+        fullAddressArray.push(order.node?.shippingAddress?.zip?.replace(/\s/g, ""));
+      }
+
+      const location = await client.request(locationQueryByName, {
+        query: `name:${order.node?.shippingLine?.title}`,
+      });
+
+      const pickupLocationAddress = location?.locations?.edges[0]?.node?.address
+        ? `Pickup ${order.node?.shippingLine?.title}, ${location?.locations?.edges[0]?.node?.address?.address1}, ${location?.locations?.edges[0]?.node?.address?.city}, ${location?.locations?.edges[0]?.node?.address?.zip}`
+        : "";
+
+      let fullAddress = fullAddressArray.join(", ");
+      if (!shippingAddress) {
+        fullAddress = pickupLocationAddress;
+      }
+
+      const shippingInstructions = getShippingInstructions(order);
+
       for (const [lineIndex, line] of mainItems.entries()) {
         let programStartDate, programEndDate, programLength;
         const lineIsProgram = line?.node?.variant?.product?.tags?.includes("Programy");
@@ -201,48 +237,13 @@ export const orders_export = async (req: Request, res: Response) => {
                 .join("\n");
           }
 
-          let shippingAddress;
-          if (order.node?.shippingAddress?.address1 && !order.node?.shippingAddress?.address2) {
-            shippingAddress = order.node?.shippingAddress?.address1;
-          } else if (order.node?.shippingAddress?.address1 && order.node?.shippingAddress?.address2) {
-            shippingAddress = `${order.node?.shippingAddress?.address1} ${order.node?.shippingAddress?.address2}`;
-          }
-
-          const fullAddressArray = [];
-          if (order.node?.shippingAddress?.address1) {
-            fullAddressArray.push(order.node?.shippingAddress?.address1);
-          }
-          if (order.node?.shippingAddress?.address2) {
-            fullAddressArray.push(order.node?.shippingAddress?.address2);
-          }
-          if (order.node?.shippingAddress?.city) {
-            fullAddressArray.push(order.node?.shippingAddress?.city);
-          }
-          if (order.node?.shippingAddress?.zip) {
-            fullAddressArray.push(order.node?.shippingAddress?.zip?.replace(/\s/g, ""));
-          }
-
-          const location = await client.request(locationQueryByName, {
-            query: `name:${order.node?.shippingLine?.title}`,
-          });
-
-          const pickupLocationAddress = location?.locations?.edges[0]?.node?.address
-            ? `Pickup ${order.node?.shippingLine?.title}, ${location?.locations?.edges[0]?.node?.address?.address1}, ${location?.locations?.edges[0]?.node?.address?.city}, ${location?.locations?.edges[0]?.node?.address?.zip}`
-            : "";
-
-          let fullAddress = fullAddressArray.join(", ");
-          if (!shippingAddress) {
-            fullAddress = pickupLocationAddress;
-          }
-
-          const shippingInstructions = getShippingInstructions(order);
           const variantTitle = line.node.variant.title == "Default Title" ? "" : ` (${line.node.variant.title})`;
           const lineItemName = lineIsProgram ? line.node.title : line.node.quantity + " x " + line.node.title + variantTitle;
 
           // check if line has associated single portions
           const lineProgramId = lineIsProgram ? line.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value : null;
           const programSinglePortions = singlePortions.filter(
-            (item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId
+            (item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId,
           );
           const programEcobox = ecobox.filter((item: any) => item.node.customAttributes.find((attr: any) => attr.key == "_program_id")?.value == lineProgramId);
 
@@ -285,7 +286,7 @@ export const orders_export = async (req: Request, res: Response) => {
           ];
           if (lineIsProgram) {
             let allergens = line.node?.customAttributes?.find(
-              (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != ""
+              (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != "",
             );
 
             // AKCE zdarma
@@ -296,7 +297,7 @@ export const orders_export = async (req: Request, res: Response) => {
 
             if (isAKCE && mainProgram) {
               allergens = mainProgram.node.customAttributes.find(
-                (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != ""
+                (attr: any) => (attr.key == "Vyřazeno" || attr.key == "Excluded" || attr.key == "Alergeny") && attr.value != "",
               );
             }
             // AKCE zdarma
@@ -331,6 +332,50 @@ export const orders_export = async (req: Request, res: Response) => {
           worksheet.addRow(row);
         }
       }
+
+      // Handle single portions not tied to any program
+      const allProgramIds = mainItems
+        .filter((line: any) => line?.node?.variant?.product?.tags?.includes("Programy"))
+        .map((line: any) => line.node.customAttributes.find((attr: any) => attr.key === "_program_id")?.value)
+        .filter(Boolean);
+
+      const untiedSinglePortions = singlePortions.filter((item: any) => {
+        const programId = item.node.customAttributes.find((attr: any) => attr.key === "_program_id")?.value;
+        return !programId || !allProgramIds.includes(programId);
+      });
+
+      for (const item of untiedSinglePortions) {
+        const variantTitle = item.node.variant.title === "Default Title" ? "" : ` (${item.node.variant.title})`;
+        const lineItemName = `${item.node.quantity} x ${item.node.title}${variantTitle}`;
+        const customAttributes = order.node?.customAttributes?.map((attr: any) => `${attr.key}: ${attr.value}`);
+
+        const row = [
+          order.node?.name,
+          order.node?.displayFinancialStatus,
+          order.node?.billingAddress?.name,
+          order.node?.shippingAddress?.name || "",
+          order.node?.shippingAddress?.company || "",
+          order.node?.shippingAddress?.phone || order.node?.billingAddress?.phone || "",
+          shippingAddress || `${order.node?.shippingLine?.title ? `Pickup ${order.node?.shippingLine?.title}` : ""}` || "",
+          order.node?.shippingAddress?.city || "",
+          order.node?.shippingAddress?.zip?.replace(/\s/g, "") || "",
+          fullAddress,
+          shippingInstructions,
+          order.node?.note,
+          customAttributes?.join("\n"),
+          "", // addon
+          "", // promo
+          "", // startDate
+          "", // endDate
+          lineItemName,
+          "", // singlePortions
+          "", // programLength
+          "", // kcal
+          "", // ecobox
+          "", // severeAllergic
+        ];
+        worksheet.addRow(row);
+      }
     }
     // return res.status(200).json(latestOrders);
     await workbook.xlsx.writeFile(`orders-${yesterday}.xlsx`);
@@ -353,7 +398,7 @@ export const orders_export = async (req: Request, res: Response) => {
         null,
         MANDRILL_MESSAGE_BCC_ADDRESS_DEV as string,
         attachment,
-        true
+        true,
       );
     }
     return res.status(200).json(attachment);
