@@ -32,6 +32,8 @@ import { brainmarkets_products_import } from "../controllers/brainmarkets_produc
 import { read_menu_from_sheet } from "../controllers/recipes/read_menu_from_sheet.controller";
 import { toggle_variant_campaign_data } from "../controllers/toggle_variant_campaign_data.controller";
 import { upsell_performance } from "../controllers/exports/upsell_performance.controller";
+import { tag_users } from "../controllers/one-off/tag_users.controller";
+import { programs } from "../controllers/exports/programs";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -65,4 +67,6 @@ router.get("/brainmarkets/products/import", brainmarkets_products_import);
 router.get("/menu/read", read_menu_from_sheet);
 router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data);
 router.get("/exports/upsell-performance", upsell_performance);
+router.get("/tag/users", tag_users);
+router.get("/exports/programs", programs);
 export default router;

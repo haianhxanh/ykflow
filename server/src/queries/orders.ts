@@ -11,6 +11,10 @@ export const ordersQuery = gql`
     orders(first: 250, query: $query, reverse: true) {
       edges {
         node {
+          customer {
+            email
+            id
+          }
           customAttributes {
             key
             value
@@ -194,6 +198,22 @@ export async function allOrdersQuery(query: string) {
                 id
                 name
                 createdAt
+                note
+                totalDiscountsSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+                totalShippingPriceSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+                originalTotalPriceSet {
+                  shopMoney {
+                    amount
+                  }
+                }
                 customAttributes {
                   key
                   value
@@ -241,7 +261,7 @@ export async function allOrdersQuery(query: string) {
           "Content-Type": "application/json",
           "X-Shopify-Access-Token": ACCESS_TOKEN,
         },
-      }
+      },
     );
 
     const data = response.data.data.orders;
@@ -295,7 +315,7 @@ export async function allGiftCardsQuery(query: string) {
           "Content-Type": "application/json",
           "X-Shopify-Access-Token": ACCESS_TOKEN,
         },
-      }
+      },
     );
 
     const data = response.data.data.giftCards;

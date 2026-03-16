@@ -25,6 +25,10 @@ exports.ordersQuery = (0, graphql_request_1.gql) `
     orders(first: 250, query: $query, reverse: true) {
       edges {
         node {
+          customer {
+            email
+            id
+          }
           customAttributes {
             key
             value
@@ -204,6 +208,22 @@ function allOrdersQuery(query) {
                 id
                 name
                 createdAt
+                note
+                totalDiscountsSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+                totalShippingPriceSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+                originalTotalPriceSet {
+                  shopMoney {
+                    amount
+                  }
+                }
                 customAttributes {
                   key
                   value

@@ -35,6 +35,8 @@ const brainmarkets_products_import_controller_1 = require("../controllers/brainm
 const read_menu_from_sheet_controller_1 = require("../controllers/recipes/read_menu_from_sheet.controller");
 const toggle_variant_campaign_data_controller_1 = require("../controllers/toggle_variant_campaign_data.controller");
 const upsell_performance_controller_1 = require("../controllers/exports/upsell_performance.controller");
+const tag_users_controller_1 = require("../controllers/one-off/tag_users.controller");
+const programs_1 = require("../controllers/exports/programs");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -68,4 +70,6 @@ router.get("/brainmarkets/products/import", brainmarkets_products_import_control
 router.get("/menu/read", read_menu_from_sheet_controller_1.read_menu_from_sheet);
 router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data_controller_1.toggle_variant_campaign_data);
 router.get("/exports/upsell-performance", upsell_performance_controller_1.upsell_performance);
+router.get("/tag/users", tag_users_controller_1.tag_users);
+router.get("/exports/programs", programs_1.programs);
 exports.default = router;
