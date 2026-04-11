@@ -153,7 +153,7 @@ const buildMealFields = (date: string, mealIndex: number, mealData: Record<strin
   const fields: Array<{ key: string; value: any }> = [
     { key: "date", value: date },
     { key: "type", value: MEAL_TYPES_MAPPING[mealIndex as unknown as keyof typeof MEAL_TYPES_MAPPING] },
-    { key: "name", value: mealData["PO"] },
+    { key: "name", value: mealData["PO"]?.trim() },
     {
       key: "allergens",
       value: JSON.stringify(

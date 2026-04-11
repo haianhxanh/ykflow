@@ -8,18 +8,28 @@ import { meals } from "./meal_rating.controller";
 import { sendNotification } from "../utils/notification";
 import { GraphQLClient } from "graphql-request";
 import { customerQuery } from "../queries/customers";
+import { metaobjectByHandleQuery } from "../queries/metaobjects";
 
 dotenv.config();
 const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
 
+const mealIndex = {
+  breakfast: 1,
+  snack_1: 2,
+  lunch: 3,
+  snack_2: 4,
+  dinner: 5,
+};
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
 export const reviews_export = async (req: Request, res: Response) => {
   try {
     const shouldSendEmail = req.query.sendEmail === "true";
-    const { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
+    let { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
+    precedingMonday = "2026-03-23";
+    lastSunday = "2026-03-29";
     const ratings = (
       await Rating.findAll({
         where: {
@@ -67,7 +77,37 @@ export const reviews_export = async (req: Request, res: Response) => {
       // @ts-ignore
       const mealType = meals && meals[i]?.name;
       const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
+
+      const invalidRecipes = [];
+
+      const uniqueRecipes = sortedRecipeTypeRatings.filter((rating, index, self) => index === self.findIndex((r) => r.recipe_name === rating.recipe_name));
+
+      for (const recipe of uniqueRecipes) {
+        console.log(recipe.meal_date);
+        // check if recipe really exists on that date in Shopify
+        const shopifyHandle = recipe.meal_date.toISOString().split("T")[0] + "-" + mealIndex[recipe.recipe_type as keyof typeof mealIndex];
+        const metaobject = await client.request(metaobjectByHandleQuery, {
+          handle: {
+            type: "meal",
+            handle: shopifyHandle,
+          },
+        });
+        if (!metaobject || !metaobject.metaobjectByHandle) {
+          invalidRecipes.push(recipe.recipe_name);
+          continue;
+        }
+        const nameField = metaobject.metaobjectByHandle.fields.find((field: any) => field.key === "name")?.value?.replace(/"/g, "'");
+        if (nameField.trim() !== recipe.recipe_name.trim()) {
+          invalidRecipes.push(recipe.recipe_name);
+          continue;
+        }
+      }
+
       for (const rating of sortedRecipeTypeRatings) {
+        // if recipe is in invalidRecipes, skip it
+        if (invalidRecipes.includes(rating.recipe_name)) {
+          continue;
+        }
         const shopifyUser = rating.shopify_user_id ? await client.request(customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` }) : null;
         const user = shopifyUser?.customer ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
         const userAdminUrl = shopifyUser?.customer ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";

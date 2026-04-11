@@ -22,16 +22,26 @@ const meal_rating_controller_1 = require("./meal_rating.controller");
 const notification_1 = require("../utils/notification");
 const graphql_request_1 = require("graphql-request");
 const customers_1 = require("../queries/customers");
+const metaobjects_1 = require("../queries/metaobjects");
 dotenv_1.default.config();
 const { ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS;
+const mealIndex = {
+    breakfast: 1,
+    snack_1: 2,
+    lunch: 3,
+    snack_2: 4,
+    dinner: 5,
+};
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d;
     try {
         const shouldSendEmail = req.query.sendEmail === "true";
-        const { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
+        let { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
+        precedingMonday = "2026-03-23";
+        lastSunday = "2026-03-29";
         const ratings = (_a = (yield rating_model_1.default.findAll({
             where: {
                 // @ts-ignore
@@ -69,7 +79,33 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
             // @ts-ignore
             const mealType = meal_rating_controller_1.meals && ((_b = meal_rating_controller_1.meals[i]) === null || _b === void 0 ? void 0 : _b.name);
             const sortedRecipeTypeRatings = recipeTypeRatings[mealType].sort((a, b) => a.recipe_name.localeCompare(b.recipe_name));
+            const invalidRecipes = [];
+            const uniqueRecipes = sortedRecipeTypeRatings.filter((rating, index, self) => index === self.findIndex((r) => r.recipe_name === rating.recipe_name));
+            for (const recipe of uniqueRecipes) {
+                console.log(recipe.meal_date);
+                // check if recipe really exists on that date in Shopify
+                const shopifyHandle = recipe.meal_date.toISOString().split("T")[0] + "-" + mealIndex[recipe.recipe_type];
+                const metaobject = yield client.request(metaobjects_1.metaobjectByHandleQuery, {
+                    handle: {
+                        type: "meal",
+                        handle: shopifyHandle,
+                    },
+                });
+                if (!metaobject || !metaobject.metaobjectByHandle) {
+                    invalidRecipes.push(recipe.recipe_name);
+                    continue;
+                }
+                const nameField = (_d = (_c = metaobject.metaobjectByHandle.fields.find((field) => field.key === "name")) === null || _c === void 0 ? void 0 : _c.value) === null || _d === void 0 ? void 0 : _d.replace(/"/g, "'");
+                if (nameField.trim() !== recipe.recipe_name.trim()) {
+                    invalidRecipes.push(recipe.recipe_name);
+                    continue;
+                }
+            }
             for (const rating of sortedRecipeTypeRatings) {
+                // if recipe is in invalidRecipes, skip it
+                if (invalidRecipes.includes(rating.recipe_name)) {
+                    continue;
+                }
                 const shopifyUser = rating.shopify_user_id ? yield client.request(customers_1.customerQuery, { id: `gid://shopify/Customer/${rating.shopify_user_id}` }) : null;
                 const user = (shopifyUser === null || shopifyUser === void 0 ? void 0 : shopifyUser.customer) ? `${shopifyUser.customer.firstName} ${shopifyUser.customer.lastName} (${shopifyUser.customer.email})` : "";
                 const userAdminUrl = (shopifyUser === null || shopifyUser === void 0 ? void 0 : shopifyUser.customer) ? `https://${STORE}/admin/customers/${rating.shopify_user_id}` : "";

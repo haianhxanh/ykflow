@@ -154,14 +154,14 @@ const deactivateMealMetaobjects = (weekDates) => __awaiter(void 0, void 0, void 
     }
 });
 const buildMealFields = (date, mealIndex, mealData) => {
-    var _a;
+    var _a, _b;
     const fields = [
         { key: "date", value: date },
         { key: "type", value: MEAL_TYPES_MAPPING[mealIndex] },
-        { key: "name", value: mealData["PO"] },
+        { key: "name", value: (_a = mealData["PO"]) === null || _a === void 0 ? void 0 : _a.trim() },
         {
             key: "allergens",
-            value: JSON.stringify(((_a = mealData["ALERGENY"]) === null || _a === void 0 ? void 0 : _a.split(",").map((allergen) => allergen.trim()).filter((allergen) => allergen !== "").filter((allergen) => ALLERGEN_VALUES.includes(allergen)).filter((allergen, index, self) => self.indexOf(allergen) === index)) || []),
+            value: JSON.stringify(((_b = mealData["ALERGENY"]) === null || _b === void 0 ? void 0 : _b.split(",").map((allergen) => allergen.trim()).filter((allergen) => allergen !== "").filter((allergen) => ALLERGEN_VALUES.includes(allergen)).filter((allergen, index, self) => self.indexOf(allergen) === index)) || []),
         },
         {
             key: "heating_option",
