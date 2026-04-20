@@ -28,8 +28,6 @@ export const reviews_export = async (req: Request, res: Response) => {
   try {
     const shouldSendEmail = req.query.sendEmail === "true";
     let { precedingMonday, lastSunday } = getLastSundayAndPrecedingMonday();
-    precedingMonday = "2026-03-23";
-    lastSunday = "2026-03-29";
     const ratings = (
       await Rating.findAll({
         where: {

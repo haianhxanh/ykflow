@@ -29,6 +29,8 @@ const reviews_export_rewards_1 = require("../controllers/reviews_export_rewards"
 const bulk_activate_inventory_at_locations_controller_1 = require("../controllers/bulk_activate_inventory_at_locations.controller");
 const program_start_date_validation_controller_1 = require("../controllers/program_start_date_validation.controller");
 const programs_campaign_pricing_update_controller_1 = require("../programs-repricing/programs_campaign_pricing_update.controller");
+const programs_new_price_update_controller_1 = require("../programs-repricing/programs_new_price_update.controller");
+const programs_non_standard_price_update_controller_1 = require("../programs-repricing/programs_non_standard_price_update.controller");
 const orders_district_export_controller_1 = require("../controllers/orders_district_export.controller");
 const bulk_set_inventory_at_locations_controller_1 = require("../controllers/bulk_set_inventory_at_locations.controller");
 const brainmarkets_products_import_controller_1 = require("../controllers/brainmarkets_products_import.controller");
@@ -37,6 +39,7 @@ const toggle_variant_campaign_data_controller_1 = require("../controllers/toggle
 const upsell_performance_controller_1 = require("../controllers/exports/upsell_performance.controller");
 const tag_users_controller_1 = require("../controllers/one-off/tag_users.controller");
 const programs_1 = require("../controllers/exports/programs");
+const npfabinipanevgift_report_controller_1 = require("../controllers/one-off/npfabinipanevgift_report.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -65,6 +68,8 @@ router.post("/custom/email", custom_email_controller_1.custom_email);
 // router.post("/validate/email", validateEmail);
 router.post("/notification/order-preparation-time", notification_order_preparation_time_controller_1.notification_order_preparation_time);
 router.post("/programs/campaign/pricing/update", programs_campaign_pricing_update_controller_1.programs_campaign_pricing_update);
+router.get("/programs/new-price/update", programs_new_price_update_controller_1.programs_new_price_update);
+router.get("/programs/non-standard/price/update", programs_non_standard_price_update_controller_1.programs_non_standard_price_update);
 router.post("/programs/start-date/validation", program_start_date_validation_controller_1.program_start_date_validation);
 router.get("/brainmarkets/products/import", brainmarkets_products_import_controller_1.brainmarkets_products_import);
 router.get("/menu/read", read_menu_from_sheet_controller_1.read_menu_from_sheet);
@@ -72,4 +77,5 @@ router.get("/variants/toggle-campaign-data", toggle_variant_campaign_data_contro
 router.get("/exports/upsell-performance", upsell_performance_controller_1.upsell_performance);
 router.get("/tag/users", tag_users_controller_1.tag_users);
 router.get("/exports/programs", programs_1.programs);
+router.get("/exports/npfabinipanevgift-report", npfabinipanevgift_report_controller_1.npfabinipanevgift_report);
 exports.default = router;

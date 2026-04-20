@@ -40,8 +40,6 @@ const reviews_export = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const shouldSendEmail = req.query.sendEmail === "true";
         let { precedingMonday, lastSunday } = (0, helpers_1.getLastSundayAndPrecedingMonday)();
-        precedingMonday = "2026-03-23";
-        lastSunday = "2026-03-29";
         const ratings = (_a = (yield rating_model_1.default.findAll({
             where: {
                 // @ts-ignore

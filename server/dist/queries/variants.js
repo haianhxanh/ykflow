@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.productVariantDeleteQuery = exports.productVariantUpdateQuery = exports.productVariantsBulkCreateQuery = exports.productVariantsBulkUpdate = exports.variantsByQuery = exports.variantByIdQuery = void 0;
+exports.productVariantDeleteQuery = exports.productVariantUpdateQuery = exports.productVariantsBulkCreateQuery = exports.productVariantsBulkUpdate = exports.variantsByQuery = exports.variantBySkuQuery = exports.variantByIdQuery = void 0;
 const graphql_request_1 = require("graphql-request");
 exports.variantByIdQuery = (0, graphql_request_1.gql) `
   query productVariant($variantGid: ID!) {
@@ -20,6 +20,25 @@ exports.variantByIdQuery = (0, graphql_request_1.gql) `
       product {
         title
         tags
+      }
+    }
+  }
+`;
+exports.variantBySkuQuery = (0, graphql_request_1.gql) `
+  query variantBySku($query: String!) {
+    productVariants(query: $query, first: 1) {
+      edges {
+        node {
+          id
+          sku
+          price
+          product {
+            id
+          }
+          metafield(namespace: "custom", key: "progressive_price") {
+            value
+          }
+        }
       }
     }
   }

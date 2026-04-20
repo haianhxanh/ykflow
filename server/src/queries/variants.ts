@@ -23,6 +23,26 @@ export const variantByIdQuery = gql`
   }
 `;
 
+export const variantBySkuQuery = gql`
+  query variantBySku($query: String!) {
+    productVariants(query: $query, first: 1) {
+      edges {
+        node {
+          id
+          sku
+          price
+          product {
+            id
+          }
+          metafield(namespace: "custom", key: "progressive_price") {
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const variantsByQuery = gql`
   query variantsByQuery($query: String!, $first: Int) {
     productVariants(query: $query, first: $first) {
