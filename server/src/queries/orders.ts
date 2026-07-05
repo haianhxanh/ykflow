@@ -278,7 +278,14 @@ export async function allGiftCardsQuery(query: string) {
   let cursor = "";
   let hasNextPage = true;
   let giftCards: any[] = [];
+  let includeBalance = true;
   while (hasNextPage) {
+    const balanceField = includeBalance
+      ? `balance {
+                  amount
+                }`
+      : "";
+
     const response = await axios.post(
       `https://${STORE}/admin/api/${API_VERSION}/graphql.json`,
       {
@@ -298,6 +305,7 @@ export async function allGiftCardsQuery(query: string) {
                 initialValue {
                   amount
                 }
+                ${balanceField}
                 transactions(first: 250) {
                   edges {
                     node {
@@ -318,7 +326,21 @@ export async function allGiftCardsQuery(query: string) {
       },
     );
 
-    const data = response.data.data.giftCards;
+    const errors = response?.data?.errors as Array<{ message?: string }> | undefined;
+    if (errors?.length) {
+      const balanceError = errors.some((error) => error?.message?.toLowerCase().includes("balance"));
+      if (includeBalance && balanceError) {
+        includeBalance = false;
+        continue;
+      }
+      throw new Error(`Shopify giftCards query failed: ${errors.map((error) => error.message).join("; ")}`);
+    }
+
+    const data = response?.data?.data?.giftCards;
+    if (!data) {
+      throw new Error("Shopify giftCards query returned empty data");
+    }
+
     hasNextPage = data.pageInfo.hasNextPage;
     cursor = data.pageInfo.endCursor;
     giftCards = giftCards.concat(data.edges);

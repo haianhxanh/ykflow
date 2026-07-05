@@ -283,10 +283,17 @@ function allOrdersQuery(query) {
 exports.allOrdersQuery = allOrdersQuery;
 function allGiftCardsQuery(query) {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c;
         let cursor = "";
         let hasNextPage = true;
         let giftCards = [];
+        let includeBalance = true;
         while (hasNextPage) {
+            const balanceField = includeBalance
+                ? `balance {
+                  amount
+                }`
+                : "";
             const response = yield axios_1.default.post(`https://${STORE}/admin/api/${API_VERSION}/graphql.json`, {
                 query: `query{
           giftCards(first: 250${cursor ? `, after: "${cursor}"` : ""}, query: "${query}") {
@@ -304,6 +311,7 @@ function allGiftCardsQuery(query) {
                 initialValue {
                   amount
                 }
+                ${balanceField}
                 transactions(first: 250) {
                   edges {
                     node {
@@ -321,7 +329,19 @@ function allGiftCardsQuery(query) {
                     "X-Shopify-Access-Token": ACCESS_TOKEN,
                 },
             });
-            const data = response.data.data.giftCards;
+            const errors = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.errors;
+            if (errors === null || errors === void 0 ? void 0 : errors.length) {
+                const balanceError = errors.some((error) => { var _a; return (_a = error === null || error === void 0 ? void 0 : error.message) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes("balance"); });
+                if (includeBalance && balanceError) {
+                    includeBalance = false;
+                    continue;
+                }
+                throw new Error(`Shopify giftCards query failed: ${errors.map((error) => error.message).join("; ")}`);
+            }
+            const data = (_c = (_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.giftCards;
+            if (!data) {
+                throw new Error("Shopify giftCards query returned empty data");
+            }
             hasNextPage = data.pageInfo.hasNextPage;
             cursor = data.pageInfo.endCursor;
             giftCards = giftCards.concat(data.edges);

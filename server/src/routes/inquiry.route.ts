@@ -37,6 +37,7 @@ import { upsell_performance } from "../controllers/exports/upsell_performance.co
 import { tag_users } from "../controllers/one-off/tag_users.controller";
 import { programs } from "../controllers/exports/programs";
 import { npfabinipanevgift_report } from "../controllers/one-off/npfabinipanevgift_report.controller";
+import { gift_card_balance_report } from "../controllers/gift_card_balance_report.controller";
 const router = express.Router();
 router.get("/inquiries", auth, get_inquiries);
 router.post("/inquiry/new", receive_inquiry);
@@ -75,4 +76,5 @@ router.get("/exports/upsell-performance", upsell_performance);
 router.get("/tag/users", tag_users);
 router.get("/exports/programs", programs);
 router.get("/exports/npfabinipanevgift-report", npfabinipanevgift_report);
+router.get("/exports/gift-cards-balance-report", gift_card_balance_report);
 export default router;

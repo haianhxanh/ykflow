@@ -40,6 +40,7 @@ const upsell_performance_controller_1 = require("../controllers/exports/upsell_p
 const tag_users_controller_1 = require("../controllers/one-off/tag_users.controller");
 const programs_1 = require("../controllers/exports/programs");
 const npfabinipanevgift_report_controller_1 = require("../controllers/one-off/npfabinipanevgift_report.controller");
+const gift_card_balance_report_controller_1 = require("../controllers/gift_card_balance_report.controller");
 const router = express_1.default.Router();
 router.get("/inquiries", authorization_1.auth, get_inquiry_controller_1.get_inquiries);
 router.post("/inquiry/new", receive_inquiry_controller_1.receive_inquiry);
@@ -78,4 +79,5 @@ router.get("/exports/upsell-performance", upsell_performance_controller_1.upsell
 router.get("/tag/users", tag_users_controller_1.tag_users);
 router.get("/exports/programs", programs_1.programs);
 router.get("/exports/npfabinipanevgift-report", npfabinipanevgift_report_controller_1.npfabinipanevgift_report);
+router.get("/exports/gift-cards-balance-report", gift_card_balance_report_controller_1.gift_card_balance_report);
 exports.default = router;
