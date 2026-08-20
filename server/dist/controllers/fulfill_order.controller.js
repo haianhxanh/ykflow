@@ -35,7 +35,7 @@ const fulfill = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.fulfill = fulfill;
 const fulfill_order = (order_id) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _a;
     const { data } = yield axios_1.default.get(`https://${STORE}/admin/api/${API_VERSION}/orders/${order_id}/fulfillment_orders.json`, {
         headers: {
             "X-Shopify-Access-Token": ACCESS_TOKEN,
@@ -45,7 +45,7 @@ const fulfill_order = (order_id) => __awaiter(void 0, void 0, void 0, function* 
         fulfillment: {
             line_items_by_fulfillment_order: [
                 {
-                    fulfillment_order_id: (_b = data.fulfillment_orders[0]) === null || _b === void 0 ? void 0 : _b.id,
+                    fulfillment_order_id: (_a = data.fulfillment_orders[0]) === null || _a === void 0 ? void 0 : _a.id,
                 },
             ],
             notify_customer: false,

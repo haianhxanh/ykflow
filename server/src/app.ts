@@ -2,6 +2,7 @@
 import logger from "morgan";
 import dotenv from "dotenv";
 import get_inquries_route from "./routes/inquiry.route";
+import trabucco_route from "./trabucco-fishing/trabucco.route";
 import { db } from "./database_connection/db_connect";
 
 /*------Importing ExpressJs----------*/
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/", get_inquries_route);
+app.use("/trabucco", trabucco_route);
 
 /*----Checking Database Connection-------------*/
 db.sync({ alter: true })

@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const inquiry_route_1 = __importDefault(require("./routes/inquiry.route"));
+const trabucco_route_1 = __importDefault(require("./trabucco-fishing/trabucco.route"));
 const db_connect_1 = require("./database_connection/db_connect");
 /*------Importing ExpressJs----------*/
 const express_1 = __importDefault(require("express"));
@@ -50,6 +51,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use("/", inquiry_route_1.default);
+app.use("/trabucco", trabucco_route_1.default);
 /*----Checking Database Connection-------------*/
 db_connect_1.db.sync({ alter: true })
     .then(() => {

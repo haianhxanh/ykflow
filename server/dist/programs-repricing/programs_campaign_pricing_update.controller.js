@@ -181,14 +181,14 @@ const createDiscountObject = (discountData, discountId) => {
     };
 };
 const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatus) => __awaiter(void 0, void 0, void 0, function* () {
-    var _1, _2, _3, _4, _5, _6, _7, _8;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     const metafieldsToDelete = [];
     const programProducts = yield client.request(products_1.productsQueryWithVariants, {
         query: "tags:Programy",
     });
     // return varaints with metafields length > 0
     const variantsWithMetafields = [];
-    (_2 = (_1 = programProducts === null || programProducts === void 0 ? void 0 : programProducts.products) === null || _1 === void 0 ? void 0 : _1.edges) === null || _2 === void 0 ? void 0 : _2.forEach((edge) => {
+    (_b = (_a = programProducts === null || programProducts === void 0 ? void 0 : programProducts.products) === null || _a === void 0 ? void 0 : _a.edges) === null || _b === void 0 ? void 0 : _b.forEach((edge) => {
         var _a, _b, _c;
         (_c = (_b = (_a = edge.node) === null || _a === void 0 ? void 0 : _a.variants) === null || _b === void 0 ? void 0 : _b.edges) === null || _c === void 0 ? void 0 : _c.forEach((variant) => {
             var _a, _b, _c;
@@ -202,8 +202,8 @@ const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatu
         });
     });
     for (const variant of variantsWithMetafields) {
-        if ((_4 = (_3 = variant.metafields) === null || _3 === void 0 ? void 0 : _3.edges) === null || _4 === void 0 ? void 0 : _4.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) {
-            const campaignData = JSON.parse((_6 = (_5 = variant.metafields.edges.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) === null || _5 === void 0 ? void 0 : _5.node) === null || _6 === void 0 ? void 0 : _6.value);
+        if ((_d = (_c = variant.metafields) === null || _c === void 0 ? void 0 : _c.edges) === null || _d === void 0 ? void 0 : _d.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) {
+            const campaignData = JSON.parse((_f = (_e = variant.metafields.edges.find((metafield) => metafield.node.key === "data" && metafield.node.namespace == "campaign")) === null || _e === void 0 ? void 0 : _e.node) === null || _f === void 0 ? void 0 : _f.value);
             const matchingCampaign = (campaignData === null || campaignData === void 0 ? void 0 : campaignData.id) == discountGid;
             if (matchingCampaign) {
                 metafieldsToDelete.push({
@@ -218,7 +218,7 @@ const deleteMetafieldsWithMatchingDiscount = (discountGid, client, discountStatu
         const deletedMetafields = yield client.request(metafields_1.metafieldsDeleteMutation, {
             metafields: metafieldsToDelete,
         });
-        if (((_8 = (_7 = deletedMetafields === null || deletedMetafields === void 0 ? void 0 : deletedMetafields.metafieldsDelete) === null || _7 === void 0 ? void 0 : _7.userErrors) === null || _8 === void 0 ? void 0 : _8.length) == 0) {
+        if (((_h = (_g = deletedMetafields === null || deletedMetafields === void 0 ? void 0 : deletedMetafields.metafieldsDelete) === null || _g === void 0 ? void 0 : _g.userErrors) === null || _h === void 0 ? void 0 : _h.length) == 0) {
             console.log(`Deleted metafields as discount is ${discountStatus}`, variantsWithMetafields === null || variantsWithMetafields === void 0 ? void 0 : variantsWithMetafields.map((variant) => variant.sku));
         }
         else {

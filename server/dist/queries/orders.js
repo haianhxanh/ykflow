@@ -12,7 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allGiftCardsQuery = exports.allOrdersQuery = exports.orderUpdateMutation = exports.orderQuery = exports.ordersQuery = void 0;
+exports.orderUpdateMutation = exports.orderQuery = exports.ordersQuery = void 0;
+exports.allOrdersQuery = allOrdersQuery;
+exports.allGiftCardsQuery = allGiftCardsQuery;
 const graphql_request_1 = require("graphql-request");
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -280,7 +282,6 @@ function allOrdersQuery(query) {
         return orders;
     });
 }
-exports.allOrdersQuery = allOrdersQuery;
 function allGiftCardsQuery(query) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -350,4 +351,3 @@ function allGiftCardsQuery(query) {
         return giftCards;
     });
 }
-exports.allGiftCardsQuery = allGiftCardsQuery;

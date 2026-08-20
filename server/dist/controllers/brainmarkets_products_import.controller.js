@@ -119,7 +119,7 @@ const brainmarkets_products_import = (req, res) => __awaiter(void 0, void 0, voi
 });
 exports.brainmarkets_products_import = brainmarkets_products_import;
 const fetchProductsFromXml = (xmlUrl) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _a;
     const response = yield fetch(xmlUrl, {
         method: "GET",
         headers: {
@@ -133,7 +133,7 @@ const fetchProductsFromXml = (xmlUrl) => __awaiter(void 0, void 0, void 0, funct
         var json_result = xml_js_1.default.xml2js(xml, { compact: true });
         return json_result;
     });
-    return (_b = response === null || response === void 0 ? void 0 : response.SHOP) === null || _b === void 0 ? void 0 : _b.SHOPITEM;
+    return (_a = response === null || response === void 0 ? void 0 : response.SHOP) === null || _a === void 0 ? void 0 : _a.SHOPITEM;
 });
 const mapItems = (items) => {
     return items.map((item) => {
