@@ -12,7 +12,7 @@ import { locationQueryByName } from "../queries/locations";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION, ORDER_EXPORT_RECIPIENTS, MANDRILL_MESSAGE_BCC_ADDRESS_DEV } = process.env;
 const recipientEmails = ORDER_EXPORT_RECIPIENTS as string;
-const programRelatedTags = ["Programy", "Monoporce", "Ecobox"];
+const programRelatedTags = ["Programy", "Monoporce", "Ecobox", "Upstairs Delivery"];
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
@@ -65,6 +65,7 @@ export const orders_export = async (req: Request, res: Response) => {
           { header: "Program Length", key: "programLength", width: 10 },
           { header: "Kcal", key: "kcal", width: 10 },
           { header: "Krabičky", key: "ecobox", width: 15 },
+          { header: "Vynos do patra", key: "upstairsDelivery", width: 15 },
           { header: "Prudký alergik", key: "severeAllergic", width: 10 },
         ];
         ALLERGENS.split(",").forEach((allergen) => {
@@ -116,10 +117,17 @@ export const orders_export = async (req: Request, res: Response) => {
       const ecobox = order.node.lineItems.edges.filter((line: any) => {
         return line.node.variant.product?.tags?.includes("Ecobox");
       });
+      const hasUpstairsDelivery = order.node.lineItems.edges.some((line: any) => {
+        return line.node.variant.product?.tags?.includes("Upstairs Delivery");
+      });
 
       if (mixedOrder) {
         for (const [lineIndex, line] of secondaryItems.entries()) {
-          if (line.node.variant.product?.tags?.includes("excluded-from-export") || line.node.variant.product?.tags?.includes("Monoporce")) {
+          if (
+            line.node.variant.product?.tags?.includes("excluded-from-export") ||
+            line.node.variant.product?.tags?.includes("Monoporce") ||
+            line.node.variant.product?.tags?.includes("Upstairs Delivery")
+          ) {
             continue;
           }
           if (line.node.originalTotalSet.shopMoney.amount - line.node.totalDiscountSet.shopMoney.amount > 0) {
@@ -282,6 +290,7 @@ export const orders_export = async (req: Request, res: Response) => {
             programLength ? programLength : "",
             lineIsProgram ? line.node?.title?.split(" | ")[1]?.replace(" kcal", "") : "",
             ecoboxCol,
+            lineIsProgram && hasUpstairsDelivery ? "true" : "",
             severeAllergic ? "Ano" : "",
           ];
           if (lineIsProgram) {
@@ -319,7 +328,7 @@ export const orders_export = async (req: Request, res: Response) => {
               const firstRow = worksheet.getRow(1);
 
               firstRow.eachCell((cell, colNumber) => {
-                if (colNumber > 21) {
+                if (colNumber > 24) {
                   if (allergens.includes(cell.value)) {
                     row.push(cell.value);
                   } else {
@@ -372,6 +381,7 @@ export const orders_export = async (req: Request, res: Response) => {
           "", // programLength
           "", // kcal
           "", // ecobox
+          "", // upstairsDelivery
           "", // severeAllergic
         ];
         worksheet.addRow(row);
