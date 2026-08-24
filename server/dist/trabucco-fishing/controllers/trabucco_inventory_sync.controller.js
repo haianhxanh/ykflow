@@ -82,6 +82,7 @@ const runSync = (feedUrl, updateMetafields) => __awaiter(void 0, void 0, void 0,
                 metafields: [
                     { ownerId: node.id, namespace: "stock", key: "internal", type: "number_integer", value: String(stock.prumyslova) },
                     { ownerId: node.id, namespace: "stock", key: "available_in_cz", type: "boolean", value: String(stock.prumyslova > 0) },
+                    { ownerId: node.id, namespace: "stock", key: "external", type: "number_integer", value: String(stock.externi) },
                 ],
             });
             if (metafieldsResult.metafieldsSet.userErrors.length > 0) {
