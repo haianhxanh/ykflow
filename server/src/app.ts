@@ -3,6 +3,7 @@ import logger from "morgan";
 import dotenv from "dotenv";
 import get_inquries_route from "./routes/inquiry.route";
 import trabucco_route from "./trabucco-fishing/trabucco.route";
+import yesme_route from "./yesme/yesme.route";
 import { db } from "./database_connection/db_connect";
 
 /*------Importing ExpressJs----------*/
@@ -10,21 +11,40 @@ import express from "express";
 var cors = require("cors");
 const app = express();
 
+const allowedOrigins = [
+  "https://yeskrabickyflow-dev-frontend.onrender.com",
+  "https://yeskrabickyflow.onrender.com",
+  "https://yes-krabicky-dev.myshopify.com",
+  "https://test-store-yes-krabicky.myshopify.com",
+  "https://yes-krabicky-checkout.myshopify.com",
+  "https://test-yes-krabicky.myshopify.com",
+  "https://yeskrabicky.cz",
+  "https://admin.shopify.com/store/yes-krabicky",
+  "https://yes-krabicky.myshopify.com",
+  "https://extensions.shopifycdn.com",
+  "https://yes-me-cz.myshopify.com",
+  "https://admin.shopify.com/store/yes-me-cz",
+  "https://www.yes-me.cz",
+  "https://yes-me.cz",
+  "http://127.0.0.1:9292",
+  "http://localhost:9292",
+];
+
 var corsOptions = {
-  origin: [
-    "https://yeskrabickyflow-dev-frontend.onrender.com",
-    "https://yeskrabickyflow.onrender.com",
-    "https://yes-krabicky-dev.myshopify.com",
-    "https://test-store-yes-krabicky.myshopify.com",
-    "https://yes-krabicky-checkout.myshopify.com",
-    "https://test-yes-krabicky.myshopify.com",
-    "https://yeskrabicky.cz",
-    "https://admin.shopify.com/store/yes-krabicky",
-    "https://yes-krabicky.myshopify.com",
-    "https://extensions.shopifycdn.com",
-  ],
-  optionsSuccessStatus: 200,
-  methods: "GET, PUT, POST",
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      /\.shopifypreview\.com$/.test(origin) ||
+      /^https:\/\/(www\.)?yes-me\.cz$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  optionsSuccessStatus: 204,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
 };
 
 app.use(cors(corsOptions));
@@ -55,6 +75,7 @@ app.use((req, res, next) => {
 
 app.use("/", get_inquries_route);
 app.use("/trabucco", trabucco_route);
+app.use("/yesme", yesme_route);
 
 /*----Checking Database Connection-------------*/
 db.sync({ alter: true })
