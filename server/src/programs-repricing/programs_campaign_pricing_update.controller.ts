@@ -10,7 +10,7 @@ import AutomaticDiscounts from "../model/automaticDiscounts.model";
 dotenv.config();
 const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 
-const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D"];
+const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D", "120D", "240D"];
 
 const BATCH_SIZE = 25; // max 25 metafields per request
 
@@ -80,7 +80,7 @@ export const programs_campaign_pricing_update = async (req: Request, res: Respon
       return res.status(200).json({ error: "Discount is not an automatic discount" });
     }
 
-    // 1. Check related products and variants - only proceed if those are programs and includes allowed SKU prefixes ["5D", "10D", "15D", "20D", "60D"]
+    // 1. Check related products and variants - only proceed if those are programs and includes allowed SKU prefixes ["5D", "10D", "15D", "20D", "40D", "60D", "120D", "240D"]
     // 2. Check if discount is active
     // Proceed with updating variant metafields
 

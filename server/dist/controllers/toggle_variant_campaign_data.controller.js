@@ -19,7 +19,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const metafields_1 = require("../queries/metafields");
 dotenv_1.default.config();
 const { STORE, API_VERSION, ACCESS_TOKEN } = process.env;
-const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D"];
+const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D", "120D", "240D"];
 const MAX_BATCH_SIZE = 25;
 const toggle_variant_campaign_data = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h;

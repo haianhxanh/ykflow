@@ -7,7 +7,7 @@ dotenv.config();
 
 const { STORE, API_VERSION, ACCESS_TOKEN } = process.env;
 
-const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D"];
+const ALLOWED_SKU_PREFIXES = ["5D", "10D", "15D", "20D", "40D", "60D", "120D", "240D"];
 
 const MAX_BATCH_SIZE = 25;
 
