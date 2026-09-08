@@ -52,9 +52,96 @@ const xml_js_1 = __importDefault(require("xml-js"));
 const turf = __importStar(require("@turf/turf"));
 dotenv_1.default.config();
 const { GOOGLE_GEOCODING_API_KEY, LOCATIONS_XML_FILE } = process.env;
+let polygonCache = null;
+let polygonCacheLoad = null;
+const asArray = (value) => {
+    if (!value)
+        return [];
+    return Array.isArray(value) ? value : [value];
+};
+const parseCoordinateText = (coordinates) => {
+    var _a;
+    const coordText = (_a = coordinates === null || coordinates === void 0 ? void 0 : coordinates._text) === null || _a === void 0 ? void 0 : _a.trim();
+    if (!coordText)
+        return null;
+    const ring = coordText
+        .split("\n")
+        .map((line) => {
+        const [lng, lat] = line.trim().split(",").map(Number);
+        return [lng, lat];
+    })
+        .filter((pair) => pair.length === 2 && pair.every((n) => Number.isFinite(n)));
+    return ring.length >= 4 ? ring : null;
+};
+const collectPlacemarks = (result) => {
+    var _a, _b, _c, _d;
+    const placemarks = [];
+    const folders = asArray((_b = (_a = result === null || result === void 0 ? void 0 : result.kml) === null || _a === void 0 ? void 0 : _a.Document) === null || _b === void 0 ? void 0 : _b.Folder);
+    for (const folder of folders) {
+        placemarks.push(...asArray(folder === null || folder === void 0 ? void 0 : folder.Placemark));
+    }
+    if (!folders.length) {
+        placemarks.push(...asArray((_d = (_c = result === null || result === void 0 ? void 0 : result.kml) === null || _c === void 0 ? void 0 : _c.Document) === null || _d === void 0 ? void 0 : _d.Placemark));
+    }
+    return placemarks;
+};
+const extractPolygonsFromXml = (xml) => {
+    var _a, _b, _c, _d, _e, _f;
+    const result = xml_js_1.default.xml2js(xml, { compact: true });
+    const polygons = [];
+    for (const placemark of collectPlacemarks(result)) {
+        const singleRing = parseCoordinateText((_c = (_b = (_a = placemark === null || placemark === void 0 ? void 0 : placemark.Polygon) === null || _a === void 0 ? void 0 : _a.outerBoundaryIs) === null || _b === void 0 ? void 0 : _b.LinearRing) === null || _c === void 0 ? void 0 : _c.coordinates);
+        if (singleRing)
+            polygons.push(singleRing);
+        for (const polygon of asArray((_d = placemark === null || placemark === void 0 ? void 0 : placemark.MultiGeometry) === null || _d === void 0 ? void 0 : _d.Polygon)) {
+            const ring = parseCoordinateText((_f = (_e = polygon === null || polygon === void 0 ? void 0 : polygon.outerBoundaryIs) === null || _e === void 0 ? void 0 : _e.LinearRing) === null || _f === void 0 ? void 0 : _f.coordinates);
+            if (ring)
+                polygons.push(ring);
+        }
+    }
+    return polygons;
+};
+const loadPolygonsFromLayers = (locationsXmlFile) => __awaiter(void 0, void 0, void 0, function* () {
+    const layers = locationsXmlFile.split(",").map((layer) => layer.trim()).filter(Boolean);
+    const polygons = [];
+    for (const layer of layers) {
+        const response = yield fetch(layer, {
+            method: "GET",
+            headers: {
+                "Content-Type": "text/xml",
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch locations XML ${layer}: ${response.status}`);
+        }
+        const xml = yield response.text();
+        polygons.push(...extractPolygonsFromXml(xml));
+    }
+    return polygons;
+});
+const getCachedPolygons = () => __awaiter(void 0, void 0, void 0, function* () {
+    const key = LOCATIONS_XML_FILE;
+    if (!key) {
+        throw new Error("LOCATIONS_XML_FILE is not set");
+    }
+    if ((polygonCache === null || polygonCache === void 0 ? void 0 : polygonCache.key) === key) {
+        return polygonCache.polygons;
+    }
+    if (!polygonCacheLoad) {
+        polygonCacheLoad = loadPolygonsFromLayers(key)
+            .then((polygons) => {
+            polygonCache = { key, polygons };
+            console.log(`Cached ${polygons.length} delivery polygons from ${key}`);
+            return polygons;
+        })
+            .finally(() => {
+            polygonCacheLoad = null;
+        });
+    }
+    return polygonCacheLoad;
+});
 // ======================= CHECKOUT ADDRESS PRESENCE IN POLYGON =======================
 const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
     try {
         if (!req.body.address1 || !req.body.city || !req.body.zip)
             return res.status(400).json({ message: "Missing required address fields" });
@@ -68,72 +155,9 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
         if (zip)
             address += zip;
         console.log("Address: ", address);
-        let placemarks = [];
-        let coordinates = [];
-        let layers = LOCATIONS_XML_FILE.split(",");
-        for (const [index, layer] of layers.entries()) {
-            // if (index != 0) continue;
-            const response = yield fetch(layer, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "text/xml",
-                },
-            })
-                .then(function (response) {
-                return response.text();
-            })
-                .then(function (xml) {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-                let result = xml_js_1.default.xml2js(xml, { compact: true });
-                // return res.status(200).json(result?.kml?.Document?.Folder);
-                if ((_b = (_a = result === null || result === void 0 ? void 0 : result.kml) === null || _a === void 0 ? void 0 : _a.Document) === null || _b === void 0 ? void 0 : _b.Folder) {
-                    for (const folder of result.kml.Document.Folder) {
-                        if (folder === null || folder === void 0 ? void 0 : folder.Placemark) {
-                            if (folder.Placemark.length > 0)
-                                for (const placemark of folder.Placemark) {
-                                    placemarks.push(placemark);
-                                }
-                            else {
-                                placemarks.push(folder.Placemark);
-                            }
-                        }
-                    }
-                }
-                else if ((_d = (_c = result === null || result === void 0 ? void 0 : result.kml) === null || _c === void 0 ? void 0 : _c.Document) === null || _d === void 0 ? void 0 : _d.Placemark) {
-                    if (((_g = (_f = (_e = result === null || result === void 0 ? void 0 : result.kml) === null || _e === void 0 ? void 0 : _e.Document) === null || _f === void 0 ? void 0 : _f.Placemark) === null || _g === void 0 ? void 0 : _g.length) > 0) {
-                        for (const placemark of result.kml.Document.Placemark) {
-                            placemarks.push(placemark);
-                        }
-                    }
-                    else if ((_j = (_h = result === null || result === void 0 ? void 0 : result.kml) === null || _h === void 0 ? void 0 : _h.Document) === null || _j === void 0 ? void 0 : _j.Placemark) {
-                        placemarks.push(result.kml.Document.Placemark);
-                    }
-                }
-                return result;
-            });
-        }
-        if (!placemarks)
+        const coordinatesArray = yield getCachedPolygons();
+        if (!coordinatesArray.length)
             return res.status(404).json({ message: "Folder not found" });
-        for (const [index, placemark] of placemarks.entries()) {
-            for (const [index, placemark] of placemarks.entries()) {
-                if ((_c = (_b = (_a = placemark === null || placemark === void 0 ? void 0 : placemark.Polygon) === null || _a === void 0 ? void 0 : _a.outerBoundaryIs) === null || _b === void 0 ? void 0 : _b.LinearRing) === null || _c === void 0 ? void 0 : _c.coordinates) {
-                    coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
-                }
-                if (placemark === null || placemark === void 0 ? void 0 : placemark.MultiGeometry) {
-                    for (const polygon of placemark.MultiGeometry.Polygon) {
-                        coordinates.push(polygon.outerBoundaryIs.LinearRing.coordinates);
-                    }
-                }
-            }
-        }
-        let coordinatesArray = coordinates.map((c) => {
-            const coordText = c._text.trim();
-            const coordLines = coordText.split("\n");
-            return coordLines.map((line) => {
-                const [lng, lat] = line.trim().split(",").map(Number);
-                return [lng, lat];
-            });
-        });
         // TEST
         // address = "Moravská 757/71, 700 30 Ostrava-jih-Hrabůvka";
         let encodedAddress = encodeURIComponent(address);
@@ -151,14 +175,18 @@ const checkout_address_validation = (req, res) => __awaiter(void 0, void 0, void
         if (!addressPoint) {
             return res.status(200).json({ data: false });
         }
-        // return res.status(200).json(addressPoint);
         const point = turf.point(addressPoint);
         let isInside = false;
         for (const polygonCoords of coordinatesArray) {
-            const polygon = turf.polygon([polygonCoords]);
-            if (turf.booleanPointInPolygon(point, polygon)) {
-                isInside = true;
-                break;
+            try {
+                const polygon = turf.polygon([polygonCoords]);
+                if (turf.booleanPointInPolygon(point, polygon)) {
+                    isInside = true;
+                    break;
+                }
+            }
+            catch (_a) {
+                continue;
             }
         }
         console.log(`Address: ${address} is inside: ${isInside}`);

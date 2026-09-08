@@ -6,6 +6,101 @@ import * as turf from "@turf/turf";
 dotenv.config();
 const { GOOGLE_GEOCODING_API_KEY, LOCATIONS_XML_FILE } = process.env;
 
+type LngLatRing = number[][];
+
+let polygonCache: { key: string; polygons: LngLatRing[] } | null = null;
+let polygonCacheLoad: Promise<LngLatRing[]> | null = null;
+
+const asArray = <T>(value: T | T[] | undefined | null): T[] => {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+};
+
+const parseCoordinateText = (coordinates: any): LngLatRing | null => {
+  const coordText = coordinates?._text?.trim();
+  if (!coordText) return null;
+  const ring = coordText
+    .split("\n")
+    .map((line: string) => {
+      const [lng, lat] = line.trim().split(",").map(Number);
+      return [lng, lat];
+    })
+    .filter((pair: number[]) => pair.length === 2 && pair.every((n) => Number.isFinite(n)));
+  return ring.length >= 4 ? ring : null;
+};
+
+const collectPlacemarks = (result: any): any[] => {
+  const placemarks: any[] = [];
+  const folders = asArray(result?.kml?.Document?.Folder);
+  for (const folder of folders) {
+    placemarks.push(...asArray(folder?.Placemark));
+  }
+  if (!folders.length) {
+    placemarks.push(...asArray(result?.kml?.Document?.Placemark));
+  }
+  return placemarks;
+};
+
+const extractPolygonsFromXml = (xml: string): LngLatRing[] => {
+  const result = xml2js.xml2js(xml, { compact: true }) as any;
+  const polygons: LngLatRing[] = [];
+
+  for (const placemark of collectPlacemarks(result)) {
+    const singleRing = parseCoordinateText(placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates);
+    if (singleRing) polygons.push(singleRing);
+
+    for (const polygon of asArray(placemark?.MultiGeometry?.Polygon)) {
+      const ring = parseCoordinateText(polygon?.outerBoundaryIs?.LinearRing?.coordinates);
+      if (ring) polygons.push(ring);
+    }
+  }
+
+  return polygons;
+};
+
+const loadPolygonsFromLayers = async (locationsXmlFile: string): Promise<LngLatRing[]> => {
+  const layers = locationsXmlFile.split(",").map((layer) => layer.trim()).filter(Boolean);
+  const polygons: LngLatRing[] = [];
+
+  for (const layer of layers) {
+    const response = await fetch(layer, {
+      method: "GET",
+      headers: {
+        "Content-Type": "text/xml",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch locations XML ${layer}: ${response.status}`);
+    }
+    const xml = await response.text();
+    polygons.push(...extractPolygonsFromXml(xml));
+  }
+
+  return polygons;
+};
+
+const getCachedPolygons = async (): Promise<LngLatRing[]> => {
+  const key = LOCATIONS_XML_FILE as string;
+  if (!key) {
+    throw new Error("LOCATIONS_XML_FILE is not set");
+  }
+  if (polygonCache?.key === key) {
+    return polygonCache.polygons;
+  }
+  if (!polygonCacheLoad) {
+    polygonCacheLoad = loadPolygonsFromLayers(key)
+      .then((polygons) => {
+        polygonCache = { key, polygons };
+        console.log(`Cached ${polygons.length} delivery polygons from ${key}`);
+        return polygons;
+      })
+      .finally(() => {
+        polygonCacheLoad = null;
+      });
+  }
+  return polygonCacheLoad;
+};
+
 // ======================= CHECKOUT ADDRESS PRESENCE IN POLYGON =======================
 
 export const checkout_address_validation = async (req: Request, res: Response) => {
@@ -19,72 +114,9 @@ export const checkout_address_validation = async (req: Request, res: Response) =
     if (city) address += city + ", ";
     if (zip) address += zip;
     console.log("Address: ", address);
-    let placemarks = [] as any;
-    let coordinates = [] as any;
-    let layers = (LOCATIONS_XML_FILE as string).split(",");
 
-    for (const [index, layer] of layers.entries()) {
-      // if (index != 0) continue;
-      const response = await fetch(layer, {
-        method: "GET",
-        headers: {
-          "Content-Type": "text/xml",
-        },
-      })
-        .then(function (response: any) {
-          return response.text();
-        })
-        .then(function (xml: any) {
-          let result = xml2js.xml2js(xml, { compact: true }) as any;
-          // return res.status(200).json(result?.kml?.Document?.Folder);
-          if (result?.kml?.Document?.Folder) {
-            for (const folder of result.kml.Document.Folder) {
-              if (folder?.Placemark) {
-                if (folder.Placemark.length > 0)
-                  for (const placemark of folder.Placemark) {
-                    placemarks.push(placemark);
-                  }
-                else {
-                  placemarks.push(folder.Placemark);
-                }
-              }
-            }
-          } else if (result?.kml?.Document?.Placemark) {
-            if (result?.kml?.Document?.Placemark?.length > 0) {
-              for (const placemark of result.kml.Document.Placemark) {
-                placemarks.push(placemark);
-              }
-            } else if (result?.kml?.Document?.Placemark) {
-              placemarks.push(result.kml.Document.Placemark);
-            }
-          }
-          return result;
-        });
-    }
-
-    if (!placemarks) return res.status(404).json({ message: "Folder not found" });
-
-    for (const [index, placemark] of placemarks.entries()) {
-      for (const [index, placemark] of placemarks.entries()) {
-        if (placemark?.Polygon?.outerBoundaryIs?.LinearRing?.coordinates) {
-          coordinates.push(placemark.Polygon.outerBoundaryIs.LinearRing.coordinates);
-        }
-        if (placemark?.MultiGeometry) {
-          for (const polygon of placemark.MultiGeometry.Polygon) {
-            coordinates.push(polygon.outerBoundaryIs.LinearRing.coordinates);
-          }
-        }
-      }
-    }
-
-    let coordinatesArray = coordinates.map((c: any) => {
-      const coordText = c._text.trim();
-      const coordLines = coordText.split("\n");
-      return coordLines.map((line: string) => {
-        const [lng, lat] = line.trim().split(",").map(Number);
-        return [lng, lat];
-      });
-    });
+    const coordinatesArray = await getCachedPolygons();
+    if (!coordinatesArray.length) return res.status(404).json({ message: "Folder not found" });
 
     // TEST
     // address = "Moravská 757/71, 700 30 Ostrava-jih-Hrabůvka";
@@ -106,16 +138,19 @@ export const checkout_address_validation = async (req: Request, res: Response) =
     if (!addressPoint) {
       return res.status(200).json({ data: false });
     }
-    // return res.status(200).json(addressPoint);
 
     const point = turf.point(addressPoint as any);
 
     let isInside = false;
     for (const polygonCoords of coordinatesArray) {
-      const polygon = turf.polygon([polygonCoords]);
-      if (turf.booleanPointInPolygon(point, polygon)) {
-        isInside = true;
-        break;
+      try {
+        const polygon = turf.polygon([polygonCoords]);
+        if (turf.booleanPointInPolygon(point, polygon)) {
+          isInside = true;
+          break;
+        }
+      } catch {
+        continue;
       }
     }
 
