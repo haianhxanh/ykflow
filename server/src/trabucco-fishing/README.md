@@ -84,7 +84,7 @@ For each variant, reads available inventory at Průmyslová and sets:
 Same 202-then-background full-sweep pattern as `catalog-variant-sync`. Does not touch
 `stock.external` (Externí sklad) — that's covered by `inventory-sync?update_metafields=true` instead.
 
-### `GET|POST /trabucco/orders/delivery-note?orderId=...`
+### `GET|POST /trabucco/orders/packing-slip?orderId=...`
 
 Builds a printable PDF dodací list from a Trabucco Shopify order. Accepts `orderId` as a GraphQL
 id (`gid://shopify/Order/123`), a numeric id, query param, or JSON body (`{ "orderId": "..." }`).

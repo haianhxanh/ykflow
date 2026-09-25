@@ -3,11 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildDeliveryNotePdf = exports.deliveryNoteFilename = exports.mapOrderToDeliveryNote = exports.TRABUCCO_SELLER = void 0;
+exports.buildPackingSlipPdf = exports.packingSlipFilename = exports.mapOrderToPackingSlip = exports.TRABUCCO_SELLER = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const DEFAULT_VAT_RATE = 0.21;
+const REDUCED_VAT_RATE = 0.12;
 exports.TRABUCCO_SELLER = {
     name: "SR TRADING, s.r.o.",
     brand: "Trabucco Fish",
@@ -21,6 +22,7 @@ const money = (bag) => { var _a; var _b; return parseFloat((_b = (_a = bag === n
 const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 const sumDiscountAllocations = (allocations) => round2((allocations !== null && allocations !== void 0 ? allocations : []).reduce((sum, a) => sum + money(a.allocatedAmountSet), 0));
 const formatCzk = (n) => new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK" }).format(n);
+const formatCzkWhole = (n) => new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK", maximumFractionDigits: 0 }).format(n);
 const formatPercent = (n) => {
     const shown = Math.abs(n - Math.round(n)) < 0.05 ? String(Math.round(n)) : n.toFixed(1).replace(".", ",");
     return `${shown} %`;
@@ -77,7 +79,7 @@ const pricedLine = (name, sku, quantity, quantityLabel, originalTotal, discounte
         lineGross: gross,
     };
 };
-const mapOrderToDeliveryNote = (order, basis = "shopify") => {
+const mapOrderToPackingSlip = (order, basis = "shopify") => {
     var _a, _b, _c, _d, _e;
     var _f, _g, _h, _j;
     const taxesIncluded = Boolean(order.taxesIncluded);
@@ -131,12 +133,17 @@ const mapOrderToDeliveryNote = (order, basis = "shopify") => {
         .map((edge) => edge.node)
         .filter((node) => { var _a; return ((_a = node.currentQuantity) !== null && _a !== void 0 ? _a : 0) > 0; })
         .map((node) => {
-        var _a;
+        var _a, _b, _c, _d;
+        var _e;
         const qty = node.currentQuantity;
+        // Custom items (no variant) have no known retail price, so DMOC is left blank for them.
+        const variantPrice = node.variant ? parseFloat((_e = node.variant.price) !== null && _e !== void 0 ? _e : "") : NaN;
+        const retailVatRate = ((_b = (_a = node.variant) === null || _a === void 0 ? void 0 : _a.product) === null || _b === void 0 ? void 0 : _b.inCollection) ? REDUCED_VAT_RATE : DEFAULT_VAT_RATE;
         const vatRatePercent = round2(vatRateFrom(node.taxLines) * 100);
         const originalTotal = money(node.originalTotalSet);
         const discountedTotal = round2(originalTotal - sumDiscountAllocations(node.discountAllocations));
-        return buildLine(node.name || node.title, node.sku || ((_a = node.variant) === null || _a === void 0 ? void 0 : _a.sku) || null, qty, `${qty} ks`, originalTotal, discountedTotal, sumTaxAmount(node.taxLines), money(node.discountedUnitPriceAfterAllDiscountsSet), vatRatePercent, true);
+        const line = buildLine(node.name || node.title, node.sku || ((_c = node.variant) === null || _c === void 0 ? void 0 : _c.sku) || null, qty, `${qty} ks`, originalTotal, discountedTotal, sumTaxAmount(node.taxLines), money(node.discountedUnitPriceAfterAllDiscountsSet), vatRatePercent, true);
+        return Object.assign(Object.assign({}, line), { ean: ((_d = node.variant) === null || _d === void 0 ? void 0 : _d.barcode) || null, dmoc: Number.isFinite(variantPrice) ? Math.round(variantPrice * (1 + retailVatRate)) : null });
     });
     if ((_d = order.shippingLine) === null || _d === void 0 ? void 0 : _d.title) {
         const vatRatePercent = round2(vatRateFrom(order.shippingLine.taxLines) * 100);
@@ -177,9 +184,9 @@ const mapOrderToDeliveryNote = (order, basis = "shopify") => {
         totals,
     };
 };
-exports.mapOrderToDeliveryNote = mapOrderToDeliveryNote;
-const deliveryNoteFilename = (orderName) => `dodaci-list-${String(orderName).replace(/[^a-zA-Z0-9_-]+/g, "")}.pdf`;
-exports.deliveryNoteFilename = deliveryNoteFilename;
+exports.mapOrderToPackingSlip = mapOrderToPackingSlip;
+const packingSlipFilename = (orderName) => `dodaci-list-${String(orderName).replace(/[^a-zA-Z0-9_-]+/g, "")}.pdf`;
+exports.packingSlipFilename = packingSlipFilename;
 const fontFile = (filename) => {
     const candidates = [
         path_1.default.join(__dirname, "../assets", filename),
@@ -193,15 +200,17 @@ const fontFile = (filename) => {
     return found;
 };
 const COLUMNS = [
-    { key: "item", label: "Položky dodávky", width: 210, align: "left" },
-    { key: "qty", label: "Množství", width: 52, align: "right" },
-    { key: "unit", label: "Cena za m. j.", width: 78, align: "right" },
-    { key: "discount", label: "Sleva", width: 48, align: "right" },
-    { key: "after", label: "Cena po slevě", width: 78, align: "right" },
-    { key: "net", label: "Cena", width: 72, align: "right" },
-    { key: "vatPct", label: "DPH %", width: 48, align: "right" },
-    { key: "vat", label: "DPH", width: 70, align: "right" },
-    { key: "gross", label: "Celková cena vč. DPH", width: 96, align: "right" },
+    { key: "item", label: "Položky zásilky", width: 200, align: "left" },
+    { key: "ean", label: "EAN", width: 78, align: "left" },
+    { key: "qty", label: "Množství", width: 40, align: "right" },
+    { key: "dmoc", label: "DMOC vč. DPH", width: 62, align: "right" },
+    { key: "unit", label: "Cena za m. j.", width: 62, align: "right" },
+    { key: "discount", label: "Sleva", width: 38, align: "right" },
+    { key: "after", label: "Cena po slevě", width: 62, align: "right" },
+    { key: "net", label: "Cena", width: 62, align: "right" },
+    { key: "vatPct", label: "DPH %", width: 36, align: "right" },
+    { key: "vat", label: "DPH", width: 56, align: "right" },
+    { key: "gross", label: "Celková cena vč. DPH", width: 78, align: "right" },
 ];
 const BOX_TEXT_TOP = 20; // space reserved for the title above the body text
 const BOX_BOTTOM_PADDING = 8;
@@ -214,7 +223,7 @@ const drawBoxed = (doc, x, y, w, h, title, lines) => {
     doc.font("Roboto-Bold").fontSize(8).fillColor("#555").text(title.toUpperCase(), x + 8, y + 6, { width: w - 16 });
     doc.font("Roboto").fontSize(9).fillColor("#111").text(lines.join("\n"), x + 8, y + BOX_TEXT_TOP, { width: w - 16 });
 };
-const buildDeliveryNotePdf = (note) => new Promise((resolve, reject) => {
+const buildPackingSlipPdf = (note) => new Promise((resolve, reject) => {
     const doc = new pdfkit_1.default({ size: "A4", layout: "landscape", margin: 28, info: { Title: `Dodací list ${note.orderName}` } });
     const chunks = [];
     doc.on("data", (chunk) => chunks.push(chunk));
@@ -274,6 +283,7 @@ const buildDeliveryNotePdf = (note) => new Promise((resolve, reject) => {
         tableY = drawHeader(tableY);
     };
     note.lines.forEach((line, index) => {
+        var _a;
         const itemText = line.sku ? `${line.name}\nKód: ${line.sku}` : line.name;
         // Measure with Roboto-Bold, matching the font the item name is actually rendered in below --
         // bold glyphs are wider than regular ones, so measuring with the regular font can underestimate
@@ -286,7 +296,9 @@ const buildDeliveryNotePdf = (note) => new Promise((resolve, reject) => {
         }
         const cells = [
             itemText,
+            (_a = line.ean) !== null && _a !== void 0 ? _a : "",
             line.quantityLabel,
+            line.dmoc != null ? formatCzkWhole(line.dmoc) : "",
             formatCzk(line.unitNet),
             formatPercent(line.discountPercent),
             formatCzk(line.unitNetAfterDiscount),
@@ -337,4 +349,4 @@ const buildDeliveryNotePdf = (note) => new Promise((resolve, reject) => {
     doc.text("Převzal / razítko odběratele", left + signW + 40, signY + 6, { width: signW });
     doc.end();
 });
-exports.buildDeliveryNotePdf = buildDeliveryNotePdf;
+exports.buildPackingSlipPdf = buildPackingSlipPdf;

@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.trabucco_delivery_note = void 0;
+exports.trabucco_packing_slip = exports.toOrderGid = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const graphql_request_1 = require("graphql-request");
 const orders_1 = require("../queries/orders");
-const delivery_note_1 = require("../utils/delivery_note");
+const packing_slip_1 = require("../utils/packing_slip");
 dotenv_1.default.config();
 const { TRABUCCO_STORE, TRABUCCO_ACCESS_TOKEN, API_VERSION } = process.env;
 const toOrderGid = (raw) => {
@@ -27,7 +27,8 @@ const toOrderGid = (raw) => {
         return `gid://shopify/Order/${value}`;
     return value;
 };
-const trabucco_delivery_note = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.toOrderGid = toOrderGid;
+const trabucco_packing_slip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
         const rawId = (((_a = req.body) === null || _a === void 0 ? void 0 : _a.orderId) || ((_b = req.body) === null || _b === void 0 ? void 0 : _b.id) || req.query.orderId || req.query.id);
@@ -38,7 +39,7 @@ const trabucco_delivery_note = (req, res) => __awaiter(void 0, void 0, void 0, f
             // @ts-ignore
             headers: { "X-Shopify-Access-Token": TRABUCCO_ACCESS_TOKEN },
         });
-        const data = (yield client.request(orders_1.trabuccoDeliveryNoteOrderQuery, { id: toOrderGid(rawId) }));
+        const data = (yield client.request(orders_1.trabuccoPackingSlipOrderQuery, { id: (0, exports.toOrderGid)(rawId) }));
         const order = data === null || data === void 0 ? void 0 : data.order;
         if (!order) {
             return res.status(404).json({ error: "Order not found" });
@@ -48,9 +49,9 @@ const trabucco_delivery_note = (req, res) => __awaiter(void 0, void 0, void 0, f
         // doesn't contradict a document they already have. Defaults to the correct Shopify math.
         const rawBasis = (req.query.basis || ((_c = req.body) === null || _c === void 0 ? void 0 : _c.basis));
         const basis = rawBasis === "invoice" ? "invoice" : "shopify";
-        const note = (0, delivery_note_1.mapOrderToDeliveryNote)(order, basis);
-        const pdf = yield (0, delivery_note_1.buildDeliveryNotePdf)(note);
-        const filename = (0, delivery_note_1.deliveryNoteFilename)(order.name);
+        const note = (0, packing_slip_1.mapOrderToPackingSlip)(order, basis);
+        const pdf = yield (0, packing_slip_1.buildPackingSlipPdf)(note);
+        const filename = (0, packing_slip_1.packingSlipFilename)(order.name);
         if (req.query.format === "json") {
             return res.status(200).json({
                 type: "application/pdf",
@@ -63,8 +64,8 @@ const trabucco_delivery_note = (req, res) => __awaiter(void 0, void 0, void 0, f
         return res.status(200).send(pdf);
     }
     catch (error) {
-        console.error("trabucco_delivery_note failed", error);
-        return res.status(500).json({ error: "Failed to generate delivery note" });
+        console.error("trabucco_packing_slip failed", error);
+        return res.status(500).json({ error: "Failed to generate packing slip" });
     }
 });
-exports.trabucco_delivery_note = trabucco_delivery_note;
+exports.trabucco_packing_slip = trabucco_packing_slip;
