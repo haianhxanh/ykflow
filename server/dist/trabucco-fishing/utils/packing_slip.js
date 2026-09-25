@@ -80,15 +80,19 @@ const pricedLine = (name, sku, quantity, quantityLabel, originalTotal, discounte
     };
 };
 const mapOrderToPackingSlip = (order, basis = "shopify") => {
-    var _a, _b, _c, _d, _e;
-    var _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g;
+    var _h, _j, _k, _l;
     const taxesIncluded = Boolean(order.taxesIncluded);
     const shippingAddress = order.shippingAddress;
     const billingAddress = order.billingAddress;
     const buyerLines = compactAddress(shippingAddress).length ? compactAddress(shippingAddress) : compactAddress(billingAddress);
-    const attrs = (_f = order.customAttributes) !== null && _f !== void 0 ? _f : [];
-    const ico = (_a = attrs.find((a) => { var _a; return ((_a = a.key) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === "ico"; })) === null || _a === void 0 ? void 0 : _a.value;
-    const dic = (_b = attrs.find((a) => { var _a; return ((_a = a.key) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === "dic"; })) === null || _b === void 0 ? void 0 : _b.value;
+    const companyName = (_b = (_a = order.purchasingEntity) === null || _a === void 0 ? void 0 : _a.company) === null || _b === void 0 ? void 0 : _b.name;
+    if (companyName && !buyerLines.some((line) => line.trim().toLowerCase() === companyName.trim().toLowerCase())) {
+        buyerLines.unshift(companyName);
+    }
+    const attrs = (_h = order.customAttributes) !== null && _h !== void 0 ? _h : [];
+    const ico = (_c = attrs.find((a) => { var _a; return ((_a = a.key) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === "ico"; })) === null || _c === void 0 ? void 0 : _c.value;
+    const dic = (_d = attrs.find((a) => { var _a; return ((_a = a.key) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === "dic"; })) === null || _d === void 0 ? void 0 : _d.value;
     if (ico || dic) {
         buyerLines.push([ico && `IČO: ${ico}`, dic && `DIČ: ${dic}`].filter(Boolean).join("  ·  "));
     }
@@ -129,7 +133,7 @@ const mapOrderToPackingSlip = (order, basis = "shopify") => {
         }
         return line;
     };
-    const lines = ((_g = (_c = order.lineItems) === null || _c === void 0 ? void 0 : _c.edges) !== null && _g !== void 0 ? _g : [])
+    const lines = ((_j = (_e = order.lineItems) === null || _e === void 0 ? void 0 : _e.edges) !== null && _j !== void 0 ? _j : [])
         .map((edge) => edge.node)
         .filter((node) => { var _a; return ((_a = node.currentQuantity) !== null && _a !== void 0 ? _a : 0) > 0; })
         .map((node) => {
@@ -145,7 +149,7 @@ const mapOrderToPackingSlip = (order, basis = "shopify") => {
         const line = buildLine(node.name || node.title, node.sku || ((_c = node.variant) === null || _c === void 0 ? void 0 : _c.sku) || null, qty, `${qty} ks`, originalTotal, discountedTotal, sumTaxAmount(node.taxLines), money(node.discountedUnitPriceAfterAllDiscountsSet), vatRatePercent, true);
         return Object.assign(Object.assign({}, line), { ean: ((_d = node.variant) === null || _d === void 0 ? void 0 : _d.barcode) || null, dmoc: Number.isFinite(variantPrice) ? Math.round(variantPrice * (1 + retailVatRate)) : null });
     });
-    if ((_d = order.shippingLine) === null || _d === void 0 ? void 0 : _d.title) {
+    if ((_f = order.shippingLine) === null || _f === void 0 ? void 0 : _f.title) {
         const vatRatePercent = round2(vatRateFrom(order.shippingLine.taxLines) * 100);
         const originalShipping = money(order.shippingLine.originalPriceSet);
         const discountedShipping = round2(originalShipping - sumDiscountAllocations(order.shippingLine.discountAllocations));
@@ -155,7 +159,7 @@ const mapOrderToPackingSlip = (order, basis = "shopify") => {
         ? {
             subtotal: invoiceSubtotal,
             discount: invoiceDiscount,
-            shipping: money(order.totalShippingPriceSet),
+            shipping: money(order.currentShippingPriceSet),
             vat: invoiceVat,
             gross: invoiceGross,
         }
@@ -163,22 +167,22 @@ const mapOrderToPackingSlip = (order, basis = "shopify") => {
             // Pull totals straight from Shopify's own order-level aggregates rather than re-summing
             // rounded per-line values -- guarantees this matches Shopify Admin exactly (summing 83+
             // individually-rounded lines can drift a few CZK from the order's actual total).
-            const discount = money(order.totalDiscountsSet);
-            const subtotal = round2(money(order.subtotalPriceSet) + discount); // gross, before discount -- matches Admin's "Subtotal"
+            const discount = money(order.currentTotalDiscountsSet);
+            const subtotal = round2(money(order.currentSubtotalPriceSet) + discount); // gross, before discount -- matches Admin's "Subtotal"
             return {
                 subtotal,
                 discount,
-                shipping: money(order.totalShippingPriceSet),
-                vat: money(order.totalTaxSet),
-                gross: money(order.totalPriceSet),
+                shipping: money(order.currentShippingPriceSet),
+                vat: money(order.currentTotalTaxSet),
+                gross: money(order.currentTotalPriceSet),
             };
         })();
     return {
         orderName: order.name,
         issuedAt: formatCzDate(order.processedAt || order.createdAt),
-        shippingMethod: (_h = (_e = order.shippingLine) === null || _e === void 0 ? void 0 : _e.title) !== null && _h !== void 0 ? _h : null,
+        shippingMethod: (_k = (_g = order.shippingLine) === null || _g === void 0 ? void 0 : _g.title) !== null && _k !== void 0 ? _k : null,
         paymentMethod: paymentLabel(order.paymentGatewayNames),
-        customerEmail: (_j = order.email) !== null && _j !== void 0 ? _j : null,
+        customerEmail: (_l = order.email) !== null && _l !== void 0 ? _l : null,
         buyerLines,
         lines,
         totals,

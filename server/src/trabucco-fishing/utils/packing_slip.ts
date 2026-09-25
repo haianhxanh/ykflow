@@ -149,6 +149,10 @@ export const mapOrderToPackingSlip = (order: any, basis: PackingSlipBasis = "sho
   const shippingAddress = order.shippingAddress;
   const billingAddress = order.billingAddress;
   const buyerLines = compactAddress(shippingAddress).length ? compactAddress(shippingAddress) : compactAddress(billingAddress);
+  const companyName: string | undefined = order.purchasingEntity?.company?.name;
+  if (companyName && !buyerLines.some((line) => line.trim().toLowerCase() === companyName.trim().toLowerCase())) {
+    buyerLines.unshift(companyName);
+  }
   const attrs: { key?: string; value?: string }[] = order.customAttributes ?? [];
   const ico = attrs.find((a) => a.key?.toLowerCase() === "ico")?.value;
   const dic = attrs.find((a) => a.key?.toLowerCase() === "dic")?.value;
@@ -259,7 +263,7 @@ export const mapOrderToPackingSlip = (order: any, basis: PackingSlipBasis = "sho
       ? {
           subtotal: invoiceSubtotal,
           discount: invoiceDiscount,
-          shipping: money(order.totalShippingPriceSet),
+          shipping: money(order.currentShippingPriceSet),
           vat: invoiceVat,
           gross: invoiceGross,
         }
@@ -267,14 +271,14 @@ export const mapOrderToPackingSlip = (order: any, basis: PackingSlipBasis = "sho
           // Pull totals straight from Shopify's own order-level aggregates rather than re-summing
           // rounded per-line values -- guarantees this matches Shopify Admin exactly (summing 83+
           // individually-rounded lines can drift a few CZK from the order's actual total).
-          const discount = money(order.totalDiscountsSet);
-          const subtotal = round2(money(order.subtotalPriceSet) + discount); // gross, before discount -- matches Admin's "Subtotal"
+          const discount = money(order.currentTotalDiscountsSet);
+          const subtotal = round2(money(order.currentSubtotalPriceSet) + discount); // gross, before discount -- matches Admin's "Subtotal"
           return {
             subtotal,
             discount,
-            shipping: money(order.totalShippingPriceSet),
-            vat: money(order.totalTaxSet),
-            gross: money(order.totalPriceSet),
+            shipping: money(order.currentShippingPriceSet),
+            vat: money(order.currentTotalTaxSet),
+            gross: money(order.currentTotalPriceSet),
           };
         })();
 

@@ -18,29 +18,37 @@ export const trabuccoPackingSlipOrderQuery = gql`
         key
         value
       }
-      subtotalPriceSet {
+      currentSubtotalPriceSet {
         shopMoney {
           amount
         }
       }
-      totalDiscountsSet {
+      currentTotalDiscountsSet {
         shopMoney {
           amount
         }
       }
-      totalShippingPriceSet {
+      currentShippingPriceSet {
         shopMoney {
           amount
         }
       }
-      totalTaxSet {
+      currentTotalTaxSet {
         shopMoney {
           amount
         }
       }
-      totalPriceSet {
+      currentTotalPriceSet {
         shopMoney {
           amount
+        }
+      }
+      # B2B orders: the buying company (address.company is often empty on these).
+      purchasingEntity {
+        ... on PurchasingCompany {
+          company {
+            name
+          }
         }
       }
       customer {
