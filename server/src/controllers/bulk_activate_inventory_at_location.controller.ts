@@ -8,10 +8,11 @@ const { ACCESS_TOKEN, STORE, API_VERSION } = process.env;
 
 /*----------------------------------- FEATURE DESCRIPTION -------------------------------------------*/
 // When adding a new pickup location to the store, the inventory is not activated at the new location.
-// This script will bulk activate the inventory at the new location for selected products.
-// Specify the following in the script (possibly to move them to query parameters later):
-// - location id
-// - product query (e.g. tag:Programy)
+// This script will bulk activate the inventory at the new location(s) for selected products.
+// Query parameters:
+// - locationId: one location id, or several separated by comma (e.g. 123,456,789)
+// - query: product query (e.g. tag:Programy)
+// Each variant is activated at all given locations in a single request.
 
 /*-------------------------------------MAIN FUNCTION------------------------------------------------*/
 
@@ -24,15 +25,23 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
       },
     });
 
-    const locationId = req.query.locationId as string;
+    const locationIds = String(req.query.locationId || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+      .map((id) => (id.startsWith("gid://") ? id : `gid://shopify/Location/${id}`));
+    if (locationIds.length === 0) {
+      return res.status(400).json({ error: "Missing locationId query parameter" });
+    }
+
     const query = req.query.query as string;
     const products = await allProductsQuery(query || "");
-    console.log(`Total products to process: ${products.length}`);
+    console.log(`Total products to process: ${products.length}, locations: ${locationIds.length}`);
 
     res.status(202).json({
       message: "Processing started",
       totalProducts: products.length,
-      locationId: locationId,
+      locationIds: locationIds,
     });
 
     const progress = {
@@ -42,6 +51,8 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
       errors: [] as any[],
     };
 
+    const inventoryItemUpdates = locationIds.map((locationId) => ({ locationId, activate: true }));
+
     for (let productIndex = 0; productIndex < products.length; productIndex++) {
       const product = products[productIndex];
 
@@ -49,12 +60,7 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
         try {
           const locationActivate = await client.request(inventoryBulkToggleActivation, {
             inventoryItemId: variant.node.inventoryItem.id,
-            inventoryItemUpdates: [
-              {
-                locationId: `gid://shopify/Location/${locationId}`,
-                activate: true,
-              },
-            ],
+            inventoryItemUpdates,
           });
           console.log(variant.node.sku ? variant.node.sku : variant.node.title);
           progress.processedVariants++;
@@ -92,5 +98,6 @@ export const bulk_activate_inventory_at_location = async (req: Request, res: Res
     }
   } catch (error) {
     console.error("Error during background processing:", error);
+    if (!res.headersSent) res.status(500).json({ error: "Internal server error" });
   }
 };
