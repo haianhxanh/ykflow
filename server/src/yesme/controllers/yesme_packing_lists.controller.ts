@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import dotenv from "dotenv";
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import fs from "fs";
 import path from "path";
 import { GraphQLClient } from "graphql-request";
@@ -8,15 +8,21 @@ import { sendYesmeEmail } from "../utils/email";
 import { appendPackingListLink, uploadPdfToShopifyFiles } from "../../trabucco-fishing/utils/packing_slip_storage";
 import { buildDeliveryNotes, buildDeliveryNotesWorkbook, deliveryNoteFilename, DeliveryNote, XLSX_MIME } from "../utils/delivery_note";
 import { czechSlashDate, fetchOrders, pragueTodayYmd, resolveDeliveryWindow, yesmeClient } from "../utils/orders";
+import { yesmeMetafieldsSet } from "../queries/orders";
 
 dotenv.config();
 
 const { YESME_PACKING_LIST_RECIPIENTS, YESME_ORDER_EXPORT_RECIPIENTS } = process.env;
 const STORE_CONCURRENCY = 3;
+// Order metafield with the content hash of the závoz's last stored dodací list.
+const HASH_NAMESPACE = "yesme";
+const HASH_KEY = "packing_list_hash";
+const METAFIELDS_SET_BATCH = 25;
 
 // Dodací listy for the same Sunday–Friday window and the same orders as the orders export,
 // one per závoz (company location + delivery day). Query options mirror the export:
 // date, sendEmail=false, download=true, revised=true, plus store=false to skip Shopify Files.
+// A závoz whose content hasn't changed since it was last stored isn't uploaded or linked again.
 export const yesme_packing_lists = async (req: Request, res: Response) => {
   try {
     const window = resolveDeliveryWindow(req.query.date);
@@ -49,7 +55,7 @@ export const yesme_packing_lists = async (req: Request, res: Response) => {
     }
 
     const shouldStore = req.query.store !== "false";
-    const stored = shouldStore ? await storeNotes(client, notes) : [];
+    const stored = shouldStore ? await storeNotes(client, notes, orders) : [];
 
     const fileName = `yesme-dodaci-listy-${start}-to-${end}.xlsx`;
     const workbook = await buildDeliveryNotesWorkbook(notes);
@@ -94,12 +100,46 @@ export const yesme_packing_lists = async (req: Request, res: Response) => {
   }
 };
 
-type StoreResult = { number: string; url?: string; error?: string };
+type StoreResult = { number: string; url?: string; unchanged?: boolean; error?: string };
 
-// Uploads each závoz's workbook to Shopify Files and links it on every order in that závoz
-// (custom.packing_lists, same as Trabucco). Failures are reported per závoz and never block the email.
-const storeNotes = async (client: GraphQLClient, notes: DeliveryNote[]): Promise<StoreResult[]> => {
+// Everything printed on the dodací list; the workbook bytes themselves differ on every build.
+const noteHash = (note: DeliveryNote) =>
+  createHash("sha256")
+    .update(
+      JSON.stringify({
+        number: note.number,
+        deliveryDate: note.deliveryDate,
+        customer: note.customer,
+        branch: note.branch,
+        carrierNote: note.carrierNote,
+        orderNames: note.orderNames,
+        lines: note.lines,
+      }),
+    )
+    .digest("hex");
+
+const saveNoteHash = async (client: GraphQLClient, orderIds: string[], hash: string) => {
+  for (let index = 0; index < orderIds.length; index += METAFIELDS_SET_BATCH) {
+    const metafields = orderIds.slice(index, index + METAFIELDS_SET_BATCH).map((ownerId) => ({
+      ownerId,
+      namespace: HASH_NAMESPACE,
+      key: HASH_KEY,
+      type: "single_line_text_field",
+      value: hash,
+    }));
+    const result: any = await client.request(yesmeMetafieldsSet, { metafields });
+    const userErrors = result?.metafieldsSet?.userErrors || [];
+    if (userErrors.length) throw new Error(`metafieldsSet: ${userErrors.map((error: any) => error.message).join("; ")}`);
+  }
+};
+
+// Uploads each changed závoz's workbook to Shopify Files and links it on every order in that závoz
+// (custom.packing_lists, same as Trabucco). A závoz is unchanged when all its orders carry the
+// current content hash, so an order joining or leaving it also counts as a change.
+// Failures are reported per závoz and never block the email.
+const storeNotes = async (client: GraphQLClient, notes: DeliveryNote[], orders: any[]): Promise<StoreResult[]> => {
   const today = pragueTodayYmd();
+  const storedHashes = new Map<string, string | undefined>(orders.map((order) => [order.id, order?.packingListHash?.value]));
   const results: StoreResult[] = [];
   for (let index = 0; index < notes.length; index += STORE_CONCURRENCY) {
     const batch = notes.slice(index, index + STORE_CONCURRENCY);
@@ -107,12 +147,17 @@ const storeNotes = async (client: GraphQLClient, notes: DeliveryNote[]): Promise
       ...(await Promise.all(
         batch.map(async (note): Promise<StoreResult> => {
           try {
+            const hash = noteHash(note);
+            if (note.orderIds.every((orderId) => storedHashes.get(orderId) === hash)) {
+              return { number: note.number, unchanged: true };
+            }
             const file = await buildDeliveryNotesWorkbook([note]);
             // Random suffix keeps the public Shopify CDN URL unguessable.
             const url = await uploadPdfToShopifyFiles(client, deliveryNoteFilename(note, randomBytes(6).toString("hex")), file, XLSX_MIME);
             for (const orderId of note.orderIds) {
               await appendPackingListLink(client, orderId, { text: `${today} (${note.number})`, url });
             }
+            await saveNoteHash(client, note.orderIds, hash);
             return { number: note.number, url };
           } catch (error) {
             console.error(`yesme_packing_lists: storing ${note.number} failed`, error);

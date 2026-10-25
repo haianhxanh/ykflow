@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.yesmeOrdersExportQuery = void 0;
+exports.yesmeMetafieldsSet = exports.yesmeOrdersExportQuery = void 0;
 const graphql_request_1 = require("graphql-request");
 exports.yesmeOrdersExportQuery = (0, graphql_request_1.gql) `
   query YesmeOrdersExport($query: String, $cursor: String) {
@@ -18,6 +18,9 @@ exports.yesmeOrdersExportQuery = (0, graphql_request_1.gql) `
           displayFinancialStatus
           deliveryDate: metafield(namespace: "delivery", key: "date") {
             jsonValue
+          }
+          packingListHash: metafield(namespace: "yesme", key: "packing_list_hash") {
+            value
           }
           billingAddress {
             firstName
@@ -108,6 +111,16 @@ exports.yesmeOrdersExportQuery = (0, graphql_request_1.gql) `
             }
           }
         }
+      }
+    }
+  }
+`;
+exports.yesmeMetafieldsSet = (0, graphql_request_1.gql) `
+  mutation YesmeMetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      userErrors {
+        field
+        message
       }
     }
   }

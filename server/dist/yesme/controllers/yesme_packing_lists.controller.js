@@ -21,12 +21,18 @@ const email_1 = require("../utils/email");
 const packing_slip_storage_1 = require("../../trabucco-fishing/utils/packing_slip_storage");
 const delivery_note_1 = require("../utils/delivery_note");
 const orders_1 = require("../utils/orders");
+const orders_2 = require("../queries/orders");
 dotenv_1.default.config();
 const { YESME_PACKING_LIST_RECIPIENTS, YESME_ORDER_EXPORT_RECIPIENTS } = process.env;
 const STORE_CONCURRENCY = 3;
+// Order metafield with the content hash of the závoz's last stored dodací list.
+const HASH_NAMESPACE = "yesme";
+const HASH_KEY = "packing_list_hash";
+const METAFIELDS_SET_BATCH = 25;
 // Dodací listy for the same Sunday–Friday window and the same orders as the orders export,
 // one per závoz (company location + delivery day). Query options mirror the export:
 // date, sendEmail=false, download=true, revised=true, plus store=false to skip Shopify Files.
+// A závoz whose content hasn't changed since it was last stored isn't uploaded or linked again.
 const yesme_packing_lists = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const window = (0, orders_1.resolveDeliveryWindow)(req.query.date);
@@ -56,7 +62,7 @@ const yesme_packing_lists = (req, res) => __awaiter(void 0, void 0, void 0, func
             return res.status(200).json({ start, end, orders: 0, deliveries: [], emailed: false, stored: [], savedTo: null });
         }
         const shouldStore = req.query.store !== "false";
-        const stored = shouldStore ? yield storeNotes(client, notes) : [];
+        const stored = shouldStore ? yield storeNotes(client, notes, orders) : [];
         const fileName = `yesme-dodaci-listy-${start}-to-${end}.xlsx`;
         const workbook = yield (0, delivery_note_1.buildDeliveryNotesWorkbook)(notes);
         const attachment = { type: delivery_note_1.XLSX_MIME, name: fileName, content: workbook.toString("base64") };
@@ -95,21 +101,57 @@ const yesme_packing_lists = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.yesme_packing_lists = yesme_packing_lists;
-// Uploads each závoz's workbook to Shopify Files and links it on every order in that závoz
-// (custom.packing_lists, same as Trabucco). Failures are reported per závoz and never block the email.
-const storeNotes = (client, notes) => __awaiter(void 0, void 0, void 0, function* () {
+// Everything printed on the dodací list; the workbook bytes themselves differ on every build.
+const noteHash = (note) => (0, crypto_1.createHash)("sha256")
+    .update(JSON.stringify({
+    number: note.number,
+    deliveryDate: note.deliveryDate,
+    customer: note.customer,
+    branch: note.branch,
+    carrierNote: note.carrierNote,
+    orderNames: note.orderNames,
+    lines: note.lines,
+}))
+    .digest("hex");
+const saveNoteHash = (client, orderIds, hash) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    for (let index = 0; index < orderIds.length; index += METAFIELDS_SET_BATCH) {
+        const metafields = orderIds.slice(index, index + METAFIELDS_SET_BATCH).map((ownerId) => ({
+            ownerId,
+            namespace: HASH_NAMESPACE,
+            key: HASH_KEY,
+            type: "single_line_text_field",
+            value: hash,
+        }));
+        const result = yield client.request(orders_2.yesmeMetafieldsSet, { metafields });
+        const userErrors = ((_a = result === null || result === void 0 ? void 0 : result.metafieldsSet) === null || _a === void 0 ? void 0 : _a.userErrors) || [];
+        if (userErrors.length)
+            throw new Error(`metafieldsSet: ${userErrors.map((error) => error.message).join("; ")}`);
+    }
+});
+// Uploads each changed závoz's workbook to Shopify Files and links it on every order in that závoz
+// (custom.packing_lists, same as Trabucco). A závoz is unchanged when all its orders carry the
+// current content hash, so an order joining or leaving it also counts as a change.
+// Failures are reported per závoz and never block the email.
+const storeNotes = (client, notes, orders) => __awaiter(void 0, void 0, void 0, function* () {
     const today = (0, orders_1.pragueTodayYmd)();
+    const storedHashes = new Map(orders.map((order) => { var _a; return [order.id, (_a = order === null || order === void 0 ? void 0 : order.packingListHash) === null || _a === void 0 ? void 0 : _a.value]; }));
     const results = [];
     for (let index = 0; index < notes.length; index += STORE_CONCURRENCY) {
         const batch = notes.slice(index, index + STORE_CONCURRENCY);
         results.push(...(yield Promise.all(batch.map((note) => __awaiter(void 0, void 0, void 0, function* () {
             try {
+                const hash = noteHash(note);
+                if (note.orderIds.every((orderId) => storedHashes.get(orderId) === hash)) {
+                    return { number: note.number, unchanged: true };
+                }
                 const file = yield (0, delivery_note_1.buildDeliveryNotesWorkbook)([note]);
                 // Random suffix keeps the public Shopify CDN URL unguessable.
                 const url = yield (0, packing_slip_storage_1.uploadPdfToShopifyFiles)(client, (0, delivery_note_1.deliveryNoteFilename)(note, (0, crypto_1.randomBytes)(6).toString("hex")), file, delivery_note_1.XLSX_MIME);
                 for (const orderId of note.orderIds) {
                     yield (0, packing_slip_storage_1.appendPackingListLink)(client, orderId, { text: `${today} (${note.number})`, url });
                 }
+                yield saveNoteHash(client, note.orderIds, hash);
                 return { number: note.number, url };
             }
             catch (error) {

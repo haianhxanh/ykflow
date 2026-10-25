@@ -17,6 +17,9 @@ export const yesmeOrdersExportQuery = gql`
           deliveryDate: metafield(namespace: "delivery", key: "date") {
             jsonValue
           }
+          packingListHash: metafield(namespace: "yesme", key: "packing_list_hash") {
+            value
+          }
           billingAddress {
             firstName
             lastName
@@ -106,6 +109,17 @@ export const yesmeOrdersExportQuery = gql`
             }
           }
         }
+      }
+    }
+  }
+`;
+
+export const yesmeMetafieldsSet = gql`
+  mutation YesmeMetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      userErrors {
+        field
+        message
       }
     }
   }

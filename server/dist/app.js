@@ -31,6 +31,8 @@ const allowedOrigins = [
     "https://yes-me.cz",
     "http://127.0.0.1:9292",
     "http://localhost:9292",
+    // Shopify admin UI extensions (yesme-b2b-management app home)
+    "https://extensions.shopifycdn.com",
 ];
 var corsOptions = {
     origin: function (origin, callback) {
