@@ -84,17 +84,17 @@ const assertNoUserErrors = (label, userErrors) => {
     }
 };
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-// Uploads the PDF to Shopify Files and returns its public CDN URL (unguessable hash in the path).
-const uploadPdfToShopifyFiles = (client, filename, pdf) => __awaiter(void 0, void 0, void 0, function* () {
+// Uploads the file (PDF by default) to Shopify Files and returns its public CDN URL (unguessable hash in the path).
+const uploadPdfToShopifyFiles = (client_1, filename_1, pdf_1, ...args_1) => __awaiter(void 0, [client_1, filename_1, pdf_1, ...args_1], void 0, function* (client, filename, pdf, mimeType = "application/pdf") {
     const staged = yield client.request(stagedUploadsCreate, {
-        input: [{ resource: "FILE", filename, mimeType: "application/pdf", httpMethod: "POST", fileSize: String(pdf.length) }],
+        input: [{ resource: "FILE", filename, mimeType, httpMethod: "POST", fileSize: String(pdf.length) }],
     });
     assertNoUserErrors("stagedUploadsCreate", staged.stagedUploadsCreate.userErrors);
     const target = staged.stagedUploadsCreate.stagedTargets[0];
     const form = new FormData();
     for (const p of target.parameters)
         form.append(p.name, p.value);
-    form.append("file", new Blob([new Uint8Array(pdf)], { type: "application/pdf" }), filename);
+    form.append("file", new Blob([new Uint8Array(pdf)], { type: mimeType }), filename);
     const upload = yield fetch(target.url, { method: "POST", body: form });
     if (!upload.ok)
         throw new Error(`Staged upload failed: HTTP ${upload.status}`);

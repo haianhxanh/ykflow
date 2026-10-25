@@ -83,17 +83,22 @@ const assertNoUserErrors = (label: string, userErrors: { message: string }[] | u
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Uploads the PDF to Shopify Files and returns its public CDN URL (unguessable hash in the path).
-export const uploadPdfToShopifyFiles = async (client: GraphQLClient, filename: string, pdf: Buffer): Promise<string> => {
+// Uploads the file (PDF by default) to Shopify Files and returns its public CDN URL (unguessable hash in the path).
+export const uploadPdfToShopifyFiles = async (
+  client: GraphQLClient,
+  filename: string,
+  pdf: Buffer,
+  mimeType = "application/pdf"
+): Promise<string> => {
   const staged: any = await client.request(stagedUploadsCreate, {
-    input: [{ resource: "FILE", filename, mimeType: "application/pdf", httpMethod: "POST", fileSize: String(pdf.length) }],
+    input: [{ resource: "FILE", filename, mimeType, httpMethod: "POST", fileSize: String(pdf.length) }],
   });
   assertNoUserErrors("stagedUploadsCreate", staged.stagedUploadsCreate.userErrors);
   const target = staged.stagedUploadsCreate.stagedTargets[0];
 
   const form = new FormData();
   for (const p of target.parameters as { name: string; value: string }[]) form.append(p.name, p.value);
-  form.append("file", new Blob([new Uint8Array(pdf)], { type: "application/pdf" }), filename);
+  form.append("file", new Blob([new Uint8Array(pdf)], { type: mimeType }), filename);
   const upload = await fetch(target.url, { method: "POST", body: form });
   if (!upload.ok) throw new Error(`Staged upload failed: HTTP ${upload.status}`);
 
