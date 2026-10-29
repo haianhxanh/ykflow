@@ -56,6 +56,7 @@ const yesme_packing_lists = (req, res) => __awaiter(void 0, void 0, void 0, func
             customer: note.customer,
             branch: note.branch,
             orders: note.orderNames,
+            orderIds: note.orderIds,
             totalQuantity: note.totalQuantity,
         }));
         if (!notes.length) {

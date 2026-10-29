@@ -47,6 +47,7 @@ export const yesme_packing_lists = async (req: Request, res: Response) => {
       customer: note.customer,
       branch: note.branch,
       orders: note.orderNames,
+      orderIds: note.orderIds,
       totalQuantity: note.totalQuantity,
     }));
 
