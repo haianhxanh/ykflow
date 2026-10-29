@@ -44,7 +44,8 @@ export const resolveDeliveryWindow = (
 };
 
 export const fetchOrders = async (client: GraphQLClient, start: string, end: string) => {
-  const query = `-status:cancelled AND metafields.delivery.date:>=${start} AND metafields.delivery.date:<=${end}`;
+  // status:open = not archived (closed) and not cancelled.
+  const query = `status:open AND metafields.delivery.date:>=${start} AND metafields.delivery.date:<=${end}`;
   let cursor: string | null = null;
   let hasNextPage = true;
   const orders: any[] = [];
@@ -61,7 +62,7 @@ export const fetchOrders = async (client: GraphQLClient, start: string, end: str
   }
 
   return orders.filter((order) => {
-    if (order?.cancelledAt) return false;
+    if (order?.cancelledAt || order?.closed) return false;
     if (DISALLOWED_FINANCIAL_STATUSES.includes(order?.displayFinancialStatus)) return false;
     const deliveryYmd = parseDeliveryDate(order?.deliveryDate?.jsonValue);
     return Boolean(deliveryYmd && deliveryYmd >= start && deliveryYmd <= end);

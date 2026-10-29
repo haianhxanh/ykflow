@@ -13,6 +13,7 @@ export const yesmeOrdersExportQuery = gql`
           name
           createdAt
           cancelledAt
+          closed
           displayFinancialStatus
           deliveryDate: metafield(namespace: "delivery", key: "date") {
             jsonValue

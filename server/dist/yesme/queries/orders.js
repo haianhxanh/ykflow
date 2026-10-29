@@ -15,6 +15,7 @@ exports.yesmeOrdersExportQuery = (0, graphql_request_1.gql) `
           name
           createdAt
           cancelledAt
+          closed
           displayFinancialStatus
           deliveryDate: metafield(namespace: "delivery", key: "date") {
             jsonValue

@@ -152,9 +152,10 @@ const orderToRows = (order, start, end) => {
     };
     return (((_p = order === null || order === void 0 ? void 0 : order.lineItems) === null || _p === void 0 ? void 0 : _p.edges) || [])
         .map((edge) => edge === null || edge === void 0 ? void 0 : edge.node)
-        .filter((line) => line && Number(line.quantity) > 0)
+        // Quantities after order edits: removed items have currentQuantity 0 and are skipped.
+        .filter((line) => line && lineQuantity(line) > 0)
         .map((line) => {
-        const quantity = Number(line.quantity) || 0;
+        const quantity = lineQuantity(line);
         const unitPrice = lineUnitPrice(line);
         return Object.assign(Object.assign({}, shared), { product: line.title || "", quantity,
             unitPrice, lineTotal: roundMoney(quantity * unitPrice) });
@@ -189,4 +190,5 @@ const lineUnitPrice = (line) => {
     const fallback = Number((_d = (_c = line === null || line === void 0 ? void 0 : line.discountedUnitPriceSet) === null || _c === void 0 ? void 0 : _c.shopMoney) === null || _d === void 0 ? void 0 : _d.amount);
     return Number.isFinite(fallback) ? fallback : 0;
 };
+const lineQuantity = (line) => { var _a; return Number((_a = line === null || line === void 0 ? void 0 : line.currentQuantity) !== null && _a !== void 0 ? _a : line === null || line === void 0 ? void 0 : line.quantity) || 0; };
 const roundMoney = (value) => Math.round(value * 100) / 100;

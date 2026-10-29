@@ -164,9 +164,10 @@ const orderToRows = (order: any, start: string, end: string) => {
 
   return (order?.lineItems?.edges || [])
     .map((edge: any) => edge?.node)
-    .filter((line: any) => line && Number(line.quantity) > 0)
+    // Quantities after order edits: removed items have currentQuantity 0 and are skipped.
+    .filter((line: any) => line && lineQuantity(line) > 0)
     .map((line: any) => {
-      const quantity = Number(line.quantity) || 0;
+      const quantity = lineQuantity(line);
       const unitPrice = lineUnitPrice(line);
       return {
         ...shared,
@@ -202,5 +203,7 @@ const lineUnitPrice = (line: any) => {
   const fallback = Number(line?.discountedUnitPriceSet?.shopMoney?.amount);
   return Number.isFinite(fallback) ? fallback : 0;
 };
+
+const lineQuantity = (line: any) => Number(line?.currentQuantity ?? line?.quantity) || 0;
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;

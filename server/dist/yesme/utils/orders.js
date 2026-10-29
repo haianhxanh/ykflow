@@ -51,7 +51,8 @@ const resolveDeliveryWindow = (rawQueryDate) => {
 exports.resolveDeliveryWindow = resolveDeliveryWindow;
 const fetchOrders = (client, start, end) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const query = `-status:cancelled AND metafields.delivery.date:>=${start} AND metafields.delivery.date:<=${end}`;
+    // status:open = not archived (closed) and not cancelled.
+    const query = `status:open AND metafields.delivery.date:>=${start} AND metafields.delivery.date:<=${end}`;
     let cursor = null;
     let hasNextPage = true;
     const orders = [];
@@ -68,7 +69,7 @@ const fetchOrders = (client, start, end) => __awaiter(void 0, void 0, void 0, fu
     }
     return orders.filter((order) => {
         var _a;
-        if (order === null || order === void 0 ? void 0 : order.cancelledAt)
+        if ((order === null || order === void 0 ? void 0 : order.cancelledAt) || (order === null || order === void 0 ? void 0 : order.closed))
             return false;
         if (DISALLOWED_FINANCIAL_STATUSES.includes(order === null || order === void 0 ? void 0 : order.displayFinancialStatus))
             return false;
